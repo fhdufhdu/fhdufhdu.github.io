@@ -4,7 +4,6 @@ disqus: false
 archive: false
 post_class: post-template
 ---
-
 <!-- Begin Article
 ================================================== -->
 <div class="container">
@@ -146,7 +145,15 @@ post_class: post-template
     <div class="container">
         <div id="comments" class="row justify-content-center mb-5">
             <div class="col-md-8">
-                {% include disqus.html %}
+                <!-- {% include disqus.html %} -->
+                <script src="https://utteranc.es/client.js"
+                    repo="fhdufhdu/fhdufhdu.github.io"
+                    issue-term="url"
+                    label="[Comment]"
+                    theme="github-light"
+                    crossorigin="anonymous"
+                    async>
+                </script>
             </div>
         </div>
     </div>
@@ -179,3 +186,4 @@ https://search.google.com/structured-data/testing-tool/u/0/
 }
 </script>
 {% endif %}
+
