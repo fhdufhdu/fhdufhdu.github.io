@@ -7,6 +7,12 @@ License: https://www.wowthemes.net/freebies-license/
     html { font-size:18px; } /* Increase the font size on higher resolutions */
     .container {max-width:80%;}
 }
+@font-face {
+    font-family: 'Pretendard-Regular';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
 .mainheading {
     padding: 1rem 0rem;
 }
@@ -55,7 +61,7 @@ pre {
 .site-content {
     min-height: 60vh;
     padding-top: 1.5rem;
-    margin-top: 57px;
+    margin-top: 100px;
     transition: all 0.4s;
 }
 
@@ -284,6 +290,9 @@ span.post-read-more a:hover {
 
 .mediumnavigation .navbar-brand {
     font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
 }
 
 .mediumnavigation .dropdown-menu {
@@ -312,7 +321,17 @@ span.post-read-more a:hover {
     font-family: Righteous;
 }
 
+.navbar-brand .sitetitle {
+    font-family: Righteous;
+    font-size: 1.5rem;
+}
+.navbar-brand .sitedescription {
+    font-size: 0.7rem;
+    margin-bottom: 0;
+}
+
 .mainheading h1.posttitle {
+    font-family: Pretendard-Regular;
     font-weight: 700;
     margin-bottom: 1rem;
 }
@@ -334,7 +353,8 @@ span.post-read-more a:hover {
 }
 
 .article-post {
-    font-family: Merriweather;
+    /* font-family: Merriweather; */
+    font-family: Pretendard-Regular;
     font-size: 1.1rem;
     line-height: 1.84;
     color: rgba(0, 0, 0, .8);
@@ -776,7 +796,7 @@ iframe {
         margin-bottom: -50px;
         margin-top: 3rem;
         padding: 0;
-        height: 350px;
+        height: 200px;
         border-radius: 0;
         background-image: url(../images/jumbotron.jpg);
         background-size: cover;
@@ -790,6 +810,25 @@ iframe {
     .jumbotron.fortags .row {
         margin: 0;
     }
+}
+
+.category-wrapper {
+    margin: 15px 0 35px 0;
+}
+.category-wrapper span {
+    font-weight: bold;
+    font-size: 1.4rem
+}
+
+.tag-category {
+    padding: 5px 10px 7px;
+    background: #222;
+    border-radius: 30px;
+    color: #fff;
+    font-weight: 500;
+    text-transform: lowercase;
+    font-size: 0.8rem;
+    display: inline-block;
 }
 
 .jumbotron.fortags {

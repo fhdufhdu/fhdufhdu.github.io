@@ -7,12 +7,14 @@ post_class: post-template
 <!-- Begin Article
 ================================================== -->
 <div class="container">
-    <div class="row">
+    <div class="row justify-content-center">
 
         <!-- Post Share -->
+        {% comment %}
         <div class="col-md-2 pl-0">
             {% include share.html %}
         </div>
+        {% endcomment %}
 
         <!-- Post -->
         {% assign author = site.authors[page.author] %}
@@ -30,8 +32,9 @@ post_class: post-template
                         <img class="author-thumb" src="https://www.gravatar.com/avatar/{{ author.gravatar }}?s=250&d=mm&r=x" alt="{{ author.display_name }}">
                         {% endif %}
                     </div>
-                    <div class="col-xs-12 col-md-9 col-lg-10 text-center text-md-left">
-                        <a target="_blank" class="link-dark" href="{{ author.web }}">{{ author.display_name }}</a><a target="_blank" href="{{ author.twitter }}" class="btn follow">Follow</a>
+                    <div class="col-xs-12 col-md-9 col-lg-10 text-center text-md-left d-flex flex-column justify-content-center">
+                        <a target="_blank" class="link-dark" href="{{ author.web }}">{{ author.display_name }}</a>
+                        <!-- <a target="_blank" href="{{ author.twitter }}" class="btn follow">Follow</a> -->
                         <span class="author-description">{{ author.description }}</span>
                     </div>
                 </div>
@@ -148,8 +151,8 @@ post_class: post-template
                 <!-- {% include disqus.html %} -->
                 <script src="https://utteranc.es/client.js"
                     repo="fhdufhdu/fhdufhdu.github.io"
-                    issue-term="url"
-                    label="[Comment]"
+                    issue-term="pathname"
+                    label="Comment"
                     theme="github-light"
                     crossorigin="anonymous"
                     async>
