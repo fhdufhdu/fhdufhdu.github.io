@@ -13,14 +13,14 @@ permalink: /:title/
 
 # Authors
 authors:
-  woosae:
-    name: woosae
-    display_name: woosae
+  fhdufhdu:
+    name: fhdufhdu
+    display_name: fhdufhdu
     avatar: assets/images/wooseong.jpeg
     email: fhdufhdu@gmail.com
     # web: https://www.wowthemes.net
     # twitter: https://twitter.com/wowthemesnet
-    description: "백엔드 개발자입니다"
+    description: "문제 해결은 언제나 짜릿해"
 
 # Plugins
 plugins:

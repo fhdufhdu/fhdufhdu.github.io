@@ -6,23 +6,23 @@
 
 <link rel="icon" href="/assets/images/logo.png">
 
-<title>[개발방법론] 객체 지향과 절차 지향에 대해 알아보자 | FHDUFHDU</title>
+<title>[Python] 추상 클래스 만들기 | FHDUFHDU</title>
 
 <!-- Begin Jekyll SEO tag v2.5.0 -->
-<title>[개발방법론] 객체 지향과 절차 지향에 대해 알아보자 | fhdufhdu</title>
+<title>[Python] 추상 클래스 만들기 | fhdufhdu</title>
 <meta name="generator" content="Jekyll v3.9.4" />
-<meta property="og:title" content="[개발방법론] 객체 지향과 절차 지향에 대해 알아보자" />
-<meta name="author" content="woosae" />
+<meta property="og:title" content="[Python] 추상 클래스 만들기" />
+<meta name="author" content="fhdufhdu" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="여기에는 마크다운 포맷의 많은 특별한 것들을 사용할 수 있습니다!" />
-<meta property="og:description" content="여기에는 마크다운 포맷의 많은 특별한 것들을 사용할 수 있습니다!" />
-<link rel="canonical" href="http://localhost:4000/powerful-things-markdown-editor/" />
-<meta property="og:url" content="http://localhost:4000/powerful-things-markdown-editor/" />
+<meta name="description" content="파이썬으로 추상 클래스를 만들어보자" />
+<meta property="og:description" content="파이썬으로 추상 클래스를 만들어보자" />
+<link rel="canonical" href="http://localhost:4000/python-%EC%B6%94%EC%83%81%ED%81%B4%EB%9E%98%EC%8A%A4%EB%A7%8C%EB%93%A4%EA%B8%B0/" />
+<meta property="og:url" content="http://localhost:4000/python-%EC%B6%94%EC%83%81%ED%81%B4%EB%9E%98%EC%8A%A4%EB%A7%8C%EB%93%A4%EA%B8%B0/" />
 <meta property="og:site_name" content="fhdufhdu" />
 <meta property="og:type" content="article" />
-<meta property="article:published_time" content="2018-06-12T00:00:00+09:00" />
+<meta property="article:published_time" content="2023-12-20T12:16:00+09:00" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/powerful-things-markdown-editor/","author":{"@type":"Person","name":"woosae"},"@type":"BlogPosting","headline":"[개발방법론] 객체 지향과 절차 지향에 대해 알아보자","dateModified":"2018-06-12T00:00:00+09:00","datePublished":"2018-06-12T00:00:00+09:00","description":"여기에는 마크다운 포맷의 많은 특별한 것들을 사용할 수 있습니다!","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/powerful-things-markdown-editor/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/assets/images/logo.png"},"name":"woosae"},"@context":"http://schema.org"}</script>
+{"url":"http://localhost:4000/python-%EC%B6%94%EC%83%81%ED%81%B4%EB%9E%98%EC%8A%A4%EB%A7%8C%EB%93%A4%EA%B8%B0/","author":{"@type":"Person","name":"fhdufhdu"},"@type":"BlogPosting","headline":"[Python] 추상 클래스 만들기","dateModified":"2023-12-20T12:16:00+09:00","datePublished":"2023-12-20T12:16:00+09:00","description":"파이썬으로 추상 클래스를 만들어보자","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/python-%EC%B6%94%EC%83%81%ED%81%B4%EB%9E%98%EC%8A%A4%EB%A7%8C%EB%93%A4%EA%B8%B0/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/assets/images/logo.png"},"name":"fhdufhdu"},"@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 
@@ -148,19 +148,19 @@
                 <div class="row post-top-meta">
                     <div class="col-xs-12 col-md-3 col-lg-2 text-center text-md-left mb-4 mb-md-0">
                         
-                        <img class="author-thumb" src="/assets/images/wooseong.jpeg" alt="woosae">
+                        <img class="author-thumb" src="/assets/images/wooseong.jpeg" alt="fhdufhdu">
                         
                     </div>
                     <div class="col-xs-12 col-md-9 col-lg-10 text-center text-md-left d-flex flex-column justify-content-center">
-                        <a target="_blank" class="link-dark" href="">woosae</a>
+                        <a target="_blank" class="link-dark" href="">fhdufhdu</a>
                         <!-- <a target="_blank" href="" class="btn follow">Follow</a> -->
-                        <span class="author-description">백엔드 개발자입니다</span>
+                        <span class="author-description">문제 해결은 언제나 짜릿해</span>
                     </div>
                 </div>
                 
 
                 <!-- Post Title -->
-                <h1 class="posttitle">[개발방법론] 객체 지향과 절차 지향에 대해 알아보자</h1>
+                <h1 class="posttitle">[Python] 추상 클래스 만들기</h1>
 
             </div>
 
@@ -177,67 +177,9 @@
                 <!-- Toc if any -->
                 
                 <!-- End Toc -->
-                <p>여기에는 마크다운 포맷의 많은 특별한 것들을 사용할 수 있습니다!</p>
+                <h2 id="추상-클래스-만들기">추상 클래스 만들기</h2>
 
-<h2 id="special-formatting">Special formatting</h2>
-
-<p>As well as bold and italics, you can also use some other special formatting in Markdown when the need arises, for example:</p>
-
-<ul>
-  <li><del>strike through</del></li>
-  <li>==highlight==</li>
-  <li>*escaped characters*</li>
-</ul>
-
-<h2 id="writing-code-blocks">Writing code blocks</h2>
-
-<p>There are two types of code elements which can be inserted in Markdown, the first is inline, and the other is block. Inline code is formatted by wrapping any word or words in back-ticks, <code class="language-plaintext highlighter-rouge">like this</code>. Larger snippets of code can be displayed across multiple lines using triple back ticks:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-</pre></td><td class="rouge-code"><pre>.my-link {
-    text-decoration: underline;
-}
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<h4 id="html">HTML</h4>
-
-<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-</pre></td><td class="rouge-code"><pre><span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"ml-1 mr-1"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;a</span> <span class="na">target=</span><span class="s">"_blank"</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;i</span> <span class="na">class=</span><span class="s">"fab fa-twitter"</span><span class="nt">&gt;&lt;/i&gt;</span>
-    <span class="nt">&lt;/a&gt;</span>
-<span class="nt">&lt;/li&gt;</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<h4 id="css">CSS</h4>
-
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-</pre></td><td class="rouge-code"><pre><span class="nc">.highlight</span> <span class="nc">.c</span> <span class="p">{</span>
-    <span class="nl">color</span><span class="p">:</span> <span class="m">#999988</span><span class="p">;</span>
-    <span class="nl">font-style</span><span class="p">:</span> <span class="nb">italic</span><span class="p">;</span> 
-<span class="p">}</span>
-<span class="nc">.highlight</span> <span class="nc">.err</span> <span class="p">{</span>
-    <span class="nl">color</span><span class="p">:</span> <span class="m">#a61717</span><span class="p">;</span>
-    <span class="nl">background-color</span><span class="p">:</span> <span class="m">#e3d2d2</span><span class="p">;</span> 
-<span class="p">}</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<h4 id="js">JS</h4>
-
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
 2
 3
 4
@@ -246,52 +188,52 @@
 7
 8
 9
-</pre></td><td class="rouge-code"><pre><span class="c1">// alertbar later</span>
-<span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">scroll</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">scrollTop</span><span class="p">();</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">y</span> <span class="o">&gt;</span> <span class="mi">280</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">$</span><span class="p">(</span><span class="s1">'.alertbar'</span><span class="p">).</span><span class="nx">fadeIn</span><span class="p">();</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">$</span><span class="p">(</span><span class="s1">'.alertbar'</span><span class="p">).</span><span class="nx">fadeOut</span><span class="p">();</span>
-    <span class="p">}</span>
-<span class="p">});</span>
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="nn">abc</span>
+
+<span class="k">class</span> <span class="nc">BaseClass</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="o">@</span><span class="n">abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="c1"># 아래처럼 
+</span><span class="k">class</span> <span class="nc">BaseClass</span><span class="p">:</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span>
+    <span class="o">@</span><span class="n">abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+        
+<span class="k">class</span> <span class="nc">ChildClass</span><span class="p">(</span><span class="n">BaseClass</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"hello world!"</span><span class="p">)</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">ChildClass</span><span class="p">()</span>
 </pre></td></tr></tbody></table></code></pre></div></div>
 
-<h4 id="python">Python</h4>
+<p>위와 같이 <code class="language-plaintext highlighter-rouge">metaclass</code>로 해당 클래스가 추상 클래스라는 것을 명시한다.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre><span class="k">print</span><span class="p">(</span><span class="s">"Hello World"</span><span class="p">)</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
+<p>이후 추상클래스로 쓰고 싶은 메서드에 <code class="language-plaintext highlighter-rouge">abstractmethod</code> 데코레이터를 달면 된다.</p>
 
-<h4 id="ruby">Ruby</h4>
+<p>만약 상속받는 클래스에서 추상클래스를 구현하지 않으면 아래와 같이 에러가 뜬다.</p>
 
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
 2
 3
-</pre></td><td class="rouge-code"><pre><span class="nb">require</span> <span class="s1">'redcarpet'</span>
-<span class="n">markdown</span> <span class="o">=</span> <span class="no">Redcarpet</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s2">"Hello World!"</span><span class="p">)</span>
-<span class="nb">puts</span> <span class="n">markdown</span><span class="p">.</span><span class="nf">to_html</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<h4 id="c">C</h4>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
-</pre></td><td class="rouge-code"><pre><span class="n">printf</span><span class="p">(</span><span class="s">"Hello World"</span><span class="p">);</span>
-</pre></td></tr></tbody></table></code></pre></div></div>
-
-<p><img src="/assets/images/8.jpg" alt="walking" /></p>
-
-<h2 id="reference-lists">Reference lists</h2>
-
-<p>The quick brown jumped over the lazy.</p>
-
-<p>Another way to insert links in markdown is using reference lists. You might want to use this style of linking to cite reference material in a Wikipedia-style. All of the links are listed at the end of the document, so you can maintain full separation between content and its source or reference.</p>
-
-<h2 id="full-html">Full HTML</h2>
-
-<p>Perhaps the best part of Markdown is that you’re never limited to just Markdown. You can write HTML directly in the Markdown editor and it will just work as HTML usually does. No limits! Here’s a standard YouTube embed code as an example:</p>
-
-<p><iframe style="width:100%;" height="315" src="https://www.youtube.com/embed/Cniqsc9QfDo?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen=""></iframe></p>
+4
+</pre></td><td class="rouge-code"><pre>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+  File <span class="s2">"/var/task/main.py"</span>, line 12, <span class="k">in</span> &lt;module&gt;
+    a <span class="o">=</span> ChildClass<span class="o">()</span>
+TypeError: Can<span class="s1">'t instantiate abstract class ChildClass with abstract method run
+</span></pre></td></tr></tbody></table></code></pre></div></div>
 
             </div>
 
@@ -301,7 +243,7 @@
             <!-- Post Date -->
             <p>
             <small>
-                <span class="post-date"><time class="post-date" datetime="2018-06-12">12 Jun 2018</time></span>           
+                <span class="post-date"><time class="post-date" datetime="2023-12-20">2023-12-20 PM 12:16</time></span>           
                 
                 </small>
             </p>
@@ -312,7 +254,7 @@
                     
                     
                     <li>
-                        <a class="smoothscroll" href="/categories#개발방법론">개발방법론</a>
+                        <a class="smoothscroll" href="/categories#python">python</a>
                     </li>
                     
                 </ul>
@@ -331,6 +273,10 @@
             <!-- Prev/Next -->
             <div class="row PageNavigation d-flex justify-content-between font-weight-bold">
             
+            <a class="prev d-block col-md-6" href="//%EA%B0%9C%EB%B0%9C%EB%B0%A9%EB%B2%95%EB%A1%A0-%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%97%90%EB%8C%80%ED%95%B4%EC%84%9C%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90/"> &laquo; [개발방법론] 객체 지향과 절차 지향에 대해 알아보자</a>
+            
+            
+            <a class="next d-block col-md-6 text-lg-right" href="//docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88DockerHub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/">[Docker] 컨테이너를 Docker Hub에 올리기 &raquo; </a>
             
             <div class="clearfix"></div>
             </div>
@@ -402,6 +348,16 @@ https://search.google.com/structured-data/testing-tool/u/0/
                 
                     
                         <a class="mt-1 mb-1 tag-category" href="/categories#개발방법론">개발방법론 (1)</a>
+                    
+                        <a class="mt-1 mb-1 tag-category" href="/categories#python">python (2)</a>
+                    
+                        <a class="mt-1 mb-1 tag-category" href="/categories#docker">docker (1)</a>
+                    
+                        <a class="mt-1 mb-1 tag-category" href="/categories#cs">cs (1)</a>
+                    
+                        <a class="mt-1 mb-1 tag-category" href="/categories#javascript">javascript (2)</a>
+                    
+                        <a class="mt-1 mb-1 tag-category" href="/categories#postgresql">postgresql (1)</a>
                     
                 
                 

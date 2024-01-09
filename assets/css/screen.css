@@ -88,6 +88,20 @@ section.recent-posts {
     margin-bottom: -1px;
 }
 
+.article-post table{
+    width: 100%;
+    text-align: center;
+}
+
+.article-post th{
+    border: solid 1px #AAA;
+    background: #333;
+    color: #fff;
+}
+.article-post td{
+    border: solid 1px #666
+}
+
 .article-post ol,
 .article-post ul {
     margin-bottom: 1.5rem;
@@ -757,6 +771,14 @@ img {
     border-top: 1px solid #ddd;
 }
 
+/* .bottompagination .current {
+    color: #00ab6b;
+}
+
+.bottompagination .other {
+    color: #999;
+} */
+
 .pointerup {
     margin-bottom: -17px;
     margin-left: 49%;
@@ -941,4 +963,15 @@ iframe {
 .lazyimg[data-srcset] {
     opacity: 0;
     transition: opacity .25s;
+}
+
+.rouge-table {
+    text-align: left!important;
+}
+
+.rouge-table th {
+    border: solid 0
+}
+.rouge-table td {
+    border: solid 0
 }

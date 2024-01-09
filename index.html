@@ -32,7 +32,7 @@ title: Home
 
 <!-- Posts Index
 ================================================== -->
-<section class="recent-posts">
+<section class="recent-posts container">
 
     <div class="section-title">
 
@@ -40,8 +40,8 @@ title: Home
 
     </div>
 
-    <div class="row listrecent">
-
+    <div class="d-flex flex-column listrecent">
+        {{paginator}}
         {% for post in paginator.posts %}
 
         {% include postbox.html %}
@@ -54,7 +54,7 @@ title: Home
 
 <!-- Pagination
 ================================================== -->
-<div class="bottompagination">
+<div class="bottompagination container">
 <div class="pointerup"><i class="fa fa-caret-up"></i></div>
 <span class="navigation" role="navigation">
     {% include pagination.html %}
