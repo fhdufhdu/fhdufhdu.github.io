@@ -18,7 +18,7 @@
 &lt;p&gt;조금 더 자세히 알아보자.&lt;/p&gt;
 &lt;p&gt;동기와 비동기 작업에 대해 알아보고 싶다면 아래 게시글을 참고하자.&lt;/p&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;%7b%7bsite.baseurl%7d%7d/cs-%eb%8f%99%ea%b8%b0%eb%b9%84%eb%8f%99%ea%b8%b0%ec%97%90%eb%8c%80%ed%95%b4%ec%84%9c%ec%95%8c%ec%95%84%eb%b3%b4%ec%9e%90/&#34; &gt;2024.01.02 - [CS] - [CS] 동기/비동기에 대해서 알아보자(sync/async)&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&#34;콜백-함수는-동기이다&#34;&gt;콜백 함수는 동기이다.&lt;/h2&gt;
+&lt;h1 id=&#34;콜백-함수는-동기이다&#34;&gt;콜백 함수는 동기이다.&lt;/h1&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;num&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;callback&lt;/span&gt;) =&amp;gt; {
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;i&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;; &lt;span style=&#34;color:#a6e22e&#34;&gt;i&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;; &lt;span style=&#34;color:#a6e22e&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;){
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;num&lt;/span&gt;)
@@ -61,8 +61,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1009&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1000&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1010&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;완벽하게 동기로 실행되는 것을 볼 수 있다. 그러므로 콜백함수를 만든다고 해서 비동기로 작동하지 않는다.&lt;/p&gt;
-&lt;h2 id=&#34;그럼-비동기는-어떤-함수가-사용되는가&#34;&gt;그럼 비동기는 어떤 함수가 사용되는가?&lt;/h2&gt;
-&lt;h3 id=&#34;우선-이벤트-루프에-대해-이해해-보자&#34;&gt;우선 이벤트 루프에 대해 이해해 보자&lt;/h3&gt;
+&lt;h1 id=&#34;그럼-비동기는-어떤-함수가-사용되는가&#34;&gt;그럼 비동기는 어떤 함수가 사용되는가?&lt;/h1&gt;
+&lt;h2 id=&#34;우선-이벤트-루프에-대해-이해해-보자&#34;&gt;우선 이벤트 루프에 대해 이해해 보자&lt;/h2&gt;
 &lt;p&gt;JS는 싱글 스레드로 작동한다. 이 싱글 스레드에서 비동기를 가능하게 해주는 것이 바로 WEB API와 이벤트 루프이다.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;setTimeout&lt;/span&gt;(()=&amp;gt;{&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)}, &lt;span style=&#34;color:#ae81ff&#34;&gt;4000&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
@@ -110,7 +110,7 @@
 &lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/5/event-loop.gif&#34;
 	width=&#34;720&#34;
 	height=&#34;405&#34;
-	srcset=&#34;https://fhdufhdu.github.io/post/5/event-loop_hu8cc376adbc462e45ad2871f47fc7d99d_708252_480x0_resize_box_1.gif 480w, https://fhdufhdu.github.io/post/5/event-loop_hu8cc376adbc462e45ad2871f47fc7d99d_708252_1024x0_resize_box_1.gif 1024w&#34;
+	
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;image&#34;
@@ -121,7 +121,7 @@
 		data-flex-basis=&#34;426px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;비동기가-되기-위한-조건&#34;&gt;비동기가 되기 위한 조건&lt;/h3&gt;
+&lt;h2 id=&#34;비동기가-되기-위한-조건&#34;&gt;비동기가 되기 위한 조건&lt;/h2&gt;
 &lt;p&gt;자, 위에서 이벤트 루프에 대해 알아보았다. 위에서 이벤트 루프는 비동기가 끝난 후 실행되어야 할 콜백 함수들이 저장된 곳이라고 말해주었다. 또한, 실질적인 비동기 작업은 WEB API에서 처리된다는 것도 알게 되었다.&lt;/p&gt;
 &lt;p&gt;그렇다면 WEB API에 작업을 위임할 수 있는 것에는 무엇이 있을까?&lt;/p&gt;
 &lt;ul&gt;
@@ -129,7 +129,7 @@
 &lt;li&gt;Timer&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;아까 말했다시피 WEB API는 다른 곳에서 작업을 수행한다. 그렇기에 해당 작업을 수행하는 동안 JS는 놀고 있게 되고, 이는 싱글스레드에서 비동기가 가능하게 되는 이유다.&lt;/p&gt;
-&lt;h2 id=&#34;정리&#34;&gt;정리&lt;/h2&gt;
+&lt;h1 id=&#34;정리&#34;&gt;정리&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;콜백을 사용한다고 모두 비동기가 되는 것이 아니다.&lt;/li&gt;
 &lt;li&gt;JS는 싱글 스레드이다. 일반적으로 싱글 스레드에서는 비동기가 불가능하다.&lt;/li&gt;
@@ -150,7 +150,7 @@
         <description>&lt;p&gt;오늘은 동기와 비동기에 대해서 설명하고자 한다.&lt;/p&gt;
 &lt;p&gt;해당 개념은 설명만 들으면 쉽게 이해가 될 수도 있지만, 헷갈릴 여지도 많은 개념이라고 생각한다.&lt;/p&gt;
 &lt;p&gt;특히 스레드 개념과 엮이기 시작하면 많이 헷갈리기 시작하는 개념이다.&lt;/p&gt;
-&lt;h2 id=&#34;동기sync&#34;&gt;동기(Sync)&lt;/h2&gt;
+&lt;h1 id=&#34;동기sync&#34;&gt;동기(Sync)&lt;/h1&gt;
 &lt;p&gt;동기가 제일 간단하다. 흔히 우리가 쓰는 코드를 상상하면 된다.&lt;/p&gt;
 &lt;p&gt;아래 JS 예제가 있다.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
@@ -160,7 +160,7 @@
 &lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/4/image.png&#34;
 	width=&#34;210&#34;
 	height=&#34;216&#34;
-	srcset=&#34;https://fhdufhdu.github.io/post/4/image_hu6422f8d317e3a397e84efe44b65b274e_7454_480x0_resize_box_3.png 480w, https://fhdufhdu.github.io/post/4/image_hu6422f8d317e3a397e84efe44b65b274e_7454_1024x0_resize_box_3.png 1024w&#34;
+	
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;코드 결과&#34;
@@ -171,9 +171,9 @@
 		data-flex-basis=&#34;233px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;h2 id=&#34;비동기async&#34;&gt;비동기(Async)&lt;/h2&gt;
+&lt;h1 id=&#34;비동기async&#34;&gt;비동기(Async)&lt;/h1&gt;
 &lt;p&gt;자 이제 비동기에 대해 이해해 보자. 단순하게 비동기는 동기의 반대말이다. 동기가 순차적으로 실행되는 것을 의미하니까 비동기는 순차적으로 실행되지 않는다고 생각하면 된다. 순차적으로 실행되지 않는다면, 코드의 실행순서를 파악하기 힘들 것이다. 이렇게 생각했을 때 비동기가 정말 필요한지에 대해 의문점이 생긴다.&lt;/p&gt;
-&lt;h3 id=&#34;비동기의-필요성&#34;&gt;비동기의 필요성&lt;/h3&gt;
+&lt;h2 id=&#34;비동기의-필요성&#34;&gt;비동기의 필요성&lt;/h2&gt;
 &lt;p&gt;비동기가 등장한 이유는 낭비되는 시간이 아까워서이다. 아래와 같은 코드를 보자&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// 해당 코드는 psuedo 코드이다.
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
@@ -195,7 +195,7 @@
 &lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/4/image-1.png&#34;
 	width=&#34;1440&#34;
 	height=&#34;554&#34;
-	srcset=&#34;https://fhdufhdu.github.io/post/4/image-1_hu44478c856b1a50a87a24c0eb9a79eee6_315178_480x0_resize_box_3.png 480w, https://fhdufhdu.github.io/post/4/image-1_hu44478c856b1a50a87a24c0eb9a79eee6_315178_1024x0_resize_box_3.png 1024w&#34;
+	
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;비동기 작동 과정&#34;
@@ -207,7 +207,7 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;위 그림처럼, 2번이 완료되지 않았음에도, 2번의 응답이 오기까지의 시간동안 다른 작업을 하는 것이 바로 비동기라고 할 수 있다.&lt;/p&gt;
-&lt;h3 id=&#34;콜백&#34;&gt;콜백&lt;/h3&gt;
+&lt;h2 id=&#34;콜백&#34;&gt;콜백&lt;/h2&gt;
 &lt;p&gt;앞서 비동기의 필요성을 말했다. 그렇다면 100초 동안 비는 시간에 다른 작업을 하고 나서, 응답을 받는 순간에는 어떻게 될까? 해당 값으로 처리하는 로직이 필요할 것이다. 그것이 바로 콜백(callback)이다.&lt;/p&gt;
 &lt;p&gt;콜백의 주요 논지는 &lt;strong&gt;&amp;ldquo;해야할 일을 뒤로 미루는 것&amp;rdquo;&lt;/strong&gt; 이다.&lt;/p&gt;
 &lt;p&gt;사실, 이름만 봐도 알 수 있다. callback은 회신하다/답신하다는 뜻이다.&lt;/p&gt;
@@ -251,7 +251,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;response&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;body&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위 처럼 콜백 함수를 작성할 수 있을 것이다. 저 4번 콜백 함수는 http 응답이 오면 실행된다.&lt;/p&gt;
 &lt;p&gt;4번의 콜백 함수는 앞서 말한 &lt;strong&gt;&amp;ldquo;해야 할 일을 뒤로 미루는 것&amp;quot;과&lt;/strong&gt; 같다.&lt;/p&gt;
-&lt;h2 id=&#34;마무리&#34;&gt;마무리&lt;/h2&gt;
+&lt;h1 id=&#34;마무리&#34;&gt;마무리&lt;/h1&gt;
 &lt;p&gt;간단하게 비동기와 콜백에 대해 알아보았다.&lt;/p&gt;
 &lt;p&gt;이렇게 보면 비동기 자체는 크게 어렵지 않은 것 같다. 하지만 필자도 이 개념을 오해 없이 이해하기에 많은 시간이 들었다.&lt;/p&gt;
 &lt;p&gt;여러분들도 오해없이 비동기를 이해할 수 있게 되었으면 좋겠다.&lt;/p&gt;

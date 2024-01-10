@@ -233,7 +233,7 @@ if (!doNotTrack) {
     <section class="article-content">
     
     
-    <h2 id="문제">문제</h2>
+    <h1 id="문제">문제</h1>
 <p>​
 회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &ldquo;가끔씩 너무 챗봇이 느려요&quot;였다.
 ​
@@ -243,7 +243,7 @@ if (!doNotTrack) {
 ​
 문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
 ​</p>
-<h3 id="기존-라우팅-방식">기존 라우팅 방식</h3>
+<h2 id="기존-라우팅-방식">기존 라우팅 방식</h2>
 <p>​
 우선 간략하게 현재 개발 환경을 말하자면 아래와 같다.
 ​</p>
@@ -261,26 +261,26 @@ if (!doNotTrack) {
 ​
 그런데 <code>importlib</code>이 느리다니&hellip; 이해가 되지 않았다. <code>importlib</code>은 결국 <code>__import__</code> 함수의 래퍼이다. <code>__import__</code>함수는 import 구문을 만나면 실행되는 기본적인 함수이다. 이게 느리다면, 파이썬을 사용해도 되는 것일까?
 ​</p>
-<h3 id="import의-작동방식에-대해서-알아보자">Import의 작동방식에 대해서 알아보자</h3>
+<h2 id="import의-작동방식에-대해서-알아보자">Import의 작동방식에 대해서 알아보자</h2>
 <p>​
 해당 정보는 <a class="link" href="https://medium.com/@likegondry/python-til-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%B4-import%EB%A1%9C-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%84-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95-76e268e7613b"  target="_blank" rel="noopener"
     >김지연 님의 블로그</a>를 참고해서 작성했다.
 ​</p>
-<h4 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기</h4>
+<h2 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기</h2>
 <p>​
 sys.module에는 이때까지 사용했던 module들이 딕셔너리 형태로 저장되어 있다. import시 해당 모듈이 이전에 import 된 것이라면 빠르게 가져올 수 있다.
 ​</p>
-<h4 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기</h4>
+<h2 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기</h2>
 <p>​
 이 작업이 좀 오래 걸린다. 파일 리스트을 하나하나 탐색하면서 모듈을 가져오기 때문에 시간이 오래걸린다. 아마 필자의 생각으로는 File I/O 작업이라서 오래 걸리는 것 같다.
 ​</p>
-<h4 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&hellip;?</h4>
+<h2 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&hellip;?</h2>
 <p>​
 만약 <code>FooFacade</code> 클래스를 <strong>처음</strong> 동적으로 import 한다면, 생각보다 시간이 오래 걸릴 수 있겠다는 생각이 들었다. 실제로도 처음 실행할 때와, 조금 유휴시간이 지난 후 실행하면 <code>importlib</code> 동작 시간이 오래 걸리는 것을 확인할 수 있었다.
 ​
 심지어 AWS 람다를 이용하고 있어서, 일정 유휴시간이 지나면 컨테이너가 내려가버린다. 그렇다면 새롭게 컨테이너가 생성될 때마다, <code>importlib</code>에서 시간을 많이 잡아먹었다.
 ​</p>
-<h2 id="해결방법">해결방법</h2>
+<h1 id="해결방법">해결방법</h1>
 <p>​
 이제 문제점을 찾았으니 해결을 해보자.
 ​
@@ -367,90 +367,10 @@ path는 &ldquo;/user/&rdquo;, endpoint는 <code>read_users</code> 함수이다. 
 ​
 그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)</p>
 <p>​
-필자의 생각이 어느 정도 맞다는 걸 인지했으니 이제 개발해서 라우팅을 적용시키는 일만 남았다.
+필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.
+(아쉽게도 회사의 코드는 공개할 수 없으므로 비슷하게도 공개할 수 없다..)
 ​</p>
-<h2 id="커스텀-router-클래스">커스텀 Router 클래스</h2>
-<p>​</p>
-<ul>
-<li>Router
-​</li>
-</ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># router.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Any, Dict, List
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Router</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self):
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>_data: Dict[str, Any] <span style="color:#f92672">=</span> {}
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_make_key</span>(self, key_list:List[str]) <span style="color:#f92672">-&gt;</span> str:
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;-&#34;</span><span style="color:#f92672">.</span>join(key_list)
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(self, key_list:List[str]):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decorated</span>(func):
-</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_data<span style="color:#f92672">.</span>setdefault(self<span style="color:#f92672">.</span>_make_key(key_list), func)
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> func
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> decorated
-</span></span><span style="display:flex;"><span>       
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">include_router</span>(self, router):
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> type(router) <span style="color:#f92672">!=</span> Router:
-</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">&#34;Router 객체만 include 할 수 있음&#34;</span>)
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>_data<span style="color:#f92672">.</span>update(router<span style="color:#f92672">.</span>_data)
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># cls_constructuere_args/cls_constructure_kwargs 는 불러올 클래스의 생성자에 필요한 파라미터</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_instance</span>(self, key_list:List[str], <span style="color:#f92672">*</span>cls_constructure_args, <span style="color:#f92672">**</span>cls_constructure_kwargs):
-</span></span><span style="display:flex;"><span>        _cls <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_data<span style="color:#f92672">.</span>get(self<span style="color:#f92672">.</span>_make_key(key_list), <span style="color:#66d9ef">None</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _cls(<span style="color:#f92672">*</span>cls_constructure_args, <span style="color:#f92672">**</span>cls_constructure_kwargs) <span style="color:#66d9ef">if</span> _cls <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">None</span>
-</span></span></code></pre></div><p>​</p>
-<ul>
-<li>사용 예제
-​</li>
-</ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># foo_facade.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> router <span style="color:#f92672">import</span> Router
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span>foo_router <span style="color:#f92672">=</span> Router()
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@foo_router.add</span>([<span style="color:#e6db74">&#34;foo&#34;</span>, <span style="color:#e6db74">&#34;facade&#34;</span>])
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FooFacade</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, call_str: str):
-</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>call_str <span style="color:#f92672">=</span> call_str
-</span></span><span style="display:flex;"><span>        
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">call</span>(self):
-</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Call FooFacade (</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>call_str<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#34;</span>)
-</span></span></code></pre></div><p>​</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># main.py</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> foo_facade <span style="color:#f92672">import</span> foo_router, FooFacade
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> router <span style="color:#f92672">import</span> Router
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span>main_router <span style="color:#f92672">=</span> Router()
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span>main_router<span style="color:#f92672">.</span>include_router(foo_router)
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span>foo_facade:FooFacade <span style="color:#f92672">=</span> main_router<span style="color:#f92672">.</span>get_instance([<span style="color:#e6db74">&#34;foo&#34;</span>, <span style="color:#e6db74">&#34;facade&#34;</span>], <span style="color:#e6db74">&#34;hi foo facade&#34;</span>)
-</span></span><span style="display:flex;"><span>foo_facade<span style="color:#f92672">.</span>call()
-</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Call FooFacade (hi foo facade) 가 출력됨</span>
-</span></span></code></pre></div><p>​</p>
-<ul>
-<li>main.py 실행 결과
-​
-<img src="/post/6/image.png"
-	width="1172"
-	height="84"
-	srcset="/post/6/image_hu3be03a5ec2314d178ade76978d5f15f0_17927_480x0_resize_box_3.png 480w, /post/6/image_hu3be03a5ec2314d178ade76978d5f15f0_17927_1024x0_resize_box_3.png 1024w"
-	loading="lazy"
-	
-		alt="router 실행 결과"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="1395"
-		data-flex-basis="3348px"
-	
->
-​</li>
-</ul>
-<h2 id="결과">결과</h2>
+<h1 id="결과">결과</h1>
 <p>​
 무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 동료 개발자와 코드리뷰 때 &ldquo;어떻게 이런 생각을 했냐&quot;라고 하셔서 되게 기분이 좋았다.</p>
 
