@@ -2,56 +2,56 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Categories on woosae</title>
-        <link>https://example.org/categories/</link>
+        <link>https://fhdufhdu.github.io/categories/</link>
         <description>Recent content in Categories on woosae</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
-        <lastBuildDate>Sun, 07 Jan 2024 20:35:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 07 Jan 2024 20:35:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>postgresql</title>
-        <link>https://example.org/categories/postgresql/</link>
+        <link>https://fhdufhdu.github.io/categories/postgresql/</link>
         <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/postgresql/</guid>
+        <guid>https://fhdufhdu.github.io/categories/postgresql/</guid>
         <description></description>
         </item>
         <item>
         <title>python</title>
-        <link>https://example.org/categories/python/</link>
+        <link>https://fhdufhdu.github.io/categories/python/</link>
         <pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/python/</guid>
+        <guid>https://fhdufhdu.github.io/categories/python/</guid>
         <description></description>
         </item>
         <item>
         <title>javascript</title>
-        <link>https://example.org/categories/javascript/</link>
+        <link>https://fhdufhdu.github.io/categories/javascript/</link>
         <pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/javascript/</guid>
+        <guid>https://fhdufhdu.github.io/categories/javascript/</guid>
         <description></description>
         </item>
         <item>
         <title>cs</title>
-        <link>https://example.org/categories/cs/</link>
+        <link>https://fhdufhdu.github.io/categories/cs/</link>
         <pubDate>Tue, 02 Jan 2024 22:15:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/cs/</guid>
+        <guid>https://fhdufhdu.github.io/categories/cs/</guid>
         <description></description>
         </item>
         <item>
         <title>dockder</title>
-        <link>https://example.org/categories/dockder/</link>
+        <link>https://fhdufhdu.github.io/categories/dockder/</link>
         <pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/dockder/</guid>
+        <guid>https://fhdufhdu.github.io/categories/dockder/</guid>
         <description></description>
         </item>
         <item>
         <title>개발 방법론</title>
-        <link>https://example.org/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</link>
+        <link>https://fhdufhdu.github.io/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</link>
         <pubDate>Wed, 20 Dec 2023 11:14:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</guid>
+        <guid>https://fhdufhdu.github.io/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</guid>
         <description></description>
         </item>
         

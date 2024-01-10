@@ -2,24 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Tags on woosae</title>
-        <link>https://example.org/tags/</link>
+        <link>https://fhdufhdu.github.io/tags/</link>
         <description>Recent content in Tags on woosae</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
-        <lastBuildDate>Sun, 07 Jan 2024 20:35:00 +0900</lastBuildDate><atom:link href="https://example.org/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 07 Jan 2024 20:35:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>database</title>
-        <link>https://example.org/tags/database/</link>
+        <link>https://fhdufhdu.github.io/tags/database/</link>
         <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
-        <guid>https://example.org/tags/database/</guid>
+        <guid>https://fhdufhdu.github.io/tags/database/</guid>
         <description></description>
         </item>
         <item>
         <title>orm</title>
-        <link>https://example.org/tags/orm/</link>
+        <link>https://fhdufhdu.github.io/tags/orm/</link>
         <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
-        <guid>https://example.org/tags/orm/</guid>
+        <guid>https://fhdufhdu.github.io/tags/orm/</guid>
         <description></description>
         </item>
         

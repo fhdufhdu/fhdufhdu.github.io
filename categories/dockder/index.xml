@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>dockder on woosae</title>
-        <link>https://example.org/categories/dockder/</link>
+        <link>https://fhdufhdu.github.io/categories/dockder/</link>
         <description>Recent content in dockder on woosae</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
-        <lastBuildDate>Wed, 20 Dec 2023 12:39:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/dockder/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 20 Dec 2023 12:39:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/dockder/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>[Docker] 컨테이너를 Docker Hub에 올리기</title>
-        <link>https://example.org/post/23-12-20-docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88dockerhub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/</link>
+        <link>https://fhdufhdu.github.io/post/23-12-20-docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88dockerhub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/</link>
         <pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate>
         
-        <guid>https://example.org/post/23-12-20-docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88dockerhub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/</guid>
+        <guid>https://fhdufhdu.github.io/post/23-12-20-docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88dockerhub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/</guid>
         <description>&lt;p&gt;Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p&gt;
 &lt;h2 id=&#34;docker-hub-로그인하기&#34;&gt;Docker Hub 로그인하기&lt;/h2&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://hub.docker.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
