@@ -182,7 +182,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// 이후 필요한 로직 실행!
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;단순하게 http 요청을 보내는 코드이다. 이 코드가 동기적으로 작동한다면 대락 100초 이후에 console.log(response.body)가 실행되고 이후 로직이 작동할 것이다. 근데 http 요청을 보내고, 받는 100초 동안 프로세스는 무엇을 하고 있을까?&lt;/p&gt;
-&lt;p&gt;정답은 **&amp;ldquo;아무것도 안하고 있다.&amp;rdquo;**이다. 정말 아무것도 안 하고 http 응답을 받는 순간까지 기다리는 것만 진행할 것이다. 만약 이 100초라는 시간에 다른 작업을 하면 어떨까? 웬만하면 많은 작업들을 처리할 수 있을 것이다.&lt;/p&gt;
+&lt;p&gt;정답은 &lt;strong&gt;&amp;ldquo;아무것도 안하고 있다.&amp;rdquo;&lt;/strong&gt; 이다. 정말 아무것도 안 하고 http 응답을 받는 순간까지 기다리는 것만 진행할 것이다. 만약 이 100초라는 시간에 다른 작업을 하면 어떨까? 웬만하면 많은 작업들을 처리할 수 있을 것이다.&lt;/p&gt;
 &lt;p&gt;이 남는 시간을 활용하기 위해 비동기라는 개념이 등장했다.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://github.com/fhdufhdu/fhdufhdu.github.io/assets/32770312/8deddbc0-e57a-4b66-9cd4-efc4db749677&#34;
 	
@@ -197,7 +197,7 @@
 &lt;p&gt;위 그림처럼, 2번이 완료되지 않았음에도, 2번의 응답이 오기까지의 시간동안 다른 작업을 하는 것이 바로 비동기라고 할 수 있다.&lt;/p&gt;
 &lt;h3 id=&#34;콜백&#34;&gt;콜백&lt;/h3&gt;
 &lt;p&gt;앞서 비동기의 필요성을 말했다. 그렇다면 100초 동안 비는 시간에 다른 작업을 하고 나서, 응답을 받는 순간에는 어떻게 될까? 해당 값으로 처리하는 로직이 필요할 것이다. 그것이 바로 콜백(callback)이다.&lt;/p&gt;
-&lt;p&gt;콜백의 주요 논지는 **&amp;ldquo;해야할 일을 뒤로 미루는 것&amp;rdquo;**이다.&lt;/p&gt;
+&lt;p&gt;콜백의 주요 논지는 &lt;strong&gt;&amp;ldquo;해야할 일을 뒤로 미루는 것&amp;rdquo;&lt;/strong&gt; 이다.&lt;/p&gt;
 &lt;p&gt;사실, 이름만 봐도 알 수 있다. callback은 회신하다/답신하다는 뜻이다.&lt;/p&gt;
 &lt;p&gt;그러니까 &amp;ldquo;할일 다 하고(=해야 할 일 미루고), 네가 요청한 일 처리할 수 있을 때 처리하겠다&amp;quot;라는 것이다.&lt;/p&gt;
 &lt;p&gt;아래 코드를 다시 보자.&lt;/p&gt;
