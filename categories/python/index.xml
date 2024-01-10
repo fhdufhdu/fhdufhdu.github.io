@@ -8,10 +8,10 @@
         <language>ko-KR</language>
         <lastBuildDate>Thu, 04 Jan 2024 23:10:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/python/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</title>
-        <link>https://fhdufhdu.github.io/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/</link>
+        <link>https://fhdufhdu.github.io/post/6/</link>
         <pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate>
         
-        <guid>https://fhdufhdu.github.io/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/</guid>
+        <guid>https://fhdufhdu.github.io/post/6/</guid>
         <description>&lt;h2 id=&#34;문제&#34;&gt;문제&lt;/h2&gt;
 &lt;p&gt;​
 회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔씩 너무 챗봇이 느려요&amp;quot;였다.
@@ -213,14 +213,18 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code&gt;read_users&lt;/cod
 &lt;ul&gt;
 &lt;li&gt;main.py 실행 결과
 ​
-&lt;img src=&#34;https://fhdufhdu.github.io/image.png&#34;
-	
-	
-	
+&lt;img src=&#34;https://fhdufhdu.github.io/post/6/image.png&#34;
+	width=&#34;1172&#34;
+	height=&#34;84&#34;
+	srcset=&#34;https://fhdufhdu.github.io/post/6/image_hu3be03a5ec2314d178ade76978d5f15f0_17927_480x0_resize_box_3.png 480w, https://fhdufhdu.github.io/post/6/image_hu3be03a5ec2314d178ade76978d5f15f0_17927_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;router 실행 결과&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;1395&#34;
+		data-flex-basis=&#34;3348px&#34;
 	
 &gt;
 ​&lt;/li&gt;

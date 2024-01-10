@@ -8,10 +8,10 @@
         <language>ko-KR</language>
         <lastBuildDate>Wed, 10 Jan 2024 14:34:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자 1편</title>
-        <link>https://fhdufhdu.github.io/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/7/</link>
+        <link>https://fhdufhdu.github.io/post/7/</link>
         <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
-        <guid>https://fhdufhdu.github.io/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/7/</guid>
+        <guid>https://fhdufhdu.github.io/post/7/</guid>
         <description>&lt;h2 id=&#34;문제&#34;&gt; 문제&lt;/h2&gt;
 &lt;p&gt;챗봇들의 게시글을 조회하는데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p&gt;
 &lt;p&gt;정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.&lt;/p&gt;
@@ -19,14 +19,18 @@
 &lt;p&gt;이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.&lt;/p&gt;
 &lt;p&gt;이제 한번 문제를 살펴보자&lt;/p&gt;
 &lt;h3 id=&#34;테이블-구조&#34;&gt;테이블 구조&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/image.png&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/7/image.png&#34;
+	width=&#34;2362&#34;
+	height=&#34;1282&#34;
+	srcset=&#34;https://fhdufhdu.github.io/post/7/image_hu78622a605d798e5e832f6a65fc93a7cb_110959_480x0_resize_box_3.png 480w, https://fhdufhdu.github.io/post/7/image_hu78622a605d798e5e832f6a65fc93a7cb_110959_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;ER Diagram&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;184&#34;
+		data-flex-basis=&#34;442px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;h3 id=&#34;orm-코드와-원인&#34;&gt;ORM 코드와 원인&lt;/h3&gt;
@@ -131,10 +135,10 @@
         </item>
         <item>
         <title>[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</title>
-        <link>https://fhdufhdu.github.io/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/</link>
+        <link>https://fhdufhdu.github.io/post/6/</link>
         <pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate>
         
-        <guid>https://fhdufhdu.github.io/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/</guid>
+        <guid>https://fhdufhdu.github.io/post/6/</guid>
         <description>&lt;h2 id=&#34;문제&#34;&gt;문제&lt;/h2&gt;
 &lt;p&gt;​
 회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔씩 너무 챗봇이 느려요&amp;quot;였다.
@@ -336,14 +340,18 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code&gt;read_users&lt;/cod
 &lt;ul&gt;
 &lt;li&gt;main.py 실행 결과
 ​
-&lt;img src=&#34;https://fhdufhdu.github.io/image.png&#34;
-	
-	
-	
+&lt;img src=&#34;https://fhdufhdu.github.io/post/6/image.png&#34;
+	width=&#34;1172&#34;
+	height=&#34;84&#34;
+	srcset=&#34;https://fhdufhdu.github.io/post/6/image_hu3be03a5ec2314d178ade76978d5f15f0_17927_480x0_resize_box_3.png 480w, https://fhdufhdu.github.io/post/6/image_hu3be03a5ec2314d178ade76978d5f15f0_17927_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;router 실행 결과&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;1395&#34;
+		data-flex-basis=&#34;3348px&#34;
 	
 &gt;
 ​&lt;/li&gt;
