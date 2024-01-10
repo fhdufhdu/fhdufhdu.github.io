@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>python on woosae</title>
+        <link>https://example.org/categories/python/</link>
+        <description>Recent content in python on woosae</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>ko-KR</language>
+        <lastBuildDate>Thu, 04 Jan 2024 23:10:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/python/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</title>
+        <link>https://example.org/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/</link>
+        <pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate>
+        
+        <guid>https://example.org/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/</guid>
+        <description>&lt;h2 id=&#34;문제&#34;&gt;문제&lt;/h2&gt;
+&lt;p&gt;​
+회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔씩 너무 챗봇이 느려요&amp;quot;였다.
+​
+챗봇 모델 쪽에서 응답이 늦는 경우는 자주 있었기에, 이번에도 그렇겠거니 하고 확인을 해보았다.
+​
+그런데 로그에 찍힌 시간을 보니, 모델은 빠른 시간 내에 응답을 해주는 것을 확인했다. 거기서 문제가 있다는 것을 깨닫고, 문제점을 찾아가기 시작했다.
+​
+문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
+​&lt;/p&gt;
+&lt;h3 id=&#34;기존-라우팅-방식&#34;&gt;기존 라우팅 방식&lt;/h3&gt;
+&lt;p&gt;​
+우선 간략하게 현재 개발 환경을 말하자면 아래와 같다.
+​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AWS Lambda(람다)&lt;/li&gt;
+&lt;li&gt;AWS Api Gateway&lt;/li&gt;
+&lt;li&gt;PostgreSQL&lt;/li&gt;
+&lt;li&gt;Python&lt;/li&gt;
+&lt;li&gt;웹 프레임워크 사용하지 않음
+​&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code&gt;importlib&lt;/code&gt;이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code&gt;importlib&lt;/code&gt;은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
+​
+예를 들어 body에 &lt;code&gt;chatbotId&lt;/code&gt;가 &lt;code&gt;Foo&lt;/code&gt;이면 &lt;code&gt;FooFacade&lt;/code&gt; 클래스를 import 해서 쓰거나, &lt;code&gt;Bar&lt;/code&gt;이면 &lt;code&gt;BarFacade&lt;/code&gt; 클래스를 import해서 쓰거나 하는 식으로 진행했다.
+​
+그런데 &lt;code&gt;importlib&lt;/code&gt;이 느리다니&amp;hellip; 이해가 되지 않았다. &lt;code&gt;importlib&lt;/code&gt;은 결국 &lt;code&gt;__import__&lt;/code&gt; 함수의 래퍼이다. &lt;code&gt;__import__&lt;/code&gt;함수는 import 구문을 만나면 실행되는 기본적인 함수이다. 이게 느리다면, 파이썬을 사용해도 되는 것일까?
+​&lt;/p&gt;
+&lt;h3 id=&#34;import의-작동방식에-대해서-알아보자&#34;&gt;Import의 작동방식에 대해서 알아보자&lt;/h3&gt;
+&lt;p&gt;​
+해당 정보는 &lt;a class=&#34;link&#34; href=&#34;https://medium.com/@likegondry/python-til-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%B4-import%EB%A1%9C-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%84-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95-76e268e7613b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;김지연 님의 블로그&lt;/a&gt;를 참고해서 작성했다.
+​&lt;/p&gt;
+&lt;h4 id=&#34;1-sysmodule에-모듈이-존재하는지-찾아보기&#34;&gt;1. sys.module에 모듈이 존재하는지 찾아보기&lt;/h4&gt;
+&lt;p&gt;​
+sys.module에는 이때까지 사용했던 module들이 딕셔너리 형태로 저장되어 있다. import시 해당 모듈이 이전에 import 된 것이라면 빠르게 가져올 수 있다.
+​&lt;/p&gt;
+&lt;h4 id=&#34;2-syspath에-저장된-파일-목록들-하나하나-찾아보기&#34;&gt;2. sys.path에 저장된 파일 목록들 하나하나 찾아보기&lt;/h4&gt;
+&lt;p&gt;​
+이 작업이 좀 오래 걸린다. 파일 리스트을 하나하나 탐색하면서 모듈을 가져오기 때문에 시간이 오래걸린다. 아마 필자의 생각으로는 File I/O 작업이라서 오래 걸리는 것 같다.
+​&lt;/p&gt;
+&lt;h4 id=&#34;그럼-동적으로-import-하는-것은&#34;&gt;그럼 동적으로 import 하는 것은&amp;hellip;?&lt;/h4&gt;
+&lt;p&gt;​
+만약 &lt;code&gt;FooFacade&lt;/code&gt; 클래스를 &lt;strong&gt;처음&lt;/strong&gt; 동적으로 import 한다면, 생각보다 시간이 오래 걸릴 수 있겠다는 생각이 들었다. 실제로도 처음 실행할 때와, 조금 유휴시간이 지난 후 실행하면 &lt;code&gt;importlib&lt;/code&gt; 동작 시간이 오래 걸리는 것을 확인할 수 있었다.
+​
+심지어 AWS 람다를 이용하고 있어서, 일정 유휴시간이 지나면 컨테이너가 내려가버린다. 그렇다면 새롭게 컨테이너가 생성될 때마다, &lt;code&gt;importlib&lt;/code&gt;에서 시간을 많이 잡아먹었다.
+​&lt;/p&gt;
+&lt;h2 id=&#34;해결방법&#34;&gt;해결방법&lt;/h2&gt;
+&lt;p&gt;​
+이제 문제점을 찾았으니 해결을 해보자.
+​
+결국 라우팅의 문제였으니, 이 라우팅을 다른 방식으로 하면 되지 않을까?
+​
+그래서 유명한 파이썬 웹 프레임워크인 FastAPI의 &lt;a class=&#34;link&#34; href=&#34;https://github.com/tiangolo/fastapi&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;깃허브 소스&lt;/a&gt;를 뜯어보았다.
+​
+FastAPI는 어떻게 라우팅을 사용하고 있을까?
+​&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;from fastapi import APIRouter, FastAPI
+​
+app = FastAPI()
+internal_router = APIRouter()
+users_router = APIRouter()
+​
+@users_router.get(&amp;#34;/users/&amp;#34;)
+def read_users():
+    return [{&amp;#34;name&amp;#34;: &amp;#34;Rick&amp;#34;}, {&amp;#34;name&amp;#34;: &amp;#34;Morty&amp;#34;}]
+​
+internal_router.include_router(users_router)
+app.include_router(internal_router)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;​
+이런 식으로 &lt;code&gt;APIRouter&lt;/code&gt; 객체를 하나 생성하고, APIRouter 객체의 &lt;code&gt;get&lt;/code&gt;(&lt;code&gt;post&lt;/code&gt;, &lt;code&gt;put&lt;/code&gt;, &amp;hellip;) 함수를 라우팅 하고자 하는 함수에 데코레이터로 붙여준다. 그리고 &lt;code&gt;app&lt;/code&gt; 객체에 해당 라우터를 전달한다.
+​
+이후 http 요청이 들어오면 &lt;code&gt;app&lt;/code&gt; 객체로 전달되고, &lt;code&gt;app&lt;/code&gt; 객체는 라우팅 정보를 확인해서 해당 함수를 실행한다.
+​
+자 어떻게 이것이 가능할까.
+​
+필자의 생각은 아래와 같았다.
+​&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;APIRouter&lt;/code&gt; 객체는 멤버 함수로 데코레이터로 사용가능한 함수를 가지고 있다.(ex. &lt;code&gt;get&lt;/code&gt;, &lt;code&gt;post&lt;/code&gt;, &lt;code&gt;put&lt;/code&gt;, &lt;code&gt;patch&lt;/code&gt;, &lt;code&gt;delete&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;데코레이터 함수는 자기가 붙은 함수를 객체 형태로 사용할 수 있다.&lt;br&gt;
+(ex. &lt;code&gt;user_router&lt;/code&gt;의 get 함수는 &lt;code&gt;read_users&lt;/code&gt; 함수를 객체형태로 사용가능)&lt;/li&gt;
+&lt;li&gt;그렇다면 get을 호출하면, &lt;code&gt;read_users&lt;/code&gt; 같은 함수를 &lt;code&gt;users_router&lt;/code&gt;에 딕셔너리 형태로 저장하면 되겠네?&lt;br&gt;
+(ex. &lt;code&gt;{&amp;quot;users&amp;quot;: read_user}&lt;/code&gt; 와 같은 형태로)&lt;/li&gt;
+&lt;li&gt;맞는 것 같은데&amp;hellip; 한번 확인해 볼까?
+​
+&lt;code&gt;APIRouter&lt;/code&gt;의 &lt;code&gt;get&lt;/code&gt; 함수를 보면 &lt;code&gt;self.api_route(...)&lt;/code&gt;를 호출하고 해당 결괏값을 바로 반환한다.
+​
+그렇다면 &lt;code&gt;api_route&lt;/code&gt; 함수를 보자.
+​&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 너무 길어서 간략하게 축소한 버전이다.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;api_route&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        path: str,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt;kwargs,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; Callable[[DecoratedCallable], DecoratedCallable]:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;decorator&lt;/span&gt;(func: DecoratedCallable) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; DecoratedCallable:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add_api_route(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                path,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                func,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt;kwargs
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            )
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; func
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; decorator
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;​
+해당 함수를 보게 되면, &lt;code&gt;user_router.get&lt;/code&gt;이 &lt;code&gt;read_users&lt;/code&gt;에 데코레이터로 붙게 되는 순간 &lt;code&gt;func&lt;/code&gt; 파라미터에 &lt;code&gt;read_users가&lt;/code&gt; 들어오게 된다. 이후 &lt;code&gt;self.add_api_route&lt;/code&gt;를 호출하는데, 이때 아래와 같은 코드가 실행된다.
+​&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;add_api_route&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        path: str,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        endpoint: Callable[&lt;span style=&#34;color:#f92672&#34;&gt;...&lt;/span&gt;, Any],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt;kwargs,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;None&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;        생략
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;        &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        route &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; route_class(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;prefix &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; path,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            endpoint&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;endpoint,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;            생략
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;            &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        )
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;routes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;append(route)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;​
+path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code&gt;read_users&lt;/code&gt; 함수이다. 이 두 가지를 통해 &lt;code&gt;route&lt;/code&gt; 객체를 하나 만들고 이를 &lt;code&gt;user_routes의&lt;/code&gt; &lt;code&gt;routes&lt;/code&gt; 리스트에 추가한다.
+​
+필자가 생각한 3번 과정은 아니고, 리스트 탐색으로 라우팅을 하는 것이지만, 어찌 됐든 비슷하다고 생각했다.
+​
+그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)&lt;/p&gt;
+&lt;p&gt;​
+필자의 생각이 어느 정도 맞다는 걸 인지했으니 이제 개발해서 라우팅을 적용시키는 일만 남았다.
+​&lt;/p&gt;
+&lt;h2 id=&#34;커스텀-router-클래스&#34;&gt;커스텀 Router 클래스&lt;/h2&gt;
+&lt;p&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Router
+​&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# router.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; typing &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; Any, Dict, List
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Router&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; __init__(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_data: Dict[str, Any] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;_make_key&lt;/span&gt;(self, key_list:List[str]) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; str:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join(key_list)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;add&lt;/span&gt;(self, key_list:List[str]):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;decorated&lt;/span&gt;(func):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_data&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;setdefault(self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_make_key(key_list), func)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; func
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; decorated
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;include_router&lt;/span&gt;(self, router):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; type(router) &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; Router:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#66d9ef&#34;&gt;raise&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Exception&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Router 객체만 include 할 수 있음&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_data&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;update(router&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_data)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# cls_constructuere_args/cls_constructure_kwargs 는 불러올 클래스의 생성자에 필요한 파라미터&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;get_instance&lt;/span&gt;(self, key_list:List[str], &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;cls_constructure_args, &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt;cls_constructure_kwargs):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        _cls &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_data&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;get(self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_make_key(key_list), &lt;span style=&#34;color:#66d9ef&#34;&gt;None&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; _cls(&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;cls_constructure_args, &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt;cls_constructure_kwargs) &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; _cls &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;None&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;사용 예제
+​&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# foo_facade.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; router &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; Router
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;foo_router &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Router()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;@foo_router.add&lt;/span&gt;([&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;foo&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;facade&amp;#34;&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;FooFacade&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; __init__(self, call_str: str):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;call_str &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; call_str
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;call&lt;/span&gt;(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        print(&lt;span style=&#34;color:#e6db74&#34;&gt;f&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Call FooFacade (&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;{&lt;/span&gt;self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;call_str&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;)&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;​&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# main.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; foo_facade &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; foo_router, FooFacade
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; router &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; Router
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main_router &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Router()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main_router&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;include_router(foo_router)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;foo_facade:FooFacade &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; main_router&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;get_instance([&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;foo&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;facade&amp;#34;&lt;/span&gt;], &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hi foo facade&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;foo_facade&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;call()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;​&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Call FooFacade (hi foo facade) 가 출력됨&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;​&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;main.py 실행 결과
+​
+&lt;img src=&#34;https://github.com/fhdufhdu/fhdufhdu.github.io/assets/32770312/5257aff9-29b3-4371-b2c1-ec2beb422ac7&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;image&#34;
+	
+	
+&gt;
+​&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;결과&#34;&gt;결과&lt;/h2&gt;
+&lt;p&gt;​
+무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 동료 개발자와 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>[Python] 추상 클래스 만들기</title>
+        <link>https://example.org/post/23-12-20-python-%EC%B6%94%EC%83%81%ED%81%B4%EB%9E%98%EC%8A%A4%EB%A7%8C%EB%93%A4%EA%B8%B0/</link>
+        <pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate>
+        
+        <guid>https://example.org/post/23-12-20-python-%EC%B6%94%EC%83%81%ED%81%B4%EB%9E%98%EC%8A%A4%EB%A7%8C%EB%93%A4%EA%B8%B0/</guid>
+        <description>&lt;h2 id=&#34;추상-클래스-만들기&#34;&gt;추상 클래스 만들기&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; abc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;BaseClass&lt;/span&gt;(metaclass&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;abc&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;ABCMeta):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;@abc.abstractmethod&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;run&lt;/span&gt;(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;pass&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 아래처럼 &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;BaseClass&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    __metaclass__ &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; abc&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;ABCMeta
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;@abc.abstractmethod&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;run&lt;/span&gt;(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;pass&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ChildClass&lt;/span&gt;(BaseClass):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;run&lt;/span&gt;(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hello world!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ChildClass()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위와 같이 &lt;code&gt;metaclass&lt;/code&gt;로 해당 클래스가 추상 클래스라는 것을 명시한다.&lt;/p&gt;
+&lt;p&gt;이후 추상클래스로 쓰고 싶은 메서드에 &lt;code&gt;abstractmethod&lt;/code&gt; 데코레이터를 달면 된다.&lt;/p&gt;
+&lt;p&gt;만약 상속받는 클래스에서 추상클래스를 구현하지 않으면 아래와 같이 에러가 뜬다.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Traceback &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;most recent call last&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  File &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;/var/task/main.py&amp;#34;&lt;/span&gt;, line 12, in &amp;lt;module&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ChildClass&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;TypeError: Can&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&amp;#39;&lt;/span&gt;t instantiate abstract class ChildClass with abstract method run
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+        </item>
+        
+    </channel>
+</rss>

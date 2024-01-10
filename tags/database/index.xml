@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>database on woosae</title>
+        <link>https://example.org/tags/database/</link>
+        <description>Recent content in database on woosae</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>ko-KR</language>
+        <lastBuildDate>Sun, 07 Jan 2024 20:35:00 +0900</lastBuildDate><atom:link href="https://example.org/tags/database/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자 1편</title>
+        <link>https://example.org/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/</link>
+        <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
+        
+        <guid>https://example.org/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/</guid>
+        <description>&lt;h2 id=&#34;문제&#34;&gt; 문제&lt;/h2&gt;
+&lt;p&gt;챗봇들의 게시글을 조회하는데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p&gt;
+&lt;p&gt;정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.&lt;/p&gt;
+&lt;p&gt;그래서 서버 코드를 인수인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.&lt;/p&gt;
+&lt;p&gt;이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.&lt;/p&gt;
+&lt;p&gt;이제 한번 문제를 살펴보자&lt;/p&gt;
+&lt;h3 id=&#34;테이블-구조&#34;&gt;테이블 구조&lt;/h3&gt;
+&lt;h3 id=&#34;orm-코드와-원인&#34;&gt;ORM 코드와 원인&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;contents&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;await&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;this&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;contentRepository&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;createQueryBuilder&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;([&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.id&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.content&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b.id&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b.name&amp;#34;&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;leftJoinAndSelect&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.bot&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;leftJoinAndSelect&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.bookmark&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b2&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b2.userId = :userId&amp;#34;&lt;/span&gt;, {&lt;span style=&#34;color:#a6e22e&#34;&gt;userId&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;leftJoinAndSelect&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.like&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;l&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;addSelect&lt;/span&gt;((&lt;span style=&#34;color:#a6e22e&#34;&gt;qb&lt;/span&gt;) =&amp;gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;qb&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;subQuery&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			.&lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;count(cc.id)&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			.&lt;span style=&#34;color:#a6e22e&#34;&gt;from&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;Comment&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cc&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			.&lt;span style=&#34;color:#a6e22e&#34;&gt;where&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cc.contentId = c.id&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;commentCount&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;skip&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;take&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;이렇게 코드가 작성되어 있었다. 해당 코드를 SQL로 바꿔보면 아래와 같다.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;.id, &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;,content, b.id, b,name, 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	(&lt;span style=&#34;color:#66d9ef&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;count&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;) &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Comment&amp;#34;&lt;/span&gt; cc &lt;span style=&#34;color:#66d9ef&#34;&gt;where&lt;/span&gt; cc.content_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;.id) &lt;span style=&#34;color:#66d9ef&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;commentCount&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Content&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	  &lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Bot&amp;#34;&lt;/span&gt; b
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		  &lt;span style=&#34;color:#66d9ef&#34;&gt;on&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;.bot_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; b.id
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	  &lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Bookmark&amp;#34;&lt;/span&gt; b2
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		  &lt;span style=&#34;color:#66d9ef&#34;&gt;on&lt;/span&gt; b2.content_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;.id &lt;span style=&#34;color:#66d9ef&#34;&gt;on&lt;/span&gt; b2.user_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	  &lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Like&amp;#34;&lt;/span&gt; l
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		  &lt;span style=&#34;color:#66d9ef&#34;&gt;on&lt;/span&gt; l.content_id &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;c&lt;/span&gt;.id
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;offset&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;limit&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;이 쿼리의 문제점이 뭘까?&lt;/p&gt;
+&lt;p&gt;우선 위의 쿼리에서 서브쿼리를 뺀 결과가 아래와 같다고 하자.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;c.id&lt;/th&gt;
+&lt;th&gt;c.content&lt;/th&gt;
+&lt;th&gt;b2.id&lt;/th&gt;
+&lt;th&gt;l.id&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&amp;ldquo;반가워요&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&amp;ldquo;반가워요&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;&amp;ldquo;반가워요&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;&amp;ldquo;안녕&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;&amp;ldquo;안녕&amp;rdquo;&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;원하는 결과는 분명 c의 리스트이다. 하지만 결과를 보면 c가 중복되는 것들이 많이 보일 것이다.&lt;/p&gt;
+&lt;p&gt;그 중복되는 모든 행에 전부 서브쿼리가 실행되어서 문제가 되는 것이다. 20개의 게시글을 요청했는데, 결과 row은 100개 혹은 200개가 넘어가는 상황이 발생하고 100,200개의 행에 전부 서브쿼리가 실행되니까 계속해서 느려지는 것이었다.&lt;/p&gt;
+&lt;p&gt;서브쿼리 자체는 크게 문제가 없었다.(사실 join 맺어서 group by로 count 계산하는게 훨씬 빠르다. 이건 2편에서 다루도록 하겠다.) &lt;/p&gt;
+&lt;h2 id=&#34;원인파악-완료-개선해보자&#34;&gt;원인파악 완료! 개선해보자&lt;/h2&gt;
+&lt;h4 id=&#34;row를-줄이자&#34;&gt;Row를 줄이자.&lt;/h4&gt;
+&lt;p&gt;Like 테이블을 join 한 이유는 유저가 해당 게시글에 좋아요를 눌렀나를 보기 위한 장치이다. 즉, 위의 결과처럼 l.id가 여러 개가 나올 필요가 없다. join을 맺었을 때, 유저가 좋아요를 눌렀다면 l.id가 존재할 것이고, 그렇지 않다면 l.id가 null이 되도록 수정하면 된다.&lt;/p&gt;
+&lt;p&gt;그렇다면, 한 가지만 수정하면 될 것처럼 보이지 않는가?&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;contents&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;await&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;this&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;contentRepository&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;createQueryBuilder&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;([&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.id&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.content&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b.id&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b.name&amp;#34;&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;leftJoinAndSelect&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.bot&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;leftJoinAndSelect&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.bookmark&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b2&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b2.userId = :userId&amp;#34;&lt;/span&gt;, {&lt;span style=&#34;color:#a6e22e&#34;&gt;userId&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;leftJoinAndSelect&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.like&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;l&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;l.userId = :userId&amp;#34;&lt;/span&gt;, {&lt;span style=&#34;color:#a6e22e&#34;&gt;userId&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;addSelect&lt;/span&gt;((&lt;span style=&#34;color:#a6e22e&#34;&gt;qb&lt;/span&gt;) =&amp;gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;qb&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;subQuery&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			.&lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;count(cc.id)&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			.&lt;span style=&#34;color:#a6e22e&#34;&gt;from&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;Comment&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cc&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			.&lt;span style=&#34;color:#a6e22e&#34;&gt;where&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cc.contentId = c.id&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;commentCount&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;skip&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;take&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;차이점은 &lt;code&gt;.leftJoinAndSelect(&amp;quot;c.like&amp;quot;, &amp;quot;l&amp;quot;)&lt;/code&gt;이 &lt;code&gt;.leftJoinAndSelect(&amp;quot;c.like&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;l.userId = :userId&amp;quot;, {userId: 1})&lt;/code&gt; 로 조건이 추가되었다는 것!&lt;/p&gt;
+&lt;p&gt;이렇게 한다면 위에서 말한 것처럼 작동한다.&lt;/p&gt;
+&lt;p&gt;기존 코드에서는 해당 유저가 좋아요를 눌렀는지를 코드상에서 &lt;code&gt;isLike: !!likedUsers.find((like) =&amp;gt; like.userId === userId)&lt;/code&gt; 이렇게 판단했지만, 저렇게 수정하고 나면 row 개수도 게시글 조회 개수에 딱 맞게 조회되며 &lt;code&gt;isLike: !!likeUsers.length&lt;/code&gt; 로 판단할 수 있게 된다.&lt;/p&gt;
+&lt;h2 id=&#34;후기&#34;&gt;후기&lt;/h2&gt;
+&lt;p&gt;생각보다 간단하게 수정되어서 조금은 허탈했다.&lt;/p&gt;
+&lt;p&gt;코드의 의도를 읽기 위해서 온갖 시도를 했었는데(실제 코드는 위의 예시보다 훠어어얼씬 복잡하다.) 의도를 파악하고, 문제를 파악하고 나니, 정말 어이없는 곳에서 문제가 있었던 케이스였던 것 같다.&lt;/p&gt;
+&lt;p&gt;이 트러블슈팅 경험으로 인해 ORM에 대한 단점이 더 눈에 들어오더라. ORM이 마냥 좋은 것만은 아니라는 건 체감하고 있었지만, 이번 경험으로 인해 그 생각이 확고히 굳어진 것 같다. SQL, 그리고 DBMS에 대한 이해 없이 ORM만 사용하게 된다면, 좋은 개발자가 될 수 없을 것이라고 생각한다.&lt;/p&gt;
+&lt;p&gt;앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다. 이번에는 ORM 수정으로만 끝났지만, 2편에서는 해당 데이터 조회에서는 이번 포스팅에서 수정한 ORM 대신 SQL을 사용하게 된 경험에 대해 얘기하도록 하겠다.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

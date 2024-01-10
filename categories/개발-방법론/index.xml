@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>개발 방법론 on woosae</title>
+        <link>https://example.org/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</link>
+        <description>Recent content in 개발 방법론 on woosae</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>ko-KR</language>
+        <lastBuildDate>Wed, 20 Dec 2023 11:14:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>[개발방법론] 객체 지향과 절차 지향에 대해 알아보자</title>
+        <link>https://example.org/post/23-12-20-%EA%B0%9C%EB%B0%9C%EB%B0%A9%EB%B2%95%EB%A1%A0-%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%97%90%EB%8C%80%ED%95%B4%EC%84%9C%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90/</link>
+        <pubDate>Wed, 20 Dec 2023 11:14:00 +0900</pubDate>
+        
+        <guid>https://example.org/post/23-12-20-%EA%B0%9C%EB%B0%9C%EB%B0%A9%EB%B2%95%EB%A1%A0-%EA%B0%9D%EC%B2%B4%EC%A7%80%ED%96%A5%EC%97%90%EB%8C%80%ED%95%B4%EC%84%9C%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90/</guid>
+        <description>&lt;blockquote&gt;
+&lt;p&gt;개발을 막 시작한 새내기 개발자부터 개발 경력이 많은 개발자까지 무조건 들어봤을 용어, 객체 지향에 대해 알아보자.&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;자동차 운전을 코드로 구현하는 것을 예시로, 객체 지향과 절차 지향을 비교해 가면서 설명한다. 객체 지향을 배우러 왔는데, 절차 지향까지 알아야 한다고 겁먹지 말자, 절차 지향을 이해한다면, 객체 지향을 이해하기 더욱 쉬울 것이다.&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;이 내용은 기본적인 코드 작성 지식이 있어야 이해할 수 있다.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;절차-지향과-객체-지향&#34;&gt;절차 지향과 객체 지향&lt;/h2&gt;
+&lt;h3 id=&#34;절차-지향이란&#34;&gt;절차 지향이란?&lt;/h3&gt;
+&lt;p&gt;객체지향이 있기 이전, 개발 패러다임은 절차 지향이었다. 절차 지향은 간단히 &amp;ldquo;어떤 일을 하기 위해 필요한 행동들의 나열&amp;rdquo; 이라고 정의할 수 있다. 아래와 같은 코드 예제를 보자&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    direction &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; input(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 어느 방향으로 돌릴 것 인가요?(left, right): &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; direction &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;right&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;사용자에게 핸들 방향을 입력받고, 해당 방향에 맞게 핸들을 돌렸다고 출력해 주는 코드이다.&lt;/p&gt;
+&lt;p&gt;이와 같이, &amp;ldquo;핸들을 꺾기 위해(어떤 일) 사용자의 입력을 받고, 입력에 맞게 문자열을 출력하는 코드 (행동들의 나열)&amp;ldquo;로 볼 수 있는 것이 절차 지향적인 코드 작성 방법이다.&lt;/p&gt;
+&lt;h3 id=&#34;객체-지향이란&#34;&gt;객체 지향이란?&lt;/h3&gt;
+&lt;p&gt;객체 지향은 절차지향의 정의인 &amp;ldquo;어떤 일을 하기 위해 필요한 행동들의 나열&amp;quot;을 확장해서 &amp;ldquo;어떤 일을 하기 위한 객체들의 상호작용&amp;quot;으로 정의할 수 있다. 아래와 같은 코드 예제를 보자&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Car&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chagne_direction&lt;/span&gt;(self, direction: string):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; direction &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;right&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    direction &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; input(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 어느 방향으로 돌릴 것 인가요?(left, right): &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    car &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Car()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    car&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;chagne_direction(direction)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;우선 Car라는 클래스를 만든다. 해당 클래스에서는 자동자의 &amp;ldquo;행동&amp;quot;과 관련된 모든 것을 다룬다. 여기에서는 방향전환 행동만을 추가했다.&lt;/p&gt;
+&lt;p&gt;그리고 절차 지향에서의 코드와 같이 사용자에게 입력을 받고, 해당 입력을 저장해 둔다.&lt;/p&gt;
+&lt;p&gt;이후, Car(클래스)에서 car(인스턴스)를 만들고, car(인스턴스)의 change_direction을 실행해서 핸들을 전환하도록 한다.&lt;/p&gt;
+&lt;p&gt;이와 같이 자동차라는 개념적인 그룹으로 묶어서 코드를 작성하는 방식을 객체 지향 개발이라고 한다.&lt;/p&gt;
+&lt;h2 id=&#34;클래스와-인스턴스&#34;&gt;클래스와 인스턴스&lt;/h2&gt;
+&lt;p&gt;클래스/인스턴스는 처음 마주했을 때 이해하기 쉽지 않은 용어이다.&lt;/p&gt;
+&lt;p&gt;자동차를 예로 들어보자.&lt;/p&gt;
+&lt;p&gt;자동차는 어떤 것인가? 명확히 정의하긴 어렵지만, 바퀴 4개(혹은 더 여러 개), 엔진, 핸들이 있는 탈 것이라고 할 수 있다. 이런 개념적인 것들을 가진 모든 것들을 자동차라고 부를 수 있다. 이렇게 보면, 완전히 추상적인 개념이라고 볼 수 있다. 이런 것들을 클래스라고 한다.&lt;/p&gt;
+&lt;p&gt;우리가 실제 이용하는 자동차들은 무엇이 있을까. 나의 산타페, 다른 사람의 산타페, 602-1A번 버스 등 많은 자동차들이 있다. 이런 것들을 인스턴스라고 한다.&lt;/p&gt;
+&lt;p&gt;자동차라는 &amp;ldquo;개념&amp;quot;만 가지고는 행동을 할 수 없지만, 산타페라는 실체를 가지고는 운전을 할 수 있다. 이처럼 행동을 할 수 있도록 클래스에서 객체를 만들어서 사용한다.&lt;/p&gt;
+&lt;p&gt;아래와 같은 코드 예제를 보자&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Car&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chagne_direction&lt;/span&gt;(self, direction: string):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; direction &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;right&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# car1과 car2는 Car에서 생성된 두개의 다른 실체임&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    car1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Car()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    car2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Car()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;이 코드는 Car클래스에서 두 개의 인스턴스를 생성한다.&lt;br&gt;
+다르게 이야기하면, 하나의 Car라는 추상적인 개념에서 두 대의 실제 자동차를 생성한 것이고, 이 자동차들을 각자 개별적으로 움직일 것이다.&lt;/p&gt;
+&lt;p&gt;정리하자면,&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;클래스는 &amp;ldquo;어떤 행동을 하는 추상적인 개념 - 자동차, 사람&amp;rdquo;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;**인스턴스는 &amp;ldquo;실제로 그 행동을 하는 실체 - 산타페(자동차), 나 자신(사람), 여러분들(사람)&amp;rdquo;**으로 정리할 수 있겠다.&lt;/p&gt;
+&lt;h2 id=&#34;객체와의-상호작용&#34;&gt;객체와의 상호작용&lt;/h2&gt;
+&lt;p&gt;이번엔 객체 지향 프로그래밍의 본질인, 객체와의 상호작용을 알아보자.&lt;/p&gt;
+&lt;p&gt;이번에도 코드 예제를 보도록 하자.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Wheel&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;change_direction&lt;/span&gt;(self, direction: string):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; direction &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;right&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;바퀴를 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;바퀴를 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Car&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; __init__(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;wheel &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Wheel()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chagne_direction&lt;/span&gt;(self, direction: string):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; direction &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;right&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;wheel&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;change_direction(direction)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    direction &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; input(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 어느 방향으로 돌릴 것 인가요?(left, right): &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    car &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Car()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    car&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;chagne_direction(direction)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;main 함수는 위의 예제와 같다.&lt;/p&gt;
+&lt;p&gt;이번에 추가된 것은 Wheel의 존재다. 잘 생각해 보면, 자동차는 바퀴가 있어야 굴러갈 것이다. 그리고 사용자가 핸들을 돌리면 바퀴가 돌아가야 할 것이다. 그러므로 Car는 Wheel을 가지고 있어야 한다. (이것을 has-a 관계라고 하는데, 이 부분은 나중에 설명하겠다)&lt;/p&gt;
+&lt;p&gt;그래서 위의 예제는 사용자가 핸들을 돌리면 바퀴도 같이 돌아가는 예제이다.&lt;/p&gt;
+&lt;p&gt;Car는 처음 생성될 때, Wheel을 생성해서 자신이 가지고 있고, 사용자가 핸들을 돌리면, Car는 Wheel의 방향을 변경한다.&lt;/p&gt;
+&lt;p&gt;이렇게 보면 Car와 Wheel이 상호작용하고 있는 것을 볼 수 있다.&lt;/p&gt;
+&lt;p&gt;만약 절차 지향적인 코드였다면 어땠을까? &lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    direction &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; input(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 어느 방향으로 돌릴 것 인가요?(left, right): &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; direction &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;right&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;바퀴를 오른쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;핸들을 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;바퀴를 왼쪽으로 전환!&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위와 같이 끝났을 것이다.&lt;/p&gt;
+&lt;p&gt;어라 근데 여기서 이상한 점이 보인다.&lt;/p&gt;
+&lt;h2 id=&#34;절차-지향이-더-좋아-보이는데&#34;&gt;절차 지향이 더 좋아 보이는데&amp;hellip;?&lt;/h2&gt;
+&lt;p&gt;필자가 제시한 예제를 보면, 절차지향적인 코드가 훨씬 짧고 간결해 보이고, 이해하기도 쉬워 보인다.&lt;/p&gt;
+&lt;p&gt;하지만 다들 실제로 객체지향적으로 구현을 하고 있다.&lt;/p&gt;
+&lt;p&gt;이유가 뭘까?&lt;/p&gt;
+&lt;p&gt;이유는 &lt;strong&gt;재사용성&lt;/strong&gt;이다.&lt;/p&gt;
+&lt;p&gt;만약 자동차가 100대가 동시에 움직인다면?&lt;/p&gt;
+&lt;p&gt;저 if-else 부분을 100번 돌리는 것이 좋을까? Car를 100개 만드는 게 좋을까?&lt;/p&gt;
+&lt;p&gt;직관적으로 봤을 때, Car를 100개 만드는 것이 다른 사람이 볼 때 더욱 이해하기가 쉽지 않을까?&lt;/p&gt;
+&lt;p&gt;하지만 더욱 중요한 이유가 있다.&lt;/p&gt;
+&lt;h2 id=&#34;다른-사람과의-협업을-고려하자&#34;&gt;다른 사람과의 협업을 고려하자.&lt;/h2&gt;
+&lt;p&gt;개발은 혼자 할 수 도 있지만 여러 명과 같이 할 수도 있다.&lt;/p&gt;
+&lt;p&gt;클래스로 짜놓으면, 누가 봐도 &amp;lsquo;아 이 부분은 자동차를 구현하려고 한 거구나&amp;rsquo;를 알 수 있다.(주석 없이도!) if-else 문을 100번 반복한다고 했을 때, 같이 협업하는 사람이 보면 과연 이 코드를 제대로 이해할까? 필자였다면, 머릿속에 물음표만을 띄웠을 것이다.&lt;/p&gt;
+&lt;p&gt;그런 면에서 봤을 때, 객체 지향 프로그래밍이 많이 쓰이는 이유를 알 수 있을 것이다.&lt;/p&gt;
+&lt;h2 id=&#34;맹신은-금물&#34;&gt;맹신은 금물.&lt;/h2&gt;
+&lt;p&gt;어느 패러다임이 항상 정답은 경우는 없다. 객체 지향이 무조건 옳지도 않고, 상황에 따라 절차 지향적으로 개발하는 것이 더 좋을 때도 있다.&lt;/p&gt;
+&lt;p&gt;항상 요구사항에 맞게 개발하는 것이 중요하다. 무조건적인 적용은 오히려 협업을 방해할 수도 있다는 것을 명심하자.&lt;/p&gt;
+&lt;h2 id=&#34;마무리하며&#34;&gt;마무리하며&lt;/h2&gt;
+&lt;p&gt;오늘은 객체 지향에 대해 설명해 보았다. 필자도 객체지향에 대해 설명하면서, 알고 있다고 생각했지만 머릿속에 막연히 있는 개념을 글로 풀어내는 것이 참 어렵다고 느낀다. 이 개념을 처음 접하는 분들도 이해하지 못한 부분이 있을 것이라고 생각한다. 그런 부분이 있다면 댓글로 물어봐주시길 바란다.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

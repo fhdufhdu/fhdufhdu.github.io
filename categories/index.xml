@@ -6,12 +6,52 @@
         <description>Recent content in Categories on woosae</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
-        <lastBuildDate>Sun, 10 Dec 2023 09:00:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Example Category</title>
-        <link>https://example.org/categories/example-category/</link>
-        <pubDate>Sun, 10 Dec 2023 09:00:00 +0900</pubDate>
+        <lastBuildDate>Sun, 07 Jan 2024 20:35:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>postgresql</title>
+        <link>https://example.org/categories/postgresql/</link>
+        <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
-        <guid>https://example.org/categories/example-category/</guid>
+        <guid>https://example.org/categories/postgresql/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>python</title>
+        <link>https://example.org/categories/python/</link>
+        <pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate>
+        
+        <guid>https://example.org/categories/python/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>javascript</title>
+        <link>https://example.org/categories/javascript/</link>
+        <pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate>
+        
+        <guid>https://example.org/categories/javascript/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>cs</title>
+        <link>https://example.org/categories/cs/</link>
+        <pubDate>Tue, 02 Jan 2024 22:15:00 +0900</pubDate>
+        
+        <guid>https://example.org/categories/cs/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>dockder</title>
+        <link>https://example.org/categories/dockder/</link>
+        <pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate>
+        
+        <guid>https://example.org/categories/dockder/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>개발 방법론</title>
+        <link>https://example.org/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</link>
+        <pubDate>Wed, 20 Dec 2023 11:14:00 +0900</pubDate>
+        
+        <guid>https://example.org/categories/%EA%B0%9C%EB%B0%9C-%EB%B0%A9%EB%B2%95%EB%A1%A0/</guid>
         <description></description>
         </item>
         

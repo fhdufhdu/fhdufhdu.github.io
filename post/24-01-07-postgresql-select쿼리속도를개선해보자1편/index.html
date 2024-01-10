@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko-KR" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='ORM으로 잘못 짜여진 쿼리를 수정해보자'>
+<title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자 1편</title>
+
+<link rel='canonical' href='https://example.org/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자 1편'>
+<meta property='og:description' content='ORM으로 잘못 짜여진 쿼리를 수정해보자'>
+<meta property='og:url' content='https://example.org/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/'>
+<meta property='og:site_name' content='woosae'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='database' /><meta property='article:tag' content='orm' /><meta property='article:published_time' content='2024-01-07T20:35:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-07T20:35:00&#43;09:00'/>
+<meta name="twitter:title" content="[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자 1편">
+<meta name="twitter:description" content="ORM으로 잘못 짜여진 쿼리를 수정해보자"><link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🤩</text></svg>">
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu95e3a12c0d9210c5dbd751eba0336b86_24679_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤩</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">woosae</a></h1>
+            <h2 class="site-description">의미있는 경험과 지식을 공유합니다</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/postgresql/" >
+                postgresql
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/24-01-07-postgresql-select%EC%BF%BC%EB%A6%AC%EC%86%8D%EB%8F%84%EB%A5%BC%EA%B0%9C%EC%84%A0%ED%95%B4%EB%B3%B4%EC%9E%901%ED%8E%B8/">[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자 1편</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            ORM으로 잘못 짜여진 쿼리를 수정해보자
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-01-07 PM 8:35</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="문제"> 문제</h2>
+<p>챗봇들의 게시글을 조회하는데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.</p>
+<p>정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.</p>
+<p>그래서 서버 코드를 인수인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.</p>
+<p>이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.</p>
+<p>이제 한번 문제를 살펴보자</p>
+<h3 id="테이블-구조">테이블 구조</h3>
+<h3 id="orm-코드와-원인">ORM 코드와 원인</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">contents</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">contentRepository</span>.<span style="color:#a6e22e">createQueryBuilder</span>(<span style="color:#e6db74">&#34;c&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">select</span>([<span style="color:#e6db74">&#34;c.id&#34;</span>, <span style="color:#e6db74">&#34;c.content&#34;</span>, <span style="color:#e6db74">&#34;b.id&#34;</span>, <span style="color:#e6db74">&#34;b.name&#34;</span>])
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">leftJoinAndSelect</span>(<span style="color:#e6db74">&#34;c.bot&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">leftJoinAndSelect</span>(<span style="color:#e6db74">&#34;c.bookmark&#34;</span>, <span style="color:#e6db74">&#34;b2&#34;</span>, <span style="color:#e6db74">&#34;b2.userId = :userId&#34;</span>, {<span style="color:#a6e22e">userId</span><span style="color:#f92672">:</span><span style="color:#ae81ff">1</span>})
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">leftJoinAndSelect</span>(<span style="color:#e6db74">&#34;c.like&#34;</span>, <span style="color:#e6db74">&#34;l&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">addSelect</span>((<span style="color:#a6e22e">qb</span>) =&gt; {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">qb</span>.<span style="color:#a6e22e">subQuery</span>()
+</span></span><span style="display:flex;"><span>			.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#34;count(cc.id)&#34;</span>)
+</span></span><span style="display:flex;"><span>			.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">Comment</span>, <span style="color:#e6db74">&#34;cc&#34;</span>)
+</span></span><span style="display:flex;"><span>			.<span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#34;cc.contentId = c.id&#34;</span>)
+</span></span><span style="display:flex;"><span>	}, <span style="color:#e6db74">&#34;commentCount&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">skip</span>(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">take</span>(<span style="color:#ae81ff">20</span>)
+</span></span></code></pre></div><p>이렇게 코드가 작성되어 있었다. 해당 코드를 SQL로 바꿔보면 아래와 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#66d9ef">c</span>.id, <span style="color:#66d9ef">c</span>,content, b.id, b,name, 
+</span></span><span style="display:flex;"><span>	(<span style="color:#66d9ef">select</span> <span style="color:#66d9ef">count</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">from</span> <span style="color:#e6db74">&#34;Comment&#34;</span> cc <span style="color:#66d9ef">where</span> cc.content_id <span style="color:#f92672">=</span> <span style="color:#66d9ef">c</span>.id) <span style="color:#66d9ef">as</span> <span style="color:#e6db74">&#34;commentCount&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">from</span> <span style="color:#e6db74">&#34;Content&#34;</span> <span style="color:#66d9ef">c</span>
+</span></span><span style="display:flex;"><span>	  <span style="color:#66d9ef">left</span> <span style="color:#66d9ef">join</span> <span style="color:#e6db74">&#34;Bot&#34;</span> b
+</span></span><span style="display:flex;"><span>		  <span style="color:#66d9ef">on</span> <span style="color:#66d9ef">c</span>.bot_id <span style="color:#f92672">=</span> b.id
+</span></span><span style="display:flex;"><span>	  <span style="color:#66d9ef">left</span> <span style="color:#66d9ef">join</span> <span style="color:#e6db74">&#34;Bookmark&#34;</span> b2
+</span></span><span style="display:flex;"><span>		  <span style="color:#66d9ef">on</span> b2.content_id <span style="color:#f92672">=</span> <span style="color:#66d9ef">c</span>.id <span style="color:#66d9ef">on</span> b2.user_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>	  <span style="color:#66d9ef">left</span> <span style="color:#66d9ef">join</span> <span style="color:#e6db74">&#34;Like&#34;</span> l
+</span></span><span style="display:flex;"><span>		  <span style="color:#66d9ef">on</span> l.content_id <span style="color:#f92672">=</span> <span style="color:#66d9ef">c</span>.id
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">offset</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">20</span>;
+</span></span></code></pre></div><p>이 쿼리의 문제점이 뭘까?</p>
+<p>우선 위의 쿼리에서 서브쿼리를 뺀 결과가 아래와 같다고 하자.</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>c.id</th>
+<th>c.content</th>
+<th>b2.id</th>
+<th>l.id</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>&ldquo;반가워요&rdquo;</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>&ldquo;반가워요&rdquo;</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>1</td>
+<td>&ldquo;반가워요&rdquo;</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>&ldquo;안녕&rdquo;</td>
+<td>4</td>
+<td>5</td>
+</tr>
+<tr>
+<td>2</td>
+<td>&ldquo;안녕&rdquo;</td>
+<td>4</td>
+<td>6</td>
+</tr>
+</tbody>
+</table></div>
+<p>원하는 결과는 분명 c의 리스트이다. 하지만 결과를 보면 c가 중복되는 것들이 많이 보일 것이다.</p>
+<p>그 중복되는 모든 행에 전부 서브쿼리가 실행되어서 문제가 되는 것이다. 20개의 게시글을 요청했는데, 결과 row은 100개 혹은 200개가 넘어가는 상황이 발생하고 100,200개의 행에 전부 서브쿼리가 실행되니까 계속해서 느려지는 것이었다.</p>
+<p>서브쿼리 자체는 크게 문제가 없었다.(사실 join 맺어서 group by로 count 계산하는게 훨씬 빠르다. 이건 2편에서 다루도록 하겠다.) </p>
+<h2 id="원인파악-완료-개선해보자">원인파악 완료! 개선해보자</h2>
+<h4 id="row를-줄이자">Row를 줄이자.</h4>
+<p>Like 테이블을 join 한 이유는 유저가 해당 게시글에 좋아요를 눌렀나를 보기 위한 장치이다. 즉, 위의 결과처럼 l.id가 여러 개가 나올 필요가 없다. join을 맺었을 때, 유저가 좋아요를 눌렀다면 l.id가 존재할 것이고, 그렇지 않다면 l.id가 null이 되도록 수정하면 된다.</p>
+<p>그렇다면, 한 가지만 수정하면 될 것처럼 보이지 않는가?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">contents</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">contentRepository</span>.<span style="color:#a6e22e">createQueryBuilder</span>(<span style="color:#e6db74">&#34;c&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">select</span>([<span style="color:#e6db74">&#34;c.id&#34;</span>, <span style="color:#e6db74">&#34;c.content&#34;</span>, <span style="color:#e6db74">&#34;b.id&#34;</span>, <span style="color:#e6db74">&#34;b.name&#34;</span>])
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">leftJoinAndSelect</span>(<span style="color:#e6db74">&#34;c.bot&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">leftJoinAndSelect</span>(<span style="color:#e6db74">&#34;c.bookmark&#34;</span>, <span style="color:#e6db74">&#34;b2&#34;</span>, <span style="color:#e6db74">&#34;b2.userId = :userId&#34;</span>, {<span style="color:#a6e22e">userId</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>})
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">leftJoinAndSelect</span>(<span style="color:#e6db74">&#34;c.like&#34;</span>, <span style="color:#e6db74">&#34;l&#34;</span>, <span style="color:#e6db74">&#34;l.userId = :userId&#34;</span>, {<span style="color:#a6e22e">userId</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>})
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">addSelect</span>((<span style="color:#a6e22e">qb</span>) =&gt; {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">qb</span>.<span style="color:#a6e22e">subQuery</span>()
+</span></span><span style="display:flex;"><span>			.<span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#34;count(cc.id)&#34;</span>)
+</span></span><span style="display:flex;"><span>			.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">Comment</span>, <span style="color:#e6db74">&#34;cc&#34;</span>)
+</span></span><span style="display:flex;"><span>			.<span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#34;cc.contentId = c.id&#34;</span>)
+</span></span><span style="display:flex;"><span>	}, <span style="color:#e6db74">&#34;commentCount&#34;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">skip</span>(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">take</span>(<span style="color:#ae81ff">20</span>)
+</span></span></code></pre></div><p>차이점은 <code>.leftJoinAndSelect(&quot;c.like&quot;, &quot;l&quot;)</code>이 <code>.leftJoinAndSelect(&quot;c.like&quot;, &quot;l&quot;, &quot;l.userId = :userId&quot;, {userId: 1})</code> 로 조건이 추가되었다는 것!</p>
+<p>이렇게 한다면 위에서 말한 것처럼 작동한다.</p>
+<p>기존 코드에서는 해당 유저가 좋아요를 눌렀는지를 코드상에서 <code>isLike: !!likedUsers.find((like) =&gt; like.userId === userId)</code> 이렇게 판단했지만, 저렇게 수정하고 나면 row 개수도 게시글 조회 개수에 딱 맞게 조회되며 <code>isLike: !!likeUsers.length</code> 로 판단할 수 있게 된다.</p>
+<h2 id="후기">후기</h2>
+<p>생각보다 간단하게 수정되어서 조금은 허탈했다.</p>
+<p>코드의 의도를 읽기 위해서 온갖 시도를 했었는데(실제 코드는 위의 예시보다 훠어어얼씬 복잡하다.) 의도를 파악하고, 문제를 파악하고 나니, 정말 어이없는 곳에서 문제가 있었던 케이스였던 것 같다.</p>
+<p>이 트러블슈팅 경험으로 인해 ORM에 대한 단점이 더 눈에 들어오더라. ORM이 마냥 좋은 것만은 아니라는 건 체감하고 있었지만, 이번 경험으로 인해 그 생각이 확고히 굳어진 것 같다. SQL, 그리고 DBMS에 대한 이해 없이 ORM만 사용하게 된다면, 좋은 개발자가 될 수 없을 것이라고 생각한다.</p>
+<p>앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다. 이번에는 ORM 수정으로만 끝났지만, 2편에서는 해당 데이터 조회에서는 이번 포스팅에서 수정한 ORM 대신 SQL을 사용하게 된 경험에 대해 얘기하도록 하겠다.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/database/">database</a>
+        
+            <a href="/tags/orm/">orm</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2024 woosae
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.21.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
