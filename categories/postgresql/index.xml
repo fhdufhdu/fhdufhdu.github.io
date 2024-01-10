@@ -19,6 +19,16 @@
 &lt;p&gt;이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.&lt;/p&gt;
 &lt;p&gt;이제 한번 문제를 살펴보자&lt;/p&gt;
 &lt;h3 id=&#34;테이블-구조&#34;&gt;테이블 구조&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;https://github.com/fhdufhdu/fhdufhdu.github.io/assets/32770312/4c780bf4-92d7-48f5-9363-ee1e1660c3d9&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;image&#34;
+	
+	
+&gt;&lt;/p&gt;
 &lt;h3 id=&#34;orm-코드와-원인&#34;&gt;ORM 코드와 원인&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;contents&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;await&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;this&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;contentRepository&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;createQueryBuilder&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	.&lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;([&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.id&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;c.content&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b.id&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b.name&amp;#34;&lt;/span&gt;])
