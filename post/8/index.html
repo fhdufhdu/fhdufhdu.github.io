@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="ko-KR" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화 해보자'>
-<title>[PostgreSQL] [실무] 데이터를 일관되게 전달해보자</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화해 보자'>
+<title>[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자</title>
 
 <link rel='canonical' href='https://fhdufhdu.github.io/post/8/'>
 
-<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[PostgreSQL] [실무] 데이터를 일관되게 전달해보자'>
-<meta property='og:description' content='데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화 해보자'>
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자'>
+<meta property='og:description' content='데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화해 보자'>
 <meta property='og:url' content='https://fhdufhdu.github.io/post/8/'>
 <meta property='og:site_name' content='fhdufhdu'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='database' /><meta property='article:tag' content='orm' /><meta property='article:published_time' content='2024-01-10T14:34:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-10T14:34:00&#43;09:00'/>
-<meta name="twitter:title" content="[PostgreSQL] [실무] 데이터를 일관되게 전달해보자">
-<meta name="twitter:description" content="데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화 해보자">
+<meta name="twitter:title" content="[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자">
+<meta name="twitter:description" content="데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화해 보자">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HWJJYSR48"></script>
 <script>
 var doNotTrack = false;
@@ -210,12 +210,12 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/post/8/">[PostgreSQL] [실무] 데이터를 일관되게 전달해보자</a>
+            <a href="/post/8/">[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자</a>
         </h2>
     
         
         <h3 class="article-subtitle">
-            데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화 해보자
+            데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화해 보자
         </h3>
         
     </div>
@@ -267,7 +267,7 @@ if (!doNotTrack) {
     
     
     <h1 id="문제"> 문제</h1>
-<p><a class="link" href="https://fhdufhdu.github.io/post/7" >1편의 문제</a> 를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 <code>게시글 리스트의 댓글 갯수와 실제 게시글을 들어갔을 때 댓글 갯수가 달라요</code> 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.</p>
+<p><a class="link" href="https://fhdufhdu.github.io/post/7" >1편의 문제</a>를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 <code>게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요</code> 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.</p>
 <p><img src="/post/8/image.png"
 	width="678"
 	height="272"
@@ -282,10 +282,10 @@ if (!doNotTrack) {
 		data-flex-basis="598px"
 	
 ></p>
-<p>위 이미지의 <code>델 oem 4090의 모험(완)</code> 게시글을 보면 댓글이 6개라고 나와 있다. 그런데, 실제로 해당 게시글을 클릭해서 들어가면 5개, 4개 같이 댓글 갯수가 줄어드는 버그가 있었다.</p>
-<p>이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 <code>삭제, 차단, 신고, 위치, 순서</code>등의 조건에 영향을 받는 정책이다. 단순히 봐도 복잡할 것이 예상되지 않는가?</p>
-<p>그래서 그랬을까? 애초에 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 갯수를 가져와서 반환하고, 게시글 상세 정보 조회시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.</p>
-<p>솔직히 처음 코드를 보고 조금 벙쪘다. 아무리 그래도 그렇지&hellip; 두개의 댓글 갯수 카운팅 방식이 같지 않다니&hellip;</p>
+<p>위 이미지의 <code>델 oem 4090의 모험(완)</code> 게시글을 보면 댓글이 6개라고 나와 있다. 그런데, 실제로 해당 게시글을 클릭해서 들어가면 5개, 4개 같이 댓글 개수가 줄어드는 버그가 있었다.</p>
+<p>이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 <code>삭제, 차단, 신고, 위치, 순서</code> 등의 조건에 영향을 받는 정책이다. 단순히 봐도 복잡할 것이 예상되지 않는가?</p>
+<p>그래서 그랬을까? 애초에 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 개수를 가져와서 반환하고, 게시글 상세 정보 조회 시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.</p>
+<p>솔직히 처음 코드를 보고 조금 벙쪘다. 아무리 그래도 그렇지&hellip; 두개의 댓글 개수 카운팅 방식이 같지 않다니&hellip;</p>
 <h1 id="문제를-어떻게-해결할-것인가">문제를 어떻게 해결할 것인가</h1>
 <p>문제의 원인을 파악하고 나서, 어떻게 해결할 지 고민이 많이 되었다. 곰곰히 생각하면서 세가지의 생각이 떠올랐다.</p>
 <ol>
@@ -297,7 +297,7 @@ if (!doNotTrack) {
 </li>
 <li><strong>게시글 목록 조회시 댓글도 싹다 불러와서 정책 필터 적용시키기</strong>
 <ul>
-<li>전체 게시글 갯수(n) * 전체 댓글 갯수(m) = <strong>O(n*m)</strong> 만큼의 시간 소모</li>
+<li>전체 게시글 개수(n) * 전체 댓글 개수(m) = <strong>O(n*m)</strong> 만큼의 시간 소모</li>
 <li>뭔가 딱봐도 시간이 오래 걸릴 것 같은 느낌</li>
 </ul>
 </li>
@@ -330,9 +330,9 @@ if (!doNotTrack) {
 <h2 id="with절-적극-활용하기">with절 적극 활용하기</h2>
 <p>postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 <code>CTE(common table expression)</code>이라고 한다.</p>
 <h2 id="대상-게시글-선택">대상 게시글 선택</h2>
-<p>with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 갯수를 최소화 하는 목적을 가진다.</p>
+<p>with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 개수를 최소화 하는 목적을 가진다.</p>
 <h2 id="댓글-선택">댓글 선택</h2>
-<p>댓글 테이블의 self join을 통해 정책을 sql에 녹여낸다. self join시 row 갯수가 많으면 시간이 오래 걸리므로 위의 게시글 조회를 저장해둔 결과를 가져와 댓글 범위를 최소화 한다. 이후 댓글과 유저를 join 한 후 유저 정보를 jsonb로 변환한다. 해당 결과도 with절로 저장해둔다.</p>
+<p>댓글 테이블의 self join을 통해 정책을 sql에 녹여낸다. self join시 row 개수가 많으면 시간이 오래 걸리므로 위의 게시글 조회를 저장해둔 결과를 가져와 댓글 범위를 최소화 한다. 이후 댓글과 유저를 join 한 후 유저 정보를 jsonb로 변환한다. 해당 결과도 with절로 저장해둔다.</p>
 <h2 id="게시글과-댓글-조합-후-json-제작">게시글과 댓글 조합 후 json 제작</h2>
 <p>대상 게시글과 댓글 정보를 이용해 join을 맺는다. 이를 통해 <code>게시글-댓글리스트</code>를 json으로 만들고 전달할 수 있게 된다.</p>
 <h1 id="후기">후기</h1>
@@ -448,7 +448,7 @@ if (!doNotTrack) {
         
 
         <div class="article-details">
-            <h2 class="article-title">[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자</h2>
+            <h2 class="article-title">[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자</h2>
         </div>
     </a>
 </article>

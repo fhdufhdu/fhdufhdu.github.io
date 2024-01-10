@@ -14,11 +14,11 @@
         <guid>https://fhdufhdu.github.io/post/6/</guid>
         <description>&lt;h1 id=&#34;문제&#34;&gt;문제&lt;/h1&gt;
 &lt;p&gt;​
-회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔씩 너무 챗봇이 느려요&amp;quot;였다.
+회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔 너무 챗봇이 느려요&amp;quot;였다.
 ​
 챗봇 모델 쪽에서 응답이 늦는 경우는 자주 있었기에, 이번에도 그렇겠거니 하고 확인을 해보았다.
 ​
-그런데 로그에 찍힌 시간을 보니, 모델은 빠른 시간 내에 응답을 해주는 것을 확인했다. 거기서 문제가 있다는 것을 깨닫고, 문제점을 찾아가기 시작했다.
+그런데, 로그에 찍힌 시간을 보니, 모델은 빠른 시간 내에 응답을 해주는 것을 확인했다. 거기서 문제가 있다는 것을 깨닫고, 문제점을 찾아가기 시작했다.
 ​
 문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
 ​&lt;/p&gt;
@@ -40,7 +40,7 @@
 ​
 그런데 &lt;code&gt;importlib&lt;/code&gt;이 느리다니&amp;hellip; 이해가 되지 않았다. &lt;code&gt;importlib&lt;/code&gt;은 결국 &lt;code&gt;__import__&lt;/code&gt; 함수의 래퍼이다. &lt;code&gt;__import__&lt;/code&gt;함수는 import 구문을 만나면 실행되는 기본적인 함수이다. 이게 느리다면, 파이썬을 사용해도 되는 것일까?
 ​&lt;/p&gt;
-&lt;h2 id=&#34;import의-작동방식에-대해서-알아보자&#34;&gt;Import의 작동방식에 대해서 알아보자&lt;/h2&gt;
+&lt;h2 id=&#34;import의-작동-방식에-대해서-알아보자&#34;&gt;Import의 작동 방식에 대해서 알아보자&lt;/h2&gt;
 &lt;p&gt;​
 해당 정보는 &lt;a class=&#34;link&#34; href=&#34;https://medium.com/@likegondry/python-til-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%B4-import%EB%A1%9C-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%84-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95-76e268e7613b&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;김지연 님의 블로그&lt;/a&gt;를 참고해서 작성했다.

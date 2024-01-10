@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="ko-KR" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='ORM으로 비효율적으로 작성된 쿼리를 수정해보자'>
-<title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='ORM으로 비효율적으로 작성된 쿼리를 수정해 보자'>
+<title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자</title>
 
 <link rel='canonical' href='https://fhdufhdu.github.io/post/7/'>
 
-<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자'>
-<meta property='og:description' content='ORM으로 비효율적으로 작성된 쿼리를 수정해보자'>
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자'>
+<meta property='og:description' content='ORM으로 비효율적으로 작성된 쿼리를 수정해 보자'>
 <meta property='og:url' content='https://fhdufhdu.github.io/post/7/'>
 <meta property='og:site_name' content='fhdufhdu'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='database' /><meta property='article:tag' content='orm' /><meta property='article:published_time' content='2024-01-07T20:35:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-07T20:35:00&#43;09:00'/>
-<meta name="twitter:title" content="[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자">
-<meta name="twitter:description" content="ORM으로 비효율적으로 작성된 쿼리를 수정해보자">
+<meta name="twitter:title" content="[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자">
+<meta name="twitter:description" content="ORM으로 비효율적으로 작성된 쿼리를 수정해 보자">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HWJJYSR48"></script>
 <script>
 var doNotTrack = false;
@@ -210,12 +210,12 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/post/7/">[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자</a>
+            <a href="/post/7/">[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자</a>
         </h2>
     
         
         <h3 class="article-subtitle">
-            ORM으로 비효율적으로 작성된 쿼리를 수정해보자
+            ORM으로 비효율적으로 작성된 쿼리를 수정해 보자
         </h3>
         
     </div>
@@ -267,9 +267,9 @@ if (!doNotTrack) {
     
     
     <h1 id="문제"> 문제</h1>
-<p>챗봇들의 게시글을 조회하는데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.</p>
+<p>챗봇들의 게시글을 조회하는 데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.</p>
 <p>정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.</p>
-<p>그래서 서버 코드를 인수인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.</p>
+<p>그래서 서버 코드를 인수·인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.</p>
 <p>이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.</p>
 <p>이제 한번 문제를 살펴보자</p>
 <h2 id="원인">원인</h2>
@@ -316,9 +316,9 @@ if (!doNotTrack) {
 </tr>
 </tbody>
 </table></div>
-<p>원하는 결과는 c의 리스트이다. 노출되는 c의 갯수는 2개인데, 총 row의 갯수는 5개로 뻥튀기되어 있는 것을 볼 수 있다. 그렇다면 2번만 서브쿼리를 실행하면 될 것을, 5번이나 실행하고 있었다는 것이다.</p>
-<p>원하는 결과에 c의 갯수가 많아지면 많아 질 수록 row의 갯수는 뻥튀기 될 것이다. 만약 20개의 c를 원한다고 하면 100개의 row가 조회될 수도 있고, 100개의 row에 모두 서브쿼리가 실행된다면 20개의 서브쿼리보다 훨씬 느릴 것이다.</p>
-<h1 id="원인파악-완료-개선해보자">원인파악 완료! 개선해보자</h1>
+<p>원하는 결과는 c의 리스트이다. 노출되는 c의 개수는 2개인데, 총 row의 개수는 5개로 뻥튀기된 것을 볼 수 있다. 그렇다면 2번만 서브쿼리를 실행하면 될 것을, 5번이나 실행하고 있었다는 것이다.</p>
+<p>원하는 결과에 c의 갯수가 많아지면 많아 질 수록 row의 개수는 뻥튀기 될 것이다. 만약 20개의 c를 원한다고 하면 100개의 row가 조회될 수도 있고, 100개의 row에 모두 서브쿼리가 실행된다면 20개의 서브쿼리보다 훨씬 느릴 것이다.</p>
+<h1 id="원인파악-완료-개선해-보자">원인파악 완료! 개선해 보자</h1>
 <h2 id="result-row의-갯수를-줄이자">Result Row의 갯수를 줄이자.</h2>
 <p>ORM 코드를 잘 살펴보니 특정 조건이 빠져있었다. 그래서 필요한 행 말고 모든 행에 대해 join을 걸면서 row의 갯수가 늘어났던 것이었다.</p>
 <p>그 조건을 넣어서 테스트 해봤더니 row의 갯수도 잘 줄어들었고, 15s -&gt; 1s로 속도가 빨라진 것을 확인했다.</p>

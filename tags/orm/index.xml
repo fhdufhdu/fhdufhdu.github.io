@@ -7,13 +7,13 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
         <lastBuildDate>Wed, 10 Jan 2024 14:34:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/tags/orm/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>[PostgreSQL] [실무] 데이터를 일관되게 전달해보자</title>
+        <title>[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자</title>
         <link>https://fhdufhdu.github.io/post/8/</link>
         <pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/8/</guid>
         <description>&lt;h1 id=&#34;문제&#34;&gt; 문제&lt;/h1&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://fhdufhdu.github.io/post/7&#34; &gt;1편의 문제&lt;/a&gt; 를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 &lt;code&gt;게시글 리스트의 댓글 갯수와 실제 게시글을 들어갔을 때 댓글 갯수가 달라요&lt;/code&gt; 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://fhdufhdu.github.io/post/7&#34; &gt;1편의 문제&lt;/a&gt;를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 &lt;code&gt;게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요&lt;/code&gt; 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/8/image.png&#34;
 	width=&#34;678&#34;
 	height=&#34;272&#34;
@@ -28,10 +28,10 @@
 		data-flex-basis=&#34;598px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;위 이미지의 &lt;code&gt;델 oem 4090의 모험(완)&lt;/code&gt; 게시글을 보면 댓글이 6개라고 나와 있다. 그런데, 실제로 해당 게시글을 클릭해서 들어가면 5개, 4개 같이 댓글 갯수가 줄어드는 버그가 있었다.&lt;/p&gt;
-&lt;p&gt;이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 &lt;code&gt;삭제, 차단, 신고, 위치, 순서&lt;/code&gt;등의 조건에 영향을 받는 정책이다. 단순히 봐도 복잡할 것이 예상되지 않는가?&lt;/p&gt;
-&lt;p&gt;그래서 그랬을까? 애초에 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 갯수를 가져와서 반환하고, 게시글 상세 정보 조회시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.&lt;/p&gt;
-&lt;p&gt;솔직히 처음 코드를 보고 조금 벙쪘다. 아무리 그래도 그렇지&amp;hellip; 두개의 댓글 갯수 카운팅 방식이 같지 않다니&amp;hellip;&lt;/p&gt;
+&lt;p&gt;위 이미지의 &lt;code&gt;델 oem 4090의 모험(완)&lt;/code&gt; 게시글을 보면 댓글이 6개라고 나와 있다. 그런데, 실제로 해당 게시글을 클릭해서 들어가면 5개, 4개 같이 댓글 개수가 줄어드는 버그가 있었다.&lt;/p&gt;
+&lt;p&gt;이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 &lt;code&gt;삭제, 차단, 신고, 위치, 순서&lt;/code&gt; 등의 조건에 영향을 받는 정책이다. 단순히 봐도 복잡할 것이 예상되지 않는가?&lt;/p&gt;
+&lt;p&gt;그래서 그랬을까? 애초에 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 개수를 가져와서 반환하고, 게시글 상세 정보 조회 시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.&lt;/p&gt;
+&lt;p&gt;솔직히 처음 코드를 보고 조금 벙쪘다. 아무리 그래도 그렇지&amp;hellip; 두개의 댓글 개수 카운팅 방식이 같지 않다니&amp;hellip;&lt;/p&gt;
 &lt;h1 id=&#34;문제를-어떻게-해결할-것인가&#34;&gt;문제를 어떻게 해결할 것인가&lt;/h1&gt;
 &lt;p&gt;문제의 원인을 파악하고 나서, 어떻게 해결할 지 고민이 많이 되었다. 곰곰히 생각하면서 세가지의 생각이 떠올랐다.&lt;/p&gt;
 &lt;ol&gt;
@@ -43,7 +43,7 @@
 &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;게시글 목록 조회시 댓글도 싹다 불러와서 정책 필터 적용시키기&lt;/strong&gt;
 &lt;ul&gt;
-&lt;li&gt;전체 게시글 갯수(n) * 전체 댓글 갯수(m) = &lt;strong&gt;O(n*m)&lt;/strong&gt; 만큼의 시간 소모&lt;/li&gt;
+&lt;li&gt;전체 게시글 개수(n) * 전체 댓글 개수(m) = &lt;strong&gt;O(n*m)&lt;/strong&gt; 만큼의 시간 소모&lt;/li&gt;
 &lt;li&gt;뭔가 딱봐도 시간이 오래 걸릴 것 같은 느낌&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -76,9 +76,9 @@
 &lt;h2 id=&#34;with절-적극-활용하기&#34;&gt;with절 적극 활용하기&lt;/h2&gt;
 &lt;p&gt;postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 &lt;code&gt;CTE(common table expression)&lt;/code&gt;이라고 한다.&lt;/p&gt;
 &lt;h2 id=&#34;대상-게시글-선택&#34;&gt;대상 게시글 선택&lt;/h2&gt;
-&lt;p&gt;with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 갯수를 최소화 하는 목적을 가진다.&lt;/p&gt;
+&lt;p&gt;with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 개수를 최소화 하는 목적을 가진다.&lt;/p&gt;
 &lt;h2 id=&#34;댓글-선택&#34;&gt;댓글 선택&lt;/h2&gt;
-&lt;p&gt;댓글 테이블의 self join을 통해 정책을 sql에 녹여낸다. self join시 row 갯수가 많으면 시간이 오래 걸리므로 위의 게시글 조회를 저장해둔 결과를 가져와 댓글 범위를 최소화 한다. 이후 댓글과 유저를 join 한 후 유저 정보를 jsonb로 변환한다. 해당 결과도 with절로 저장해둔다.&lt;/p&gt;
+&lt;p&gt;댓글 테이블의 self join을 통해 정책을 sql에 녹여낸다. self join시 row 개수가 많으면 시간이 오래 걸리므로 위의 게시글 조회를 저장해둔 결과를 가져와 댓글 범위를 최소화 한다. 이후 댓글과 유저를 join 한 후 유저 정보를 jsonb로 변환한다. 해당 결과도 with절로 저장해둔다.&lt;/p&gt;
 &lt;h2 id=&#34;게시글과-댓글-조합-후-json-제작&#34;&gt;게시글과 댓글 조합 후 json 제작&lt;/h2&gt;
 &lt;p&gt;대상 게시글과 댓글 정보를 이용해 join을 맺는다. 이를 통해 &lt;code&gt;게시글-댓글리스트&lt;/code&gt;를 json으로 만들고 전달할 수 있게 된다.&lt;/p&gt;
 &lt;h1 id=&#34;후기&#34;&gt;후기&lt;/h1&gt;
@@ -87,15 +87,15 @@
 </description>
         </item>
         <item>
-        <title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해보자</title>
+        <title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자</title>
         <link>https://fhdufhdu.github.io/post/7/</link>
         <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/7/</guid>
         <description>&lt;h1 id=&#34;문제&#34;&gt; 문제&lt;/h1&gt;
-&lt;p&gt;챗봇들의 게시글을 조회하는데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p&gt;
+&lt;p&gt;챗봇들의 게시글을 조회하는 데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p&gt;
 &lt;p&gt;정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.&lt;/p&gt;
-&lt;p&gt;그래서 서버 코드를 인수인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.&lt;/p&gt;
+&lt;p&gt;그래서 서버 코드를 인수·인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.&lt;/p&gt;
 &lt;p&gt;이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.&lt;/p&gt;
 &lt;p&gt;이제 한번 문제를 살펴보자&lt;/p&gt;
 &lt;h2 id=&#34;원인&#34;&gt;원인&lt;/h2&gt;
@@ -142,9 +142,9 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;원하는 결과는 c의 리스트이다. 노출되는 c의 갯수는 2개인데, 총 row의 갯수는 5개로 뻥튀기되어 있는 것을 볼 수 있다. 그렇다면 2번만 서브쿼리를 실행하면 될 것을, 5번이나 실행하고 있었다는 것이다.&lt;/p&gt;
-&lt;p&gt;원하는 결과에 c의 갯수가 많아지면 많아 질 수록 row의 갯수는 뻥튀기 될 것이다. 만약 20개의 c를 원한다고 하면 100개의 row가 조회될 수도 있고, 100개의 row에 모두 서브쿼리가 실행된다면 20개의 서브쿼리보다 훨씬 느릴 것이다.&lt;/p&gt;
-&lt;h1 id=&#34;원인파악-완료-개선해보자&#34;&gt;원인파악 완료! 개선해보자&lt;/h1&gt;
+&lt;p&gt;원하는 결과는 c의 리스트이다. 노출되는 c의 개수는 2개인데, 총 row의 개수는 5개로 뻥튀기된 것을 볼 수 있다. 그렇다면 2번만 서브쿼리를 실행하면 될 것을, 5번이나 실행하고 있었다는 것이다.&lt;/p&gt;
+&lt;p&gt;원하는 결과에 c의 갯수가 많아지면 많아 질 수록 row의 개수는 뻥튀기 될 것이다. 만약 20개의 c를 원한다고 하면 100개의 row가 조회될 수도 있고, 100개의 row에 모두 서브쿼리가 실행된다면 20개의 서브쿼리보다 훨씬 느릴 것이다.&lt;/p&gt;
+&lt;h1 id=&#34;원인파악-완료-개선해-보자&#34;&gt;원인파악 완료! 개선해 보자&lt;/h1&gt;
 &lt;h2 id=&#34;result-row의-갯수를-줄이자&#34;&gt;Result Row의 갯수를 줄이자.&lt;/h2&gt;
 &lt;p&gt;ORM 코드를 잘 살펴보니 특정 조건이 빠져있었다. 그래서 필요한 행 말고 모든 행에 대해 join을 걸면서 row의 갯수가 늘어났던 것이었다.&lt;/p&gt;
 &lt;p&gt;그 조건을 넣어서 테스트 해봤더니 row의 갯수도 잘 줄어들었고, 15s -&amp;gt; 1s로 속도가 빨라진 것을 확인했다.&lt;/p&gt;
