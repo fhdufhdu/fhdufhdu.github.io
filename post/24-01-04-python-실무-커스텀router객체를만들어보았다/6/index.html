@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko-KR" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='직접 만들어보는 Router 객체! 이를 통해 속도 개선 경험을 공유한다'>
+<title>[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</title>
+
+<link rel='canonical' href='https://fhdufhdu.github.io/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/'>
+
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[Python] [실무] 커스텀 Router 객체를 만들어 보았다.'>
+<meta property='og:description' content='직접 만들어보는 Router 객체! 이를 통해 속도 개선 경험을 공유한다'>
+<meta property='og:url' content='https://fhdufhdu.github.io/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/'>
+<meta property='og:site_name' content='fhdufhdu'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2024-01-04T23:10:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-04T23:10:00&#43;09:00'/>
+<meta name="twitter:title" content="[Python] [실무] 커스텀 Router 객체를 만들어 보았다.">
+<meta name="twitter:description" content="직접 만들어보는 Router 객체! 이를 통해 속도 개선 경험을 공유한다">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7HWJJYSR48"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-7HWJJYSR48', { 'anonymize_ip': false });
+}
+</script>
+<link rel="icon" href="https://fhdufhdu.github.io/favicon.png">
+
+
+<meta name="naver-site-verification" content="6d753ef05b036bf72e177ec56685c036c230f81e" />
+<meta name="google-site-verification" content="Qvwxie2h5X0Fo-VCDyLZnJ8tNGARZmDZTZNVmsfWCVg" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu95e3a12c0d9210c5dbd751eba0336b86_24679_300x0_resize_q75_box.jpeg" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤩</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">fhdufhdu</a></h1>
+            <h2 class="site-description">의미있는 경험과 지식을 공유합니다</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>Dark Mode</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/python/" >
+                python
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/24-01-04-python-%EC%8B%A4%EB%AC%B4-%EC%BB%A4%EC%8A%A4%ED%85%80router%EA%B0%9D%EC%B2%B4%EB%A5%BC%EB%A7%8C%EB%93%A4%EC%96%B4%EB%B3%B4%EC%95%98%EB%8B%A4/6/">[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            직접 만들어보는 Router 객체! 이를 통해 속도 개선 경험을 공유한다
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-01-04 PM 11:10</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    4 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="문제">문제</h2>
+<p>​
+회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &ldquo;가끔씩 너무 챗봇이 느려요&quot;였다.
+​
+챗봇 모델 쪽에서 응답이 늦는 경우는 자주 있었기에, 이번에도 그렇겠거니 하고 확인을 해보았다.
+​
+그런데 로그에 찍힌 시간을 보니, 모델은 빠른 시간 내에 응답을 해주는 것을 확인했다. 거기서 문제가 있다는 것을 깨닫고, 문제점을 찾아가기 시작했다.
+​
+문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
+​</p>
+<h3 id="기존-라우팅-방식">기존 라우팅 방식</h3>
+<p>​
+우선 간략하게 현재 개발 환경을 말하자면 아래와 같다.
+​</p>
+<ul>
+<li>AWS Lambda(람다)</li>
+<li>AWS Api Gateway</li>
+<li>PostgreSQL</li>
+<li>Python</li>
+<li>웹 프레임워크 사용하지 않음
+​</li>
+</ul>
+<p>챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 <code>importlib</code>이라는 라이브러리를 이용해서 라우팅을 실시했다. <code>importlib</code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
+​
+예를 들어 body에 <code>chatbotId</code>가 <code>Foo</code>이면 <code>FooFacade</code> 클래스를 import 해서 쓰거나, <code>Bar</code>이면 <code>BarFacade</code> 클래스를 import해서 쓰거나 하는 식으로 진행했다.
+​
+그런데 <code>importlib</code>이 느리다니&hellip; 이해가 되지 않았다. <code>importlib</code>은 결국 <code>__import__</code> 함수의 래퍼이다. <code>__import__</code>함수는 import 구문을 만나면 실행되는 기본적인 함수이다. 이게 느리다면, 파이썬을 사용해도 되는 것일까?
+​</p>
+<h3 id="import의-작동방식에-대해서-알아보자">Import의 작동방식에 대해서 알아보자</h3>
+<p>​
+해당 정보는 <a class="link" href="https://medium.com/@likegondry/python-til-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%B4-import%EB%A1%9C-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%84-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95-76e268e7613b"  target="_blank" rel="noopener"
+    >김지연 님의 블로그</a>를 참고해서 작성했다.
+​</p>
+<h4 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기</h4>
+<p>​
+sys.module에는 이때까지 사용했던 module들이 딕셔너리 형태로 저장되어 있다. import시 해당 모듈이 이전에 import 된 것이라면 빠르게 가져올 수 있다.
+​</p>
+<h4 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기</h4>
+<p>​
+이 작업이 좀 오래 걸린다. 파일 리스트을 하나하나 탐색하면서 모듈을 가져오기 때문에 시간이 오래걸린다. 아마 필자의 생각으로는 File I/O 작업이라서 오래 걸리는 것 같다.
+​</p>
+<h4 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&hellip;?</h4>
+<p>​
+만약 <code>FooFacade</code> 클래스를 <strong>처음</strong> 동적으로 import 한다면, 생각보다 시간이 오래 걸릴 수 있겠다는 생각이 들었다. 실제로도 처음 실행할 때와, 조금 유휴시간이 지난 후 실행하면 <code>importlib</code> 동작 시간이 오래 걸리는 것을 확인할 수 있었다.
+​
+심지어 AWS 람다를 이용하고 있어서, 일정 유휴시간이 지나면 컨테이너가 내려가버린다. 그렇다면 새롭게 컨테이너가 생성될 때마다, <code>importlib</code>에서 시간을 많이 잡아먹었다.
+​</p>
+<h2 id="해결방법">해결방법</h2>
+<p>​
+이제 문제점을 찾았으니 해결을 해보자.
+​
+결국 라우팅의 문제였으니, 이 라우팅을 다른 방식으로 하면 되지 않을까?
+​
+그래서 유명한 파이썬 웹 프레임워크인 FastAPI의 <a class="link" href="https://github.com/tiangolo/fastapi"  target="_blank" rel="noopener"
+    >깃허브 소스</a>를 뜯어보았다.
+​
+FastAPI는 어떻게 라우팅을 사용하고 있을까?
+​</p>
+<pre tabindex="0"><code>from fastapi import APIRouter, FastAPI
+​
+app = FastAPI()
+internal_router = APIRouter()
+users_router = APIRouter()
+​
+@users_router.get(&#34;/users/&#34;)
+def read_users():
+    return [{&#34;name&#34;: &#34;Rick&#34;}, {&#34;name&#34;: &#34;Morty&#34;}]
+​
+internal_router.include_router(users_router)
+app.include_router(internal_router)
+</code></pre><p>​
+이런 식으로 <code>APIRouter</code> 객체를 하나 생성하고, APIRouter 객체의 <code>get</code>(<code>post</code>, <code>put</code>, &hellip;) 함수를 라우팅 하고자 하는 함수에 데코레이터로 붙여준다. 그리고 <code>app</code> 객체에 해당 라우터를 전달한다.
+​
+이후 http 요청이 들어오면 <code>app</code> 객체로 전달되고, <code>app</code> 객체는 라우팅 정보를 확인해서 해당 함수를 실행한다.
+​
+자 어떻게 이것이 가능할까.
+​
+필자의 생각은 아래와 같았다.
+​</p>
+<ol>
+<li><code>APIRouter</code> 객체는 멤버 함수로 데코레이터로 사용가능한 함수를 가지고 있다.(ex. <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, <code>delete</code>)</li>
+<li>데코레이터 함수는 자기가 붙은 함수를 객체 형태로 사용할 수 있다.<br>
+(ex. <code>user_router</code>의 get 함수는 <code>read_users</code> 함수를 객체형태로 사용가능)</li>
+<li>그렇다면 get을 호출하면, <code>read_users</code> 같은 함수를 <code>users_router</code>에 딕셔너리 형태로 저장하면 되겠네?<br>
+(ex. <code>{&quot;users&quot;: read_user}</code> 와 같은 형태로)</li>
+<li>맞는 것 같은데&hellip; 한번 확인해 볼까?
+​
+<code>APIRouter</code>의 <code>get</code> 함수를 보면 <code>self.api_route(...)</code>를 호출하고 해당 결괏값을 바로 반환한다.
+​
+그렇다면 <code>api_route</code> 함수를 보자.
+​</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 너무 길어서 간략하게 축소한 버전이다.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">api_route</span>(
+</span></span><span style="display:flex;"><span>        self,
+</span></span><span style="display:flex;"><span>        path: str,
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">**</span>kwargs,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#f92672">-&gt;</span> Callable[[DecoratedCallable], DecoratedCallable]:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decorator</span>(func: DecoratedCallable) <span style="color:#f92672">-&gt;</span> DecoratedCallable:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>add_api_route(
+</span></span><span style="display:flex;"><span>                path,
+</span></span><span style="display:flex;"><span>                func,
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">**</span>kwargs
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> func
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> decorator
+</span></span></code></pre></div><p>​
+해당 함수를 보게 되면, <code>user_router.get</code>이 <code>read_users</code>에 데코레이터로 붙게 되는 순간 <code>func</code> 파라미터에 <code>read_users가</code> 들어오게 된다. 이후 <code>self.add_api_route</code>를 호출하는데, 이때 아래와 같은 코드가 실행된다.
+​</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add_api_route</span>(
+</span></span><span style="display:flex;"><span>        self,
+</span></span><span style="display:flex;"><span>        path: str,
+</span></span><span style="display:flex;"><span>        endpoint: Callable[<span style="color:#f92672">...</span>, Any],
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">**</span>kwargs,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        생략
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        route <span style="color:#f92672">=</span> route_class(
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>prefix <span style="color:#f92672">+</span> path,
+</span></span><span style="display:flex;"><span>            endpoint<span style="color:#f92672">=</span>endpoint,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            생략
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>routes<span style="color:#f92672">.</span>append(route)
+</span></span></code></pre></div><p>​
+path는 &ldquo;/user/&rdquo;, endpoint는 <code>read_users</code> 함수이다. 이 두 가지를 통해 <code>route</code> 객체를 하나 만들고 이를 <code>user_routes의</code> <code>routes</code> 리스트에 추가한다.
+​
+필자가 생각한 3번 과정은 아니고, 리스트 탐색으로 라우팅을 하는 것이지만, 어찌 됐든 비슷하다고 생각했다.
+​
+그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)</p>
+<p>​
+필자의 생각이 어느 정도 맞다는 걸 인지했으니 이제 개발해서 라우팅을 적용시키는 일만 남았다.
+​</p>
+<h2 id="커스텀-router-클래스">커스텀 Router 클래스</h2>
+<p>​</p>
+<ul>
+<li>Router
+​</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># router.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> Any, Dict, List
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Router</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>_data: Dict[str, Any] <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_make_key</span>(self, key_list:List[str]) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;-&#34;</span><span style="color:#f92672">.</span>join(key_list)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(self, key_list:List[str]):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decorated</span>(func):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_data<span style="color:#f92672">.</span>setdefault(self<span style="color:#f92672">.</span>_make_key(key_list), func)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> func
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> decorated
+</span></span><span style="display:flex;"><span>       
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">include_router</span>(self, router):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> type(router) <span style="color:#f92672">!=</span> Router:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">&#34;Router 객체만 include 할 수 있음&#34;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>_data<span style="color:#f92672">.</span>update(router<span style="color:#f92672">.</span>_data)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># cls_constructuere_args/cls_constructure_kwargs 는 불러올 클래스의 생성자에 필요한 파라미터</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_instance</span>(self, key_list:List[str], <span style="color:#f92672">*</span>cls_constructure_args, <span style="color:#f92672">**</span>cls_constructure_kwargs):
+</span></span><span style="display:flex;"><span>        _cls <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_data<span style="color:#f92672">.</span>get(self<span style="color:#f92672">.</span>_make_key(key_list), <span style="color:#66d9ef">None</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _cls(<span style="color:#f92672">*</span>cls_constructure_args, <span style="color:#f92672">**</span>cls_constructure_kwargs) <span style="color:#66d9ef">if</span> _cls <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">None</span>
+</span></span></code></pre></div><p>​</p>
+<ul>
+<li>사용 예제
+​</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># foo_facade.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> router <span style="color:#f92672">import</span> Router
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>foo_router <span style="color:#f92672">=</span> Router()
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@foo_router.add</span>([<span style="color:#e6db74">&#34;foo&#34;</span>, <span style="color:#e6db74">&#34;facade&#34;</span>])
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FooFacade</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, call_str: str):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>call_str <span style="color:#f92672">=</span> call_str
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">call</span>(self):
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Call FooFacade (</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>call_str<span style="color:#e6db74">}</span><span style="color:#e6db74">)&#34;</span>)
+</span></span></code></pre></div><p>​</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># main.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> foo_facade <span style="color:#f92672">import</span> foo_router, FooFacade
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> router <span style="color:#f92672">import</span> Router
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>main_router <span style="color:#f92672">=</span> Router()
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>main_router<span style="color:#f92672">.</span>include_router(foo_router)
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>foo_facade:FooFacade <span style="color:#f92672">=</span> main_router<span style="color:#f92672">.</span>get_instance([<span style="color:#e6db74">&#34;foo&#34;</span>, <span style="color:#e6db74">&#34;facade&#34;</span>], <span style="color:#e6db74">&#34;hi foo facade&#34;</span>)
+</span></span><span style="display:flex;"><span>foo_facade<span style="color:#f92672">.</span>call()
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Call FooFacade (hi foo facade) 가 출력됨</span>
+</span></span></code></pre></div><p>​</p>
+<ul>
+<li>main.py 실행 결과
+​
+<img src="/image.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="router 실행 결과"
+	
+	
+>
+​</li>
+</ul>
+<h2 id="결과">결과</h2>
+<p>​
+무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 동료 개발자와 코드리뷰 때 &ldquo;어떻게 이런 생각을 했냐&quot;라고 하셔서 되게 기분이 좋았다.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.css"integrity="sha256-J&#43;iAE0sgH8QSz9hpcDxXIftnj65JEZgNhGcgReTTK9s="crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.js"integrity="sha256-InsNdER1b2xUewP&#43;pKCUJpkhiqwHgqiPXDlIk7GzBu4="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/contrib/auto-render.min.js"integrity="sha256-y39Mpg7V3D4lhBX4x6O0bUqTV4pSrfgwEfGKfxkOdgI="crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="fhdufhdu/fhdufhdu.github.io"
+        issue-term="pathname"
+        
+        label="comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2023 - 
+        
+        2024 fhdufhdu
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.21.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

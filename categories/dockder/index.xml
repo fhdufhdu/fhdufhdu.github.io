@@ -8,10 +8,10 @@
         <language>ko-KR</language>
         <lastBuildDate>Wed, 20 Dec 2023 12:39:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/dockder/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>[Docker] 컨테이너를 Docker Hub에 올리기</title>
-        <link>https://fhdufhdu.github.io/post/23-12-20-docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88dockerhub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/</link>
+        <link>https://fhdufhdu.github.io/post/3/</link>
         <pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate>
         
-        <guid>https://fhdufhdu.github.io/post/23-12-20-docker-%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88dockerhub%EC%97%90%EC%98%AC%EB%A6%AC%EA%B8%B0/</guid>
+        <guid>https://fhdufhdu.github.io/post/3/</guid>
         <description>&lt;p&gt;Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p&gt;
 &lt;h2 id=&#34;docker-hub-로그인하기&#34;&gt;Docker Hub 로그인하기&lt;/h2&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://hub.docker.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -20,14 +20,18 @@
 &lt;p&gt;회원가입을 하고 나면 플랜을 선택하라는 화면이 나올 수 있는데, 이때 Personal 플랜으로 진행하면 된다.(무료)&lt;/p&gt;
 &lt;h2 id=&#34;repository-만들기&#34;&gt;Repository 만들기&lt;/h2&gt;
 &lt;p&gt;로그인을 하고나서 메인화면에서&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://github.com/fhdufhdu/fhdufhdu.github.io/assets/32770312/b241f086-f56e-4a0b-bdcb-7ba0a4d6d4b5&#34;
-	
-	
-	
+&lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/3/image.png&#34;
+	width=&#34;2552&#34;
+	height=&#34;292&#34;
+	srcset=&#34;https://fhdufhdu.github.io/post/3/image_hu2594c3c054d75237d0dd57d8a6cd34cf_134369_480x0_resize_box_3.png 480w, https://fhdufhdu.github.io/post/3/image_hu2594c3c054d75237d0dd57d8a6cd34cf_134369_1024x0_resize_box_3.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
-		alt=&#34;image&#34;
+		alt=&#34;도커 허브 웹페이지&#34;
 	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;873&#34;
+		data-flex-basis=&#34;2097px&#34;
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;위 이미지와 같이 Repository -&amp;gt; Create Repository를 눌러준다.&lt;/p&gt;
