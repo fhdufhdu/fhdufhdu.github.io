@@ -185,7 +185,7 @@
 <p>그래서 서버 코드를 인수인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.</p>
 <p>이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.</p>
 <p>이제 한번 문제를 살펴보자</p>
-<h3 id="테이블-구조">테이블 구조</h3>
+<h3 id="테이블-구조1">테이블 구조1</h3>
 <h3 id="orm-코드와-원인">ORM 코드와 원인</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">contents</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">contentRepository</span>.<span style="color:#a6e22e">createQueryBuilder</span>(<span style="color:#e6db74">&#34;c&#34;</span>)
 </span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">select</span>([<span style="color:#e6db74">&#34;c.id&#34;</span>, <span style="color:#e6db74">&#34;c.content&#34;</span>, <span style="color:#e6db74">&#34;b.id&#34;</span>, <span style="color:#e6db74">&#34;b.name&#34;</span>])
