@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Categories on woosae</title>
+        <link>https://example.org/categories/</link>
+        <description>Recent content in Categories on woosae</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>ko-KR</language>
+        <lastBuildDate>Sun, 10 Dec 2023 09:00:00 +0900</lastBuildDate><atom:link href="https://example.org/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Example Category</title>
+        <link>https://example.org/categories/example-category/</link>
+        <pubDate>Sun, 10 Dec 2023 09:00:00 +0900</pubDate>
+        
+        <guid>https://example.org/categories/example-category/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>
