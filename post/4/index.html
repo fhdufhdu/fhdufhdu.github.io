@@ -29,6 +29,39 @@ if (!doNotTrack) {
 <meta name="naver-site-verification" content="6d753ef05b036bf72e177ec56685c036c230f81e" />
 <meta name="google-site-verification" content="Qvwxie2h5X0Fo-VCDyLZnJ8tNGARZmDZTZNVmsfWCVg" />
 
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+@font-face {
+    font-family: 'S-CoreDream4';
+    src: url('/font/SCDream4.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'S-CoreDream5';
+    src: url('/font/SCDream5.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'D2Coding';
+    src: url('/font/D2Coding.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+:root {
+    --base-font-family: "S-CoreDream4","Lato", var(--sys-font-family), var(--zh-font-family), sans-serif !important;
+    --code-font-family: "JetBrains Mono", "S-CoreDream5", Menlo, Monaco, Consolas, "Courier New", var(--zh-font-family), monospace!important;
+    font-size: xx-small;
+    line-height: normal;
+}
+</style>
     </head>
     <body class="
     article-page
@@ -240,7 +273,7 @@ if (!doNotTrack) {
     <p>오늘은 동기와 비동기에 대해서 설명하고자 한다.</p>
 <p>해당 개념은 설명만 들으면 쉽게 이해가 될 수도 있지만, 헷갈릴 여지도 많은 개념이라고 생각한다.</p>
 <p>특히 스레드 개념과 엮이기 시작하면 많이 헷갈리기 시작하는 개념이다.</p>
-<h2 id="동기sync">동기(Sync)</h2>
+<h1 id="동기sync">동기(Sync)</h1>
 <p>동기가 제일 간단하다. 흔히 우리가 쓰는 코드를 상상하면 된다.</p>
 <p>아래 JS 예제가 있다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#ae81ff">1</span>)
@@ -250,7 +283,7 @@ if (!doNotTrack) {
 <p><img src="/post/4/image.png"
 	width="210"
 	height="216"
-	srcset="/post/4/image_hu6422f8d317e3a397e84efe44b65b274e_7454_480x0_resize_box_3.png 480w, /post/4/image_hu6422f8d317e3a397e84efe44b65b274e_7454_1024x0_resize_box_3.png 1024w"
+	
 	loading="lazy"
 	
 		alt="코드 결과"
@@ -261,9 +294,9 @@ if (!doNotTrack) {
 		data-flex-basis="233px"
 	
 ></p>
-<h2 id="비동기async">비동기(Async)</h2>
+<h1 id="비동기async">비동기(Async)</h1>
 <p>자 이제 비동기에 대해 이해해 보자. 단순하게 비동기는 동기의 반대말이다. 동기가 순차적으로 실행되는 것을 의미하니까 비동기는 순차적으로 실행되지 않는다고 생각하면 된다. 순차적으로 실행되지 않는다면, 코드의 실행순서를 파악하기 힘들 것이다. 이렇게 생각했을 때 비동기가 정말 필요한지에 대해 의문점이 생긴다.</p>
-<h3 id="비동기의-필요성">비동기의 필요성</h3>
+<h2 id="비동기의-필요성">비동기의 필요성</h2>
 <p>비동기가 등장한 이유는 낭비되는 시간이 아까워서이다. 아래와 같은 코드를 보자</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// 해당 코드는 psuedo 코드이다.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
@@ -285,7 +318,7 @@ if (!doNotTrack) {
 <p><img src="/post/4/image-1.png"
 	width="1440"
 	height="554"
-	srcset="/post/4/image-1_hu44478c856b1a50a87a24c0eb9a79eee6_315178_480x0_resize_box_3.png 480w, /post/4/image-1_hu44478c856b1a50a87a24c0eb9a79eee6_315178_1024x0_resize_box_3.png 1024w"
+	
 	loading="lazy"
 	
 		alt="비동기 작동 과정"
@@ -297,7 +330,7 @@ if (!doNotTrack) {
 	
 ></p>
 <p>위 그림처럼, 2번이 완료되지 않았음에도, 2번의 응답이 오기까지의 시간동안 다른 작업을 하는 것이 바로 비동기라고 할 수 있다.</p>
-<h3 id="콜백">콜백</h3>
+<h2 id="콜백">콜백</h2>
 <p>앞서 비동기의 필요성을 말했다. 그렇다면 100초 동안 비는 시간에 다른 작업을 하고 나서, 응답을 받는 순간에는 어떻게 될까? 해당 값으로 처리하는 로직이 필요할 것이다. 그것이 바로 콜백(callback)이다.</p>
 <p>콜백의 주요 논지는 <strong>&ldquo;해야할 일을 뒤로 미루는 것&rdquo;</strong> 이다.</p>
 <p>사실, 이름만 봐도 알 수 있다. callback은 회신하다/답신하다는 뜻이다.</p>
@@ -341,7 +374,7 @@ if (!doNotTrack) {
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">body</span>)
 </span></span></code></pre></div><p>위 처럼 콜백 함수를 작성할 수 있을 것이다. 저 4번 콜백 함수는 http 응답이 오면 실행된다.</p>
 <p>4번의 콜백 함수는 앞서 말한 <strong>&ldquo;해야 할 일을 뒤로 미루는 것&quot;과</strong> 같다.</p>
-<h2 id="마무리">마무리</h2>
+<h1 id="마무리">마무리</h1>
 <p>간단하게 비동기와 콜백에 대해 알아보았다.</p>
 <p>이렇게 보면 비동기 자체는 크게 어렵지 않은 것 같다. 하지만 필자도 이 개념을 오해 없이 이해하기에 많은 시간이 들었다.</p>
 <p>여러분들도 오해없이 비동기를 이해할 수 있게 되었으면 좋겠다.</p>

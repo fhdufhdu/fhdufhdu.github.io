@@ -29,6 +29,39 @@ if (!doNotTrack) {
 <meta name="naver-site-verification" content="6d753ef05b036bf72e177ec56685c036c230f81e" />
 <meta name="google-site-verification" content="Qvwxie2h5X0Fo-VCDyLZnJ8tNGARZmDZTZNVmsfWCVg" />
 
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+@font-face {
+    font-family: 'S-CoreDream4';
+    src: url('/font/SCDream4.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'S-CoreDream5';
+    src: url('/font/SCDream5.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'D2Coding';
+    src: url('/font/D2Coding.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+:root {
+    --base-font-family: "S-CoreDream4","Lato", var(--sys-font-family), var(--zh-font-family), sans-serif !important;
+    --code-font-family: "JetBrains Mono", "S-CoreDream5", Menlo, Monaco, Consolas, "Courier New", var(--zh-font-family), monospace!important;
+    font-size: xx-small;
+    line-height: normal;
+}
+</style>
     </head>
     <body class="
     article-page
@@ -239,7 +272,7 @@ if (!doNotTrack) {
 <p>조금 더 자세히 알아보자.</p>
 <p>동기와 비동기 작업에 대해 알아보고 싶다면 아래 게시글을 참고하자.</p>
 <p><a class="link" href="%7b%7bsite.baseurl%7d%7d/cs-%eb%8f%99%ea%b8%b0%eb%b9%84%eb%8f%99%ea%b8%b0%ec%97%90%eb%8c%80%ed%95%b4%ec%84%9c%ec%95%8c%ec%95%84%eb%b3%b4%ec%9e%90/" >2024.01.02 - [CS] - [CS] 동기/비동기에 대해서 알아보자(sync/async)</a></p>
-<h2 id="콜백-함수는-동기이다">콜백 함수는 동기이다.</h2>
+<h1 id="콜백-함수는-동기이다">콜백 함수는 동기이다.</h1>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">num</span>, <span style="color:#a6e22e">callback</span>) =&gt; {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">10</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>){
 </span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">num</span>)
@@ -282,8 +315,8 @@ if (!doNotTrack) {
 </span></span><span style="display:flex;"><span><span style="color:#ae81ff">1009</span>
 </span></span><span style="display:flex;"><span><span style="color:#ae81ff">1000</span> <span style="color:#ae81ff">1010</span>
 </span></span></code></pre></div><p>완벽하게 동기로 실행되는 것을 볼 수 있다. 그러므로 콜백함수를 만든다고 해서 비동기로 작동하지 않는다.</p>
-<h2 id="그럼-비동기는-어떤-함수가-사용되는가">그럼 비동기는 어떤 함수가 사용되는가?</h2>
-<h3 id="우선-이벤트-루프에-대해-이해해-보자">우선 이벤트 루프에 대해 이해해 보자</h3>
+<h1 id="그럼-비동기는-어떤-함수가-사용되는가">그럼 비동기는 어떤 함수가 사용되는가?</h1>
+<h2 id="우선-이벤트-루프에-대해-이해해-보자">우선 이벤트 루프에 대해 이해해 보자</h2>
 <p>JS는 싱글 스레드로 작동한다. 이 싱글 스레드에서 비동기를 가능하게 해주는 것이 바로 WEB API와 이벤트 루프이다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">setTimeout</span>(()=&gt;{<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#ae81ff">1</span>)}, <span style="color:#ae81ff">4000</span>)
 </span></span><span style="display:flex;"><span>
@@ -331,7 +364,7 @@ if (!doNotTrack) {
 <p><img src="/post/5/event-loop.gif"
 	width="720"
 	height="405"
-	srcset="/post/5/event-loop_hu8cc376adbc462e45ad2871f47fc7d99d_708252_480x0_resize_box_1.gif 480w, /post/5/event-loop_hu8cc376adbc462e45ad2871f47fc7d99d_708252_1024x0_resize_box_1.gif 1024w"
+	
 	loading="lazy"
 	
 		alt="image"
@@ -342,7 +375,7 @@ if (!doNotTrack) {
 		data-flex-basis="426px"
 	
 ></p>
-<h3 id="비동기가-되기-위한-조건">비동기가 되기 위한 조건</h3>
+<h2 id="비동기가-되기-위한-조건">비동기가 되기 위한 조건</h2>
 <p>자, 위에서 이벤트 루프에 대해 알아보았다. 위에서 이벤트 루프는 비동기가 끝난 후 실행되어야 할 콜백 함수들이 저장된 곳이라고 말해주었다. 또한, 실질적인 비동기 작업은 WEB API에서 처리된다는 것도 알게 되었다.</p>
 <p>그렇다면 WEB API에 작업을 위임할 수 있는 것에는 무엇이 있을까?</p>
 <ul>
@@ -350,7 +383,7 @@ if (!doNotTrack) {
 <li>Timer</li>
 </ul>
 <p>아까 말했다시피 WEB API는 다른 곳에서 작업을 수행한다. 그렇기에 해당 작업을 수행하는 동안 JS는 놀고 있게 되고, 이는 싱글스레드에서 비동기가 가능하게 되는 이유다.</p>
-<h2 id="정리">정리</h2>
+<h1 id="정리">정리</h1>
 <ul>
 <li>콜백을 사용한다고 모두 비동기가 되는 것이 아니다.</li>
 <li>JS는 싱글 스레드이다. 일반적으로 싱글 스레드에서는 비동기가 불가능하다.</li>

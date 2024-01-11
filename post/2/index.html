@@ -29,6 +29,39 @@ if (!doNotTrack) {
 <meta name="naver-site-verification" content="6d753ef05b036bf72e177ec56685c036c230f81e" />
 <meta name="google-site-verification" content="Qvwxie2h5X0Fo-VCDyLZnJ8tNGARZmDZTZNVmsfWCVg" />
 
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+@font-face {
+    font-family: 'S-CoreDream4';
+    src: url('/font/SCDream4.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'S-CoreDream5';
+    src: url('/font/SCDream5.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'D2Coding';
+    src: url('/font/D2Coding.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+:root {
+    --base-font-family: "S-CoreDream4","Lato", var(--sys-font-family), var(--zh-font-family), sans-serif !important;
+    --code-font-family: "JetBrains Mono", "S-CoreDream5", Menlo, Monaco, Consolas, "Courier New", var(--zh-font-family), monospace!important;
+    font-size: xx-small;
+    line-height: normal;
+}
+</style>
     </head>
     <body class="
     article-page
@@ -233,7 +266,7 @@ if (!doNotTrack) {
     <section class="article-content">
     
     
-    <h2 id="추상-클래스-만들기">추상 클래스 만들기</h2>
+    <h1 id="추상-클래스-만들기">추상 클래스 만들기</h1>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> abc
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BaseClass</span>(metaclass<span style="color:#f92672">=</span>abc<span style="color:#f92672">.</span>ABCMeta):

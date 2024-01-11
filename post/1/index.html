@@ -29,6 +29,39 @@ if (!doNotTrack) {
 <meta name="naver-site-verification" content="6d753ef05b036bf72e177ec56685c036c230f81e" />
 <meta name="google-site-verification" content="Qvwxie2h5X0Fo-VCDyLZnJ8tNGARZmDZTZNVmsfWCVg" />
 
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+@font-face {
+    font-family: 'S-CoreDream4';
+    src: url('/font/SCDream4.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'S-CoreDream5';
+    src: url('/font/SCDream5.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'D2Coding';
+    src: url('/font/D2Coding.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+:root {
+    --base-font-family: "S-CoreDream4","Lato", var(--sys-font-family), var(--zh-font-family), sans-serif !important;
+    --code-font-family: "JetBrains Mono", "S-CoreDream5", Menlo, Monaco, Consolas, "Courier New", var(--zh-font-family), monospace!important;
+    font-size: xx-small;
+    line-height: normal;
+}
+</style>
     </head>
     <body class="
     article-page
@@ -236,8 +269,8 @@ if (!doNotTrack) {
     <blockquote>
 <p>개발을 막 시작한 새내기 개발자부터 개발 경력이 많은 개발자까지 무조건 들어봤을 용어, 객체 지향에 대해 알아보자.<!-- raw HTML omitted --><!-- raw HTML omitted -->자동차 운전을 코드로 구현하는 것을 예시로, 객체 지향과 절차 지향을 비교해 가면서 설명한다. 객체 지향을 배우러 왔는데, 절차 지향까지 알아야 한다고 겁먹지 말자, 절차 지향을 이해한다면, 객체 지향을 이해하기 더욱 쉬울 것이다.<!-- raw HTML omitted --><!-- raw HTML omitted -->이 내용은 기본적인 코드 작성 지식이 있어야 이해할 수 있다.</p>
 </blockquote>
-<h2 id="절차-지향과-객체-지향">절차 지향과 객체 지향</h2>
-<h3 id="절차-지향이란">절차 지향이란?</h3>
+<h1 id="절차-지향과-객체-지향">절차 지향과 객체 지향</h1>
+<h2 id="절차-지향이란">절차 지향이란?</h2>
 <p>객체지향이 있기 이전, 개발 패러다임은 절차 지향이었다. 절차 지향은 간단히 &ldquo;어떤 일을 하기 위해 필요한 행동들의 나열&rdquo; 이라고 정의할 수 있다. 아래와 같은 코드 예제를 보자</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>():
 </span></span><span style="display:flex;"><span>    direction <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;핸들을 어느 방향으로 돌릴 것 인가요?(left, right): &#34;</span>)
@@ -250,7 +283,7 @@ if (!doNotTrack) {
 </span></span><span style="display:flex;"><span>main()
 </span></span></code></pre></div><p>사용자에게 핸들 방향을 입력받고, 해당 방향에 맞게 핸들을 돌렸다고 출력해 주는 코드이다.</p>
 <p>이와 같이, &ldquo;핸들을 꺾기 위해(어떤 일) 사용자의 입력을 받고, 입력에 맞게 문자열을 출력하는 코드 (행동들의 나열)&ldquo;로 볼 수 있는 것이 절차 지향적인 코드 작성 방법이다.</p>
-<h3 id="객체-지향이란">객체 지향이란?</h3>
+<h2 id="객체-지향이란">객체 지향이란?</h2>
 <p>객체 지향은 절차지향의 정의인 &ldquo;어떤 일을 하기 위해 필요한 행동들의 나열&quot;을 확장해서 &ldquo;어떤 일을 하기 위한 객체들의 상호작용&quot;으로 정의할 수 있다. 아래와 같은 코드 예제를 보자</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>:
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">chagne_direction</span>(self, direction: string):
@@ -270,7 +303,7 @@ if (!doNotTrack) {
 <p>그리고 절차 지향에서의 코드와 같이 사용자에게 입력을 받고, 해당 입력을 저장해 둔다.</p>
 <p>이후, Car(클래스)에서 car(인스턴스)를 만들고, car(인스턴스)의 change_direction을 실행해서 핸들을 전환하도록 한다.</p>
 <p>이와 같이 자동차라는 개념적인 그룹으로 묶어서 코드를 작성하는 방식을 객체 지향 개발이라고 한다.</p>
-<h2 id="클래스와-인스턴스">클래스와 인스턴스</h2>
+<h1 id="클래스와-인스턴스">클래스와 인스턴스</h1>
 <p>클래스/인스턴스는 처음 마주했을 때 이해하기 쉽지 않은 용어이다.</p>
 <p>자동차를 예로 들어보자.</p>
 <p>자동차는 어떤 것인가? 명확히 정의하긴 어렵지만, 바퀴 4개(혹은 더 여러 개), 엔진, 핸들이 있는 탈 것이라고 할 수 있다. 이런 개념적인 것들을 가진 모든 것들을 자동차라고 부를 수 있다. 이렇게 보면, 완전히 추상적인 개념이라고 볼 수 있다. 이런 것들을 클래스라고 한다.</p>
@@ -295,7 +328,7 @@ if (!doNotTrack) {
 <p>정리하자면,</p>
 <p><strong>클래스는 &ldquo;어떤 행동을 하는 추상적인 개념 - 자동차, 사람&rdquo;</strong></p>
 <p>**인스턴스는 &ldquo;실제로 그 행동을 하는 실체 - 산타페(자동차), 나 자신(사람), 여러분들(사람)&rdquo;**으로 정리할 수 있겠다.</p>
-<h2 id="객체와의-상호작용">객체와의 상호작용</h2>
+<h1 id="객체와의-상호작용">객체와의 상호작용</h1>
 <p>이번엔 객체 지향 프로그래밍의 본질인, 객체와의 상호작용을 알아보자.</p>
 <p>이번에도 코드 예제를 보도록 하자.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Wheel</span>:
@@ -343,7 +376,7 @@ if (!doNotTrack) {
 </span></span><span style="display:flex;"><span>main()
 </span></span></code></pre></div><p>위와 같이 끝났을 것이다.</p>
 <p>어라 근데 여기서 이상한 점이 보인다.</p>
-<h2 id="절차-지향이-더-좋아-보이는데">절차 지향이 더 좋아 보이는데&hellip;?</h2>
+<h1 id="절차-지향이-더-좋아-보이는데">절차 지향이 더 좋아 보이는데&hellip;?</h1>
 <p>필자가 제시한 예제를 보면, 절차지향적인 코드가 훨씬 짧고 간결해 보이고, 이해하기도 쉬워 보인다.</p>
 <p>하지만 다들 실제로 객체지향적으로 구현을 하고 있다.</p>
 <p>이유가 뭘까?</p>
@@ -352,14 +385,14 @@ if (!doNotTrack) {
 <p>저 if-else 부분을 100번 돌리는 것이 좋을까? Car를 100개 만드는 게 좋을까?</p>
 <p>직관적으로 봤을 때, Car를 100개 만드는 것이 다른 사람이 볼 때 더욱 이해하기가 쉽지 않을까?</p>
 <p>하지만 더욱 중요한 이유가 있다.</p>
-<h2 id="다른-사람과의-협업을-고려하자">다른 사람과의 협업을 고려하자.</h2>
+<h1 id="다른-사람과의-협업을-고려하자">다른 사람과의 협업을 고려하자.</h1>
 <p>개발은 혼자 할 수 도 있지만 여러 명과 같이 할 수도 있다.</p>
 <p>클래스로 짜놓으면, 누가 봐도 &lsquo;아 이 부분은 자동차를 구현하려고 한 거구나&rsquo;를 알 수 있다.(주석 없이도!) if-else 문을 100번 반복한다고 했을 때, 같이 협업하는 사람이 보면 과연 이 코드를 제대로 이해할까? 필자였다면, 머릿속에 물음표만을 띄웠을 것이다.</p>
 <p>그런 면에서 봤을 때, 객체 지향 프로그래밍이 많이 쓰이는 이유를 알 수 있을 것이다.</p>
-<h2 id="맹신은-금물">맹신은 금물.</h2>
+<h1 id="맹신은-금물">맹신은 금물.</h1>
 <p>어느 패러다임이 항상 정답은 경우는 없다. 객체 지향이 무조건 옳지도 않고, 상황에 따라 절차 지향적으로 개발하는 것이 더 좋을 때도 있다.</p>
 <p>항상 요구사항에 맞게 개발하는 것이 중요하다. 무조건적인 적용은 오히려 협업을 방해할 수도 있다는 것을 명심하자.</p>
-<h2 id="마무리하며">마무리하며</h2>
+<h1 id="마무리하며">마무리하며</h1>
 <p>오늘은 객체 지향에 대해 설명해 보았다. 필자도 객체지향에 대해 설명하면서, 알고 있다고 생각했지만 머릿속에 막연히 있는 개념을 글로 풀어내는 것이 참 어렵다고 느낀다. 이 개념을 처음 접하는 분들도 이해하지 못한 부분이 있을 것이라고 생각한다. 그런 부분이 있다면 댓글로 물어봐주시길 바란다.</p>
 
 </section>
