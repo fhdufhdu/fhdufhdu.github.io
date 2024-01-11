@@ -267,7 +267,7 @@ if (!doNotTrack) {
     
     
     <h1 id="문제"> 문제</h1>
-<p><a class="link" href="https://fhdufhdu.github.io/post/7" >1편의 문제</a>를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 <code>게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요</code> 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.</p>
+<p><a class="link" href="/post/7" >1편의 문제</a>를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 <code>게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요</code> 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.</p>
 <p><img src="/post/8/image.png"
 	width="678"
 	height="272"
@@ -328,7 +328,7 @@ if (!doNotTrack) {
 </blockquote>
 <h1 id="해결-과정">해결 과정</h1>
 <h2 id="with절-적극-활용하기">with절 적극 활용하기</h2>
-<p>postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 <code>CTE(common table expression)</code>이라고 한다. (<a class="link" href="https://fhdufhdu.github.io/post/9" >참고 링크</a>)</p>
+<p>postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 <code>CTE(common table expression)</code>이라고 한다. (<a class="link" href="/post/9" >참고 링크</a>)</p>
 <h2 id="대상-게시글-선택">대상 게시글 선택</h2>
 <p>with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 개수를 최소화 하는 목적을 가진다.</p>
 <h2 id="댓글-선택">댓글 선택</h2>
