@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="ko-KR" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해보자'>
-<title>[Hugo] 무한스크롤을 구현해보자</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해 보자'>
+<title>[Hugo] 무한스크롤을 구현해 보자</title>
 
 <link rel='canonical' href='https://fhdufhdu.github.io/post/10/'>
 
-<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[Hugo] 무한스크롤을 구현해보자'>
-<meta property='og:description' content='JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해보자'>
+<link rel="stylesheet" href="/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css"><meta property='og:title' content='[Hugo] 무한스크롤을 구현해 보자'>
+<meta property='og:description' content='JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해 보자'>
 <meta property='og:url' content='https://fhdufhdu.github.io/post/10/'>
 <meta property='og:site_name' content='fhdufhdu'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2024-01-11T09:41:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-11T09:41:00&#43;09:00'/><meta property='og:image' content='https://fhdufhdu.github.io/summary-img/hugo.png' />
-<meta name="twitter:title" content="[Hugo] 무한스크롤을 구현해보자">
-<meta name="twitter:description" content="JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해보자"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="[Hugo] 무한스크롤을 구현해 보자">
+<meta name="twitter:description" content="JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해 보자"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://fhdufhdu.github.io/summary-img/hugo.png' />
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HWJJYSR48"></script>
 <script>
@@ -241,7 +241,7 @@ if (!doNotTrack) {
         <div class="article-image">
             <a href="/post/10/">
                 
-                    <img src="/summary-img/hugo.png" loading="lazy" alt="Featured image of post [Hugo] 무한스크롤을 구현해보자" />
+                    <img src="/summary-img/hugo.png" loading="lazy" alt="Featured image of post [Hugo] 무한스크롤을 구현해 보자" />
                 
             </a>
         </div>
@@ -260,12 +260,12 @@ if (!doNotTrack) {
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/post/10/">[Hugo] 무한스크롤을 구현해보자</a>
+            <a href="/post/10/">[Hugo] 무한스크롤을 구현해 보자</a>
         </h2>
     
         
         <h3 class="article-subtitle">
-            JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해보자
+            JS의 Observer와 Hugo 템플릿을 결합해서 무한스크롤을 구현해 보자
         </h3>
         
     </div>
@@ -318,10 +318,10 @@ if (!doNotTrack) {
     
     <h1 id="발단">발단</h1>
 <p>Hudi님의 <a class="link" href="https://hudi.blog/"  target="_blank" rel="noopener"
-    >블로그</a>를 보다보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러가지 방법을 찾아보았다.</p>
+    >블로그</a>를 보다 보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러 가지 방법을 찾아보았다.</p>
 <p>찾아보니 제일 좋은 방법은 <code>IntersectionObserver</code>를 이용하는 것이라고 한다.</p>
 <blockquote>
-<p><code>InsersectionObserver</code>란 상위 요소와의 교차영역에 대한 변화를 비동기적으로 감지하는 API. element가 화면에 노출되었는지 여부를 간단하게 구독할 수 있음.</p>
+<p><code>InsersectionObserver</code>란 상위 요소와의 교차 영역에 대한 변화를 비동기적으로 감지하는 API. element가 화면에 노출되었는지 여부를 간단하게 구독할 수 있음.</p>
 </blockquote>
 <h1 id="문제">문제</h1>
 <p>그런데 문제는, hugo와 js가 궁합이 그렇게 좋지 않다는 것이다.</p>
@@ -330,7 +330,7 @@ if (!doNotTrack) {
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">test</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{{ $test := 1 }}{{ $test }}{{ </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">num</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> }}  
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">`</span>
-</span></span></code></pre></div><p>위와 같은 코드는 빌드시에 아래 처럼 에러가 발생한다.</p>
+</span></span></code></pre></div><p>위와 같은 코드는 빌드 시에 아래처럼 에러가 발생한다.</p>
 <p><img src="/post/10/image.png"
 	width="1526"
 	height="166"
@@ -345,7 +345,7 @@ if (!doNotTrack) {
 		data-flex-basis="2206px"
 	
 ></p>
-<p>이유가 무엇일까? 우리는 <code>hugo 빌드</code>와 <code>js 실행</code>사이의 순서를 알아야한다.</p>
+<p>이유가 무엇일까? 우리는 <code>hugo 빌드</code>와 <code>js 실행</code> 사이의 순서를 알아야 한다.</p>
 <ol>
 <li>hugo 빌드</li>
 <li>hugo 템플릿에 값들이 설정되어 변환됨

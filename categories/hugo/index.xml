@@ -7,17 +7,17 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
         <lastBuildDate>Thu, 11 Jan 2024 09:41:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/hugo/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>[Hugo] 무한스크롤을 구현해보자</title>
+        <title>[Hugo] 무한스크롤을 구현해 보자</title>
         <link>https://fhdufhdu.github.io/post/10/</link>
         <pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/10/</guid>
-        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/hugo.png" alt="Featured image of post [Hugo] 무한스크롤을 구현해보자" /&gt;&lt;h1 id=&#34;발단&#34;&gt;발단&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/hugo.png" alt="Featured image of post [Hugo] 무한스크롤을 구현해 보자" /&gt;&lt;h1 id=&#34;발단&#34;&gt;발단&lt;/h1&gt;
 &lt;p&gt;Hudi님의 &lt;a class=&#34;link&#34; href=&#34;https://hudi.blog/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;블로그&lt;/a&gt;를 보다보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러가지 방법을 찾아보았다.&lt;/p&gt;
+    &gt;블로그&lt;/a&gt;를 보다 보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러 가지 방법을 찾아보았다.&lt;/p&gt;
 &lt;p&gt;찾아보니 제일 좋은 방법은 &lt;code&gt;IntersectionObserver&lt;/code&gt;를 이용하는 것이라고 한다.&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;code&gt;InsersectionObserver&lt;/code&gt;란 상위 요소와의 교차영역에 대한 변화를 비동기적으로 감지하는 API. element가 화면에 노출되었는지 여부를 간단하게 구독할 수 있음.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;InsersectionObserver&lt;/code&gt;란 상위 요소와의 교차 영역에 대한 변화를 비동기적으로 감지하는 API. element가 화면에 노출되었는지 여부를 간단하게 구독할 수 있음.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h1 id=&#34;문제&#34;&gt;문제&lt;/h1&gt;
 &lt;p&gt;그런데 문제는, hugo와 js가 궁합이 그렇게 좋지 않다는 것이다.&lt;/p&gt;
@@ -26,7 +26,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;test&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;`
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;{{ $test := 1 }}{{ $test }}{{ &lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;num&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; }}  
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;`&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위와 같은 코드는 빌드시에 아래 처럼 에러가 발생한다.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위와 같은 코드는 빌드 시에 아래처럼 에러가 발생한다.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/10/image.png&#34;
 	width=&#34;1526&#34;
 	height=&#34;166&#34;
@@ -41,7 +41,7 @@
 		data-flex-basis=&#34;2206px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;p&gt;이유가 무엇일까? 우리는 &lt;code&gt;hugo 빌드&lt;/code&gt;와 &lt;code&gt;js 실행&lt;/code&gt;사이의 순서를 알아야한다.&lt;/p&gt;
+&lt;p&gt;이유가 무엇일까? 우리는 &lt;code&gt;hugo 빌드&lt;/code&gt;와 &lt;code&gt;js 실행&lt;/code&gt; 사이의 순서를 알아야 한다.&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;hugo 빌드&lt;/li&gt;
 &lt;li&gt;hugo 템플릿에 값들이 설정되어 변환됨

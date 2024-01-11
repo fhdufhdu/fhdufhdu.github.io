@@ -7,14 +7,14 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
         <lastBuildDate>Thu, 11 Jan 2024 08:54:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/postgresql/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with절)</title>
+        <title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title>
         <link>https://fhdufhdu.github.io/post/9/</link>
         <pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/9/</guid>
-        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/postgresql.png" alt="Featured image of post [PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with절)" /&gt;&lt;h1 id=&#34;with-절이란&#34;&gt;With 절이란?&lt;/h1&gt;
-&lt;p&gt;복잡한 쿼리를 작성하다보면, 비슷한 쿼리를 여러번 사용해야할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한번만 실행하고 싶을 때가 있을 것이다.&lt;/p&gt;
-&lt;p&gt;이럴 때 필요한 것이 &lt;code&gt;with&lt;/code&gt;절이다. with절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code&gt;CTE(common table expression)&lt;/code&gt;라고 한다.&lt;/p&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/postgresql.png" alt="Featured image of post [PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)" /&gt;&lt;h1 id=&#34;with-절이란&#34;&gt;With 절이란?&lt;/h1&gt;
+&lt;p&gt;복잡한 쿼리를 작성하다 보면, 비슷한 쿼리를 여러 번 사용해야 할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한 번만 실행하고 싶을 때가 있을 것이다.&lt;/p&gt;
+&lt;p&gt;이럴 때 필요한 것이 &lt;code&gt;with&lt;/code&gt; 절이다. with 절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code&gt;CTE(common table expression)&lt;/code&gt;라고 한다.&lt;/p&gt;
 &lt;h1 id=&#34;사용법&#34;&gt;사용법&lt;/h1&gt;
 &lt;h2 id=&#34;테이블-구조&#34;&gt;테이블 구조&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;create&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;table&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;user&lt;/span&gt;(
@@ -33,7 +33,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt; temp_user u2
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;on&lt;/span&gt; u1.locale &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; u2.locale
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;temp_user에 결과를 저장해놓고 계속 불러와서 쓸 수 있게 도와준다.&lt;/p&gt;
-&lt;h3 id=&#34;with절-여러개-사용&#34;&gt;with절 여러개 사용&lt;/h3&gt;
+&lt;h3 id=&#34;with-절-여러-개-사용&#34;&gt;with 절 여러 개 사용&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;with&lt;/span&gt; temp_user &lt;span style=&#34;color:#66d9ef&#34;&gt;as&lt;/span&gt; (
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;user&lt;/span&gt;
@@ -47,7 +47,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt; temp_user u1
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt; temp_user2 u2
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;on&lt;/span&gt; u1.locale &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; u2.locale
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위와 같이 &lt;code&gt;,&lt;/code&gt;기호로 하나의 쿼리에서 여러개의 with절을 사용할 수 있다.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위와 같이 &lt;code&gt;,&lt;/code&gt;기호로 하나의 쿼리에서 여러 개의 with 절을 사용할 수 있다.&lt;/p&gt;
 </description>
         </item>
         <item>
