@@ -1,70 +1,46 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>dockder on fhdufhdu</title>
-        <link>https://fhdufhdu.github.io/categories/dockder/</link>
-        <description>Recent content in dockder on fhdufhdu</description>
-        <generator>Hugo -- gohugo.io</generator>
-        <language>ko-KR</language>
-        <lastBuildDate>Wed, 20 Dec 2023 12:39:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/dockder/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>[Docker] 컨테이너를 Docker Hub에 올리기</title>
-        <link>https://fhdufhdu.github.io/post/3/</link>
-        <pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate>
-        
-        <guid>https://fhdufhdu.github.io/post/3/</guid>
-        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/dockerhub.png" alt="Featured image of post [Docker] 컨테이너를 Docker Hub에 올리기" /&gt;&lt;p&gt;Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p&gt;
-&lt;h1 id=&#34;docker-hub-로그인하기&#34;&gt;Docker Hub 로그인하기&lt;/h1&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://hub.docker.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;Docker Hub&lt;/a&gt;에 들어가서 로그인을 먼저 한다. 회원가입을 진행하지 않았다면 회원가입을 먼저 하자.&lt;/p&gt;
-&lt;p&gt;개인 Docker Hub Repository에 이미지를 올리기 때문에 로그인은 필수다.&lt;/p&gt;
-&lt;p&gt;회원가입을 하고 나면 플랜을 선택하라는 화면이 나올 수 있는데, 이때 Personal 플랜으로 진행하면 된다.(무료)&lt;/p&gt;
-&lt;h1 id=&#34;repository-만들기&#34;&gt;Repository 만들기&lt;/h1&gt;
-&lt;p&gt;로그인을 하고나서 메인화면에서&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/3/image.png&#34;
-	width=&#34;2552&#34;
-	height=&#34;292&#34;
-	
-	loading=&#34;lazy&#34;
-	
-		alt=&#34;도커 허브 웹페이지&#34;
-	
-	
-		class=&#34;gallery-image&#34; 
-		data-flex-grow=&#34;873&#34;
-		data-flex-basis=&#34;2097px&#34;
-	
-&gt;&lt;/p&gt;
-&lt;p&gt;위 이미지와 같이 Repository -&amp;gt; Create Repository를 눌러준다.&lt;/p&gt;
-&lt;p&gt;정보 입력 후 Repostiory를 생성하게 되면 자신의 Repository 화면으로 들어갈 수 있게 된다.&lt;/p&gt;
-&lt;h1 id=&#34;컨테이너-commit-하기&#34;&gt;컨테이너 commit 하기&lt;/h1&gt;
-&lt;p&gt;현재 자신의 컴퓨터에 존재하는 컨테이너를 image화 하는 과정이다.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ docker commit 자신의컨테이너이름 repository경로:tag
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 실제 입력 예&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# tag(=version)는 본인 전략대로 사용하기&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ docker commit es fhdufhdu/test_elasticsearch:1.0
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id=&#34;생성된-이미지를-업로드하기&#34;&gt;생성된 이미지를 업로드하기&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 로그인, username에 email은 입력하지 말기&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ docker login
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#이미지 이름에 있는 repository로 이미지가 업로드되게 된다.&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ docker push fhdufhdu/mim_elasticsearch:1.0
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;The push refers to repository &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;docker.io/fhdufhdu/mim_elasticsearch&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ec8582fc54e5: Pushed 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bca54c335b28: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;de080e772c1a: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cfc1ead7498a: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;245d80f411fb: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;489e330647ba: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cff7c30e604c: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;3a50035e8665: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;7074040eb2b7: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;af7ed92504ae: Mounted from library/elasticsearch 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;1.0: digest: sha256:018de9cde96f6304cb8967a5747fe123244af76ef502fd7c5e446dd91b6aa765 size: &lt;span style=&#34;color:#ae81ff&#34;&gt;2417&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;위 명령어를 실행하면, 이미지를 Repository에 올릴 것이다.&lt;/p&gt;
-&lt;p&gt;이후 이미지를 받아와서 컨테이너에 올리는 작업은 기존 방식과 동일하게 진행하면 된다.&lt;/p&gt;
-</description>
-        </item>
-        
-    </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>dockder on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/dockder/</link><description>Recent content in dockder on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 20 Dec 2023 12:39:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/dockder/index.xml" rel="self" type="application/rss+xml"/><item><title>[Docker] 컨테이너를 Docker Hub에 올리기</title><link>https://fhdufhdu.github.io/post/3/</link><pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/3/</guid><description>&lt;img src="https://fhdufhdu.github.io/summary-img/dockerhub.png" alt="Featured image of post [Docker] 컨테이너를 Docker Hub에 올리기" />&lt;p>Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p>
+&lt;h1 id="docker-hub-로그인하기">Docker Hub 로그인하기&lt;/h1>
+&lt;p>&lt;a class="link" href="https://hub.docker.com/" target="_blank" rel="noopener"
+>Docker Hub&lt;/a>에 들어가서 로그인을 먼저 한다. 회원가입을 진행하지 않았다면 회원가입을 먼저 하자.&lt;/p>
+&lt;p>개인 Docker Hub Repository에 이미지를 올리기 때문에 로그인은 필수다.&lt;/p>
+&lt;p>회원가입을 하고 나면 플랜을 선택하라는 화면이 나올 수 있는데, 이때 Personal 플랜으로 진행하면 된다.(무료)&lt;/p>
+&lt;h1 id="repository-만들기">Repository 만들기&lt;/h1>
+&lt;p>로그인을 하고나서 메인화면에서&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/3/image.png"
+width="2552"
+height="292"
+loading="lazy"
+alt="도커 허브 웹페이지"
+class="gallery-image"
+data-flex-grow="873"
+data-flex-basis="2097px"
+>&lt;/p>
+&lt;p>위 이미지와 같이 Repository -&amp;gt; Create Repository를 눌러준다.&lt;/p>
+&lt;p>정보 입력 후 Repostiory를 생성하게 되면 자신의 Repository 화면으로 들어갈 수 있게 된다.&lt;/p>
+&lt;h1 id="컨테이너-commit-하기">컨테이너 commit 하기&lt;/h1>
+&lt;p>현재 자신의 컴퓨터에 존재하는 컨테이너를 image화 하는 과정이다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ docker commit 자신의컨테이너이름 repository경로:tag
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 실제 입력 예&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># tag(=version)는 본인 전략대로 사용하기&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker commit es fhdufhdu/test_elasticsearch:1.0
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="생성된-이미지를-업로드하기">생성된 이미지를 업로드하기&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 로그인, username에 email은 입력하지 말기&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker login
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">#이미지 이름에 있는 repository로 이미지가 업로드되게 된다.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker push fhdufhdu/mim_elasticsearch:1.0
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>The push refers to repository &lt;span style="color:#f92672">[&lt;/span>docker.io/fhdufhdu/mim_elasticsearch&lt;span style="color:#f92672">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ec8582fc54e5: Pushed
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>bca54c335b28: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>de080e772c1a: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cfc1ead7498a: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>245d80f411fb: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>489e330647ba: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cff7c30e604c: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>3a50035e8665: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>7074040eb2b7: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>af7ed92504ae: Mounted from library/elasticsearch
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1.0: digest: sha256:018de9cde96f6304cb8967a5747fe123244af76ef502fd7c5e446dd91b6aa765 size: &lt;span style="color:#ae81ff">2417&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위 명령어를 실행하면, 이미지를 Repository에 올릴 것이다.&lt;/p>
+&lt;p>이후 이미지를 받아와서 컨테이너에 올리는 작업은 기존 방식과 동일하게 진행하면 된다.&lt;/p></description></item></channel></rss>
