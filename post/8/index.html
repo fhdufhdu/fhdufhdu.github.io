@@ -10,11 +10,7 @@
 <meta property='og:description' content='데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화해 보자'>
 <meta property='og:url' content='https://fhdufhdu.github.io/post/8/'>
 <meta property='og:site_name' content='fhdufhdu'>
-<<<<<<< HEAD
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='database' /><meta property='article:tag' content='orm' /><meta property='article:published_time' content='2024-01-10T14:34:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-11T09:08:00&#43;09:00'/>
-=======
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='database' /><meta property='article:tag' content='orm' /><meta property='article:published_time' content='2024-01-10T14:34:00&#43;09:00'/><meta property='article:modified_time' content='2024-01-10T14:34:00&#43;09:00'/>
->>>>>>> refs/remotes/origin/main
 <meta name="twitter:title" content="[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자">
 <meta name="twitter:description" content="데이터를 일관되게 전달하도록 ORM을 제거하고 쿼리를 최적화해 보자">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HWJJYSR48"></script>
@@ -332,11 +328,7 @@ if (!doNotTrack) {
 </blockquote>
 <h1 id="해결-과정">해결 과정</h1>
 <h2 id="with절-적극-활용하기">with절 적극 활용하기</h2>
-<<<<<<< HEAD
 <p>postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 <code>CTE(common table expression)</code>이라고 한다. (<a class="link" href="https://fhdufhdu.github.io/post/9" >참고 링크</a>)</p>
-=======
-<p>postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 <code>CTE(common table expression)</code>이라고 한다.</p>
->>>>>>> refs/remotes/origin/main
 <h2 id="대상-게시글-선택">대상 게시글 선택</h2>
 <p>with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 개수를 최소화 하는 목적을 가진다.</p>
 <h2 id="댓글-선택">댓글 선택</h2>
