@@ -12,7 +12,7 @@
         <pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/5/</guid>
-        <description>&lt;p&gt;오늘은 JS의 비동기에 대해 설명해보고자 한다.&lt;/p&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/javascript.png" alt="Featured image of post [JS] 이벤트 루프와 비동기 함수" /&gt;&lt;p&gt;오늘은 JS의 비동기에 대해 설명해보고자 한다.&lt;/p&gt;
 &lt;p&gt;JS에 대해 잘 모르고 비동기에 대한 개념이 희박하던 때, 단순히 콜백함수가 비동기 함수인 줄 알았다.&lt;/p&gt;
 &lt;p&gt;하지만 단순히 콜백함수를 만든다고 해서 비동기적으로 작동하는 것은 아니다. 모든 JS의 비동기는 이벤트 루프에 등록되어야 한다.&lt;/p&gt;
 &lt;p&gt;조금 더 자세히 알아보자.&lt;/p&gt;

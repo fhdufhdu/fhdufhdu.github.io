@@ -12,7 +12,7 @@
         <pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/9/</guid>
-        <description>&lt;h1 id=&#34;with-절이란&#34;&gt;With 절이란?&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/postgresql.png" alt="Featured image of post [PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with절)" /&gt;&lt;h1 id=&#34;with-절이란&#34;&gt;With 절이란?&lt;/h1&gt;
 &lt;p&gt;복잡한 쿼리를 작성하다보면, 비슷한 쿼리를 여러번 사용해야할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한번만 실행하고 싶을 때가 있을 것이다.&lt;/p&gt;
 &lt;p&gt;이럴 때 필요한 것이 &lt;code&gt;with&lt;/code&gt;절이다. with절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code&gt;CTE(common table expression)&lt;/code&gt;라고 한다.&lt;/p&gt;
 &lt;h1 id=&#34;사용법&#34;&gt;사용법&lt;/h1&gt;
@@ -56,7 +56,7 @@
         <pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/8/</guid>
-        <description>&lt;h1 id=&#34;문제&#34;&gt; 문제&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/postgresql.png" alt="Featured image of post [PostgreSQL] [실무] 데이터를 일관되게 전달해 보자" /&gt;&lt;h1 id=&#34;문제&#34;&gt; 문제&lt;/h1&gt;
 &lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://fhdufhdu.github.io/post/7&#34; &gt;1편의 문제&lt;/a&gt;를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 &lt;code&gt;게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요&lt;/code&gt; 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://fhdufhdu.github.io/post/8/image.png&#34;
 	width=&#34;678&#34;
@@ -136,7 +136,7 @@
         <pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/7/</guid>
-        <description>&lt;h1 id=&#34;문제&#34;&gt; 문제&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/postgresql.png" alt="Featured image of post [PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자" /&gt;&lt;h1 id=&#34;문제&#34;&gt; 문제&lt;/h1&gt;
 &lt;p&gt;챗봇들의 게시글을 조회하는 데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p&gt;
 &lt;p&gt;정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.&lt;/p&gt;
 &lt;p&gt;그래서 서버 코드를 인수·인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.&lt;/p&gt;

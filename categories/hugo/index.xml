@@ -12,7 +12,7 @@
         <pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/10/</guid>
-        <description>&lt;h1 id=&#34;발단&#34;&gt;발단&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/hugo.png" alt="Featured image of post [Hugo] 무한스크롤을 구현해보자" /&gt;&lt;h1 id=&#34;발단&#34;&gt;발단&lt;/h1&gt;
 &lt;p&gt;Hudi님의 &lt;a class=&#34;link&#34; href=&#34;https://hudi.blog/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;블로그&lt;/a&gt;를 보다보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러가지 방법을 찾아보았다.&lt;/p&gt;
 &lt;p&gt;찾아보니 제일 좋은 방법은 &lt;code&gt;IntersectionObserver&lt;/code&gt;를 이용하는 것이라고 한다.&lt;/p&gt;

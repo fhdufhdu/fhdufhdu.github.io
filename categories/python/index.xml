@@ -12,7 +12,7 @@
         <pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/6/</guid>
-        <description>&lt;h1 id=&#34;문제&#34;&gt;문제&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/python.png" alt="Featured image of post [Python] [실무] 커스텀 Router 객체를 만들어 보았다." /&gt;&lt;h1 id=&#34;문제&#34;&gt;문제&lt;/h1&gt;
 &lt;p&gt;​
 회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔 너무 챗봇이 느려요&amp;quot;였다.
 ​
@@ -160,7 +160,7 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code&gt;read_users&lt;/cod
         <pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate>
         
         <guid>https://fhdufhdu.github.io/post/2/</guid>
-        <description>&lt;h1 id=&#34;추상-클래스-만들기&#34;&gt;추상 클래스 만들기&lt;/h1&gt;
+        <description>&lt;img src="https://fhdufhdu.github.io/summary-img/python.png" alt="Featured image of post [Python] 추상 클래스 만들기" /&gt;&lt;h1 id=&#34;추상-클래스-만들기&#34;&gt;추상 클래스 만들기&lt;/h1&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; abc
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;BaseClass&lt;/span&gt;(metaclass&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;abc&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;ABCMeta):
