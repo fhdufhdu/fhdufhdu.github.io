@@ -13,7 +13,7 @@
         
         <guid>https://fhdufhdu.github.io/post/9/</guid>
         <description>&lt;h1 id=&#34;with-절이란&#34;&gt;With 절이란?&lt;/h1&gt;
-&lt;p&gt;복잡한 쿼리를 작성하다보면, 비슷한 쿼리를 여러번 사용해야할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한번만 실행하고 싶을 때가 있을 것이다..&lt;/p&gt;
+&lt;p&gt;복잡한 쿼리를 작성하다보면, 비슷한 쿼리를 여러번 사용해야할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한번만 실행하고 싶을 때가 있을 것이다.&lt;/p&gt;
 &lt;p&gt;이럴 때 필요한 것이 &lt;code&gt;with&lt;/code&gt;절이다. with절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code&gt;CTE(common table expression)&lt;/code&gt;라고 한다.&lt;/p&gt;
 &lt;h1 id=&#34;사용법&#34;&gt;사용법&lt;/h1&gt;
 &lt;h2 id=&#34;테이블-구조&#34;&gt;테이블 구조&lt;/h2&gt;
