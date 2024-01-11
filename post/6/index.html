@@ -374,19 +374,19 @@ sys.module에는 이때까지 사용했던 module들이 딕셔너리 형태로 �
 ​
 FastAPI는 어떻게 라우팅을 사용하고 있을까?
 ​</p>
-<pre tabindex="0"><code>from fastapi import APIRouter, FastAPI
-​
-app = FastAPI()
-internal_router = APIRouter()
-users_router = APIRouter()
-​
-@users_router.get(&#34;/users/&#34;)
-def read_users():
-    return [{&#34;name&#34;: &#34;Rick&#34;}, {&#34;name&#34;: &#34;Morty&#34;}]
-​
-internal_router.include_router(users_router)
-app.include_router(internal_router)
-</code></pre><p>​
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> fastapi <span style="color:#f92672">import</span> APIRouter, FastAPI
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>app <span style="color:#f92672">=</span> FastAPI()
+</span></span><span style="display:flex;"><span>internal_router <span style="color:#f92672">=</span> APIRouter()
+</span></span><span style="display:flex;"><span>users_router <span style="color:#f92672">=</span> APIRouter()
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@users_router.get</span>(<span style="color:#e6db74">&#34;/users/&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">read_users</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> [{<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Rick&#34;</span>}, {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Morty&#34;</span>}]
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">​</span>
+</span></span><span style="display:flex;"><span>internal_router<span style="color:#f92672">.</span>include_router(users_router)
+</span></span><span style="display:flex;"><span>app<span style="color:#f92672">.</span>include_router(internal_router)
+</span></span></code></pre></div><p>​
 이런 식으로 <code>APIRouter</code> 객체를 하나 생성하고, APIRouter 객체의 <code>get</code>(<code>post</code>, <code>put</code>, &hellip;) 함수를 라우팅 하고자 하는 함수에 데코레이터로 붙여준다. 그리고 <code>app</code> 객체에 해당 라우터를 전달한다.
 ​
 이후 http 요청이 들어오면 <code>app</code> 객체로 전달되고, <code>app</code> 객체는 라우팅 정보를 확인해서 해당 함수를 실행한다.
