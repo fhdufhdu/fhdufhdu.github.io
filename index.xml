@@ -6,6 +6,7 @@
         <description>Recent content on fhdufhdu</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>ko-KR</language>
+<<<<<<< HEAD
         <lastBuildDate>Thu, 11 Jan 2024 08:54:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with절)</title>
         <link>https://fhdufhdu.github.io/post/9/</link>
@@ -51,6 +52,9 @@
 </description>
         </item>
         <item>
+=======
+        <lastBuildDate>Wed, 10 Jan 2024 14:34:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+>>>>>>> refs/remotes/origin/main
         <title>[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자</title>
         <link>https://fhdufhdu.github.io/post/8/</link>
         <pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate>
@@ -118,7 +122,11 @@
 &lt;/blockquote&gt;
 &lt;h1 id=&#34;해결-과정&#34;&gt;해결 과정&lt;/h1&gt;
 &lt;h2 id=&#34;with절-적극-활용하기&#34;&gt;with절 적극 활용하기&lt;/h2&gt;
+<<<<<<< HEAD
 &lt;p&gt;postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 &lt;code&gt;CTE(common table expression)&lt;/code&gt;이라고 한다. (&lt;a class=&#34;link&#34; href=&#34;https://fhdufhdu.github.io/post/9&#34; &gt;참고 링크&lt;/a&gt;)&lt;/p&gt;
+=======
+&lt;p&gt;postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 &lt;code&gt;CTE(common table expression)&lt;/code&gt;이라고 한다.&lt;/p&gt;
+>>>>>>> refs/remotes/origin/main
 &lt;h2 id=&#34;대상-게시글-선택&#34;&gt;대상 게시글 선택&lt;/h2&gt;
 &lt;p&gt;with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 개수를 최소화 하는 목적을 가진다.&lt;/p&gt;
 &lt;h2 id=&#34;댓글-선택&#34;&gt;댓글 선택&lt;/h2&gt;
