@@ -14,7 +14,7 @@
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;p>즉, 5개씩 로딩하고 싶다면, 아래와 같은 리스트를 5개씩 html 형태로 빌드하고, 해당 데이터를 http get을 이용해 가져와야 한다는 것이다.&lt;/p>
+&lt;p>즉, 5개씩 로딩하고 싶다면, &lt;strong>아래와 같은 리스트를 5개씩 html 형태로 빌드하고, 해당 데이터를 http get을 이용해 가져와야 한다&lt;/strong>는 것이다.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/11/image.png"
 width="937"
 height="853"
@@ -26,19 +26,19 @@ data-flex-basis="263px"
 >&lt;/p>
 &lt;p>여러가지 생각이 들었는데,&lt;/p>
 &lt;ul>
-&lt;li>게시글.md를 게시글.html로 바꿔주는 로직이 있으니, 게시글.md를 게시글.html, 게시글-타이틀.html로 만들어 줄 수 있겠다.
+&lt;li>&lt;code>게시글.md&lt;/code>를 &lt;code>게시글.html&lt;/code>로 바꿔주는 로직이 있으니, &lt;code>게시글.md&lt;/code>를 &lt;code>게시글.html&lt;/code>, &lt;code>게시글-타이틀.html&lt;/code>로 만들어 줄 수 있겠다.
 &lt;ul>
-&lt;li>공식문서를 살펴보니, 게시글.md는 무조건 하나의 게시글.html로 치환되도록 설계되어 있음.(&lt;a class="link" href="https://gohugo.io/templates/lookup-order/" target="_blank" rel="noopener"
+&lt;li>공식문서를 살펴보니, &lt;code>게시글.md&lt;/code>는 무조건 하나의 &lt;code>게시글.html&lt;/code>로 치환되도록 설계되어 있음.(&lt;a class="link" href="https://gohugo.io/templates/lookup-order/" target="_blank" rel="noopener"
 >공식 문서&lt;/a>)&lt;/li>
 &lt;li>적용 불가&lt;/li>
 &lt;/ul>
 &lt;/li>
-&lt;li>Pagination 기능을 활용해 볼까? (&lt;a class="link" href="https://gohugo.io/templates/pagination/" target="_blank" rel="noopener"
+&lt;li>&lt;code>Pagination&lt;/code> 기능을 활용해 볼까? (&lt;a class="link" href="https://gohugo.io/templates/pagination/" target="_blank" rel="noopener"
 >공식 문서&lt;/a>)
 &lt;ul>
-&lt;li>Pagination 기능을 활성화하면, &lt;code>/page/${pageNum}&lt;/code>으로 접근 가능함.&lt;/li>
-&lt;li>Pagination은 index.html을 총 페이지 숫자에 맞게 여러 개 생성해 줌.&lt;/li>
-&lt;li>그래서 index.html에 pagination 템플릿을 삽입하면 각 페이지에 맞는 컨텐츠를 삽입해 줌.&lt;/li>
+&lt;li>&lt;code>Pagination&lt;/code> 기능을 활성화하면, &lt;code>/page/${pageNum}&lt;/code>으로 접근 가능함.&lt;/li>
+&lt;li>&lt;code>Pagination&lt;/code>은 &lt;code>index.html&lt;/code>을 총 페이지 숫자에 맞게 여러 개 생성해 줌.&lt;/li>
+&lt;li>그래서 &lt;code>index.html&lt;/code>에 &lt;code>Pagination&lt;/code> 템플릿을 삽입하면 각 페이지에 맞는 컨텐츠를 삽입해 줌.&lt;/li>
 &lt;li>&lt;strong>index.html&lt;/strong>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>{{ $pages := where .Site.RegularPages &amp;#34;Type&amp;#34; &amp;#34;in&amp;#34; .Site.Params.mainSections }}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{{ $notHidden := where .Site.RegularPages &amp;#34;Params.hidden&amp;#34; &amp;#34;!=&amp;#34; true }}
@@ -51,20 +51,20 @@ data-flex-basis="263px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ end }}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#f92672">section&lt;/span>&amp;gt;
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>위와 같은 index.html이 있고, paginate=5로 설정해둔다면,
+&lt;li>위와 같은 &lt;code>index.html&lt;/code>이 있고, &lt;code>paginate=5&lt;/code>로 설정해둔다면,
 &lt;ul>
-&lt;li>index.html은 1~5 게시글이 삽입되어서 빌드.&lt;/li>
-&lt;li>page/1/index.html은 index.html으로 리다이렉팅하게끔 빌드.&lt;/li>
-&lt;li>page/2/index.html은 6~10 게시글이 삽입되어서 빌드.&lt;/li>
+&lt;li>&lt;code>index.html&lt;/code>은 &lt;code>1~5 게시글&lt;/code>이 삽입되어서 빌드.&lt;/li>
+&lt;li>&lt;code>page/1/index.html&lt;/code>은 &lt;code>index.html&lt;/code>으로 &lt;strong>리다이렉팅&lt;/strong>하게끔 빌드.&lt;/li>
+&lt;li>&lt;code>page/2/index.html&lt;/code>은 &lt;code>6~10 게시글&lt;/code>이 삽입되어서 빌드.&lt;/li>
 &lt;li>&amp;hellip;&lt;/li>
-&lt;li>즉, index.html과 page/{pageNum}/index.html은 기본 구조가 완전 동일&lt;/li>
+&lt;li>즉, &lt;code>index.html&lt;/code>과 &lt;code>page/{pageNum}/index.html&lt;/code>은 기본 구조가 &lt;strong>동일&lt;/strong>&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;li>그렇다면 이것을 활용하면 되겠다.&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;p>그래서 Pagination을 이용해서 개발을 진행하기로 한다.&lt;/p>
+&lt;p>그래서 &lt;code>Pagination&lt;/code>을 이용해서 개발을 진행하기로 한다.&lt;/p>
 &lt;h1 id="구현">구현&lt;/h1>
 &lt;h2 id="hugotoml-수정">hugo.toml 수정&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-toml" data-lang="toml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">baseURL&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;https://fhdufhdu.github.io/&amp;#39;&lt;/span>
