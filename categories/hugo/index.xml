@@ -1,4 +1,126 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>hugo on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/hugo/</link><description>Recent content in hugo on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Thu, 11 Jan 2024 09:41:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>[Hugo] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;img src="https://fhdufhdu.github.io/summary-img/hugo.png" alt="Featured image of post [Hugo] 무한스크롤을 구현해 보자" />&lt;h1 id="발단">발단&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>hugo on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/hugo/</link><description>Recent content in hugo on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Sun, 14 Jan 2024 14:16:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h1 id="이전-버전의-문제">이전 버전의 문제&lt;/h1>
+&lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/10" >저번 게시글&lt;/a>에서 무한 스크롤을 구현했지만, 하나의 html에 모든 데이터를 가지고 있는 구조였다. 해당 구조는 게시글이 1,000개 혹은 10,000개가 된다면, 메인 페이지를 불러오는데, 많은 네트워크 자원을 소비하게 될 것이다. 여러분들의 모바일 데이터 잔량은 소중하니까&amp;hellip;&lt;/p>
+&lt;h1 id="방법을-찾자">방법을 찾자&lt;/h1>
+&lt;p>처음 발상은 이랬다.&lt;/p>
+&lt;blockquote>
+&lt;p>특정 범위에 해당하는 게시글 리스트를 미리 저장해놓고, http GET 요청을 통해 그때그때 가져오면 되지 않을까?&lt;/p>
+&lt;/blockquote>
+&lt;p>그런데 여기에는 아래와 같은 조건이 붙는다.&lt;/p>
+&lt;ul>
+&lt;li>html로 만들어진 게시글 리스트가 필요.
+&lt;ul>
+&lt;li>테마가 업데이트되어도 수정 없이 무한 스크롤을 구현하고 싶음.&lt;/li>
+&lt;li>json과 같은 데이터는 js로 html을 만들어야 하므로, 현재 사용하는 테마가 업데이트되면, 필자가 작성한 js도 수정해야 함.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>즉, 5개씩 로딩하고 싶다면, 아래와 같은 리스트를 5개씩 html 형태로 빌드하고, 해당 데이터를 http get을 이용해 가져와야 한다는 것이다.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/11/image.png"
+width="937"
+height="853"
+loading="lazy"
+alt="메뉴 리스트"
+class="gallery-image"
+data-flex-grow="109"
+data-flex-basis="263px"
+>&lt;/p>
+&lt;p>여러가지 생각이 들었는데,&lt;/p>
+&lt;ul>
+&lt;li>게시글.md를 게시글.html로 바꿔주는 로직이 있으니, 게시글.md를 게시글.html, 게시글-타이틀.html로 만들어 줄 수 있겠다.
+&lt;ul>
+&lt;li>공식문서를 살펴보니, 게시글.md는 무조건 하나의 게시글.html로 치환되도록 설계되어 있음.(&lt;a class="link" href="https://gohugo.io/templates/lookup-order/" target="_blank" rel="noopener"
+>공식 문서&lt;/a>)&lt;/li>
+&lt;li>적용 불가&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Pagination 기능을 활용해 볼까? (&lt;a class="link" href="https://gohugo.io/templates/pagination/" target="_blank" rel="noopener"
+>공식 문서&lt;/a>)
+&lt;ul>
+&lt;li>Pagination 기능을 활성화하면, &lt;code>/page/${pageNum}&lt;/code>으로 접근 가능함.&lt;/li>
+&lt;li>Pagination은 index.html을 총 페이지 숫자에 맞게 여러 개 생성해 줌.&lt;/li>
+&lt;li>그래서 index.html에 pagination 템플릿을 삽입하면 각 페이지에 맞는 컨텐츠를 삽입해 줌.&lt;/li>
+&lt;li>&lt;strong>index.html&lt;/strong>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>{{ $pages := where .Site.RegularPages &amp;#34;Type&amp;#34; &amp;#34;in&amp;#34; .Site.Params.mainSections }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{{ $notHidden := where .Site.RegularPages &amp;#34;Params.hidden&amp;#34; &amp;#34;!=&amp;#34; true }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{{ $filtered := ($pages | intersect $notHidden) }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{{ $pag := .Paginate ($filtered) }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">section&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">class&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;article-list&amp;#34;&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ range $index, $element := $pag.Pages }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ partial &amp;#34;article-list/default&amp;#34; . }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ end }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#f92672">section&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>위와 같은 index.html이 있고, paginate=5로 설정해둔다면,
+&lt;ul>
+&lt;li>index.html은 1~5 게시글이 삽입되어서 빌드.&lt;/li>
+&lt;li>page/1/index.html은 index.html으로 리다이렉팅하게끔 빌드.&lt;/li>
+&lt;li>page/2/index.html은 6~10 게시글이 삽입되어서 빌드.&lt;/li>
+&lt;li>&amp;hellip;&lt;/li>
+&lt;li>즉, index.html과 page/{pageNum}/index.html은 기본 구조가 완전 동일&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>그렇다면 이것을 활용하면 되겠다.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>그래서 Pagination을 이용해서 개발을 진행하기로 한다.&lt;/p>
+&lt;h1 id="구현">구현&lt;/h1>
+&lt;h2 id="hugotoml-수정">hugo.toml 수정&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-toml" data-lang="toml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">baseURL&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;https://fhdufhdu.github.io/&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">languageCode&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;ko-KR&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">title&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;fhdufhdu&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">theme&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;hugo-theme-stack&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">paginate&lt;/span> = &lt;span style="color:#ae81ff">5&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">//추가&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="indexhtml-수정">index.html 수정&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">section&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">class&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;article-list&amp;#34;&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ range $index, $element := $pag.Pages }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ partial &amp;#34;article-list/default&amp;#34; . }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ end }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#f92672">section&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">div&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts-footer&amp;#34;&lt;/span>&amp;gt;&amp;lt;/&lt;span style="color:#f92672">div&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">script&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">postsId&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;#posts&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">http&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">XMLHttpRequest&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">page&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">2&lt;/span> &lt;span style="color:#75715e">// 1 페이지는 index.html에 들어가 있으니까. 2 페이지로 init value 지정
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">intersectionObserver&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">IntersectionObserver&lt;/span>((&lt;span style="color:#a6e22e">entries&lt;/span>)=&amp;gt;{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// intersectionRatio가 0 이하이면 아직 노출되지 않은 것
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#a6e22e">entries&lt;/span>[&lt;span style="color:#ae81ff">0&lt;/span>].&lt;span style="color:#a6e22e">intersectionRatio&lt;/span> &lt;span style="color:#f92672">&amp;lt;=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>) &lt;span style="color:#66d9ef">return&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">url&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">`/page/&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#a6e22e">page&lt;/span>&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">/`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#e6db74">`&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#a6e22e">page&lt;/span>&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">페이지 로드 중...`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// http 요청을 통해 page html 가져오기
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">fetch&lt;/span>(&lt;span style="color:#a6e22e">url&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">then&lt;/span>((&lt;span style="color:#a6e22e">response&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// ok가 아니라면 마지막 페이지라는 것
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#f92672">!&lt;/span>&lt;span style="color:#a6e22e">response&lt;/span>.&lt;span style="color:#a6e22e">ok&lt;/span>) &lt;span style="color:#66d9ef">throw&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> Error(&lt;span style="color:#e6db74">`&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#a6e22e">page&lt;/span>&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">페이지가 마지막입니다`&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">response&lt;/span>.&lt;span style="color:#a6e22e">text&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> })
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">then&lt;/span>((&lt;span style="color:#a6e22e">html&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 데이터 파싱을 위해 html을 가상의 element에 넣음.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">element&lt;/span> &lt;span style="color:#f92672">=&lt;/span> document.&lt;span style="color:#a6e22e">createElement&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;temp&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">element&lt;/span>.&lt;span style="color:#a6e22e">innerHTML&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">html&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// #posts 데이터를 들고와서 innerHTML 추가(innerHTML에는 게시글 리스트가 있음)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> document.&lt;span style="color:#a6e22e">querySelector&lt;/span>(&lt;span style="color:#a6e22e">postsId&lt;/span>).&lt;span style="color:#a6e22e">innerHTML&lt;/span> &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#a6e22e">element&lt;/span>.&lt;span style="color:#a6e22e">querySelector&lt;/span>(&lt;span style="color:#a6e22e">postsId&lt;/span>).&lt;span style="color:#a6e22e">innerHTML&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#e6db74">`&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#a6e22e">page&lt;/span>&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">페이지 로드 완료`&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">page&lt;/span>&lt;span style="color:#f92672">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> })
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#66d9ef">catch&lt;/span>((&lt;span style="color:#a6e22e">err&lt;/span>)=&amp;gt;&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">err&lt;/span>.&lt;span style="color:#a6e22e">message&lt;/span>))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// element 구독
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">intersectionObserver&lt;/span>.&lt;span style="color:#a6e22e">observe&lt;/span>(document.&lt;span style="color:#a6e22e">querySelector&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;#posts-footer&amp;#39;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#f92672">script&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="후기">후기&lt;/h1>
+&lt;p>이전 게시글에서 무한 스크롤을 구현하고나서 많이 뿌듯했지만, 한편으로는 가슴속에 남아있는 불편함이 있었다. 보기에는 무한 스크롤이지만, 실제로는 무한 스크롤이라고 부르기는 좀 좋지 않은 구조였기 때문이다. 실제로 게시글 수가 많아질수록 쓸데없이 네트워크 자원을 소비한다는 문제가 있는 구조이다.&lt;/p>
+&lt;p>어쨌든, 좀 더 나은 코드를 작성하는 것이 바로 개발자의 역할이 아니겠는가? 이 불편한 감정을 해결하기 위해 고민을 오래 했던 것 같다. 샤워하다가도 생각나고, 밥먹다가도 생각나고, 출근하다가도 생각이 났다.&lt;/p>
+&lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
+&lt;p>해당 방법보다 더 좋은 아이디어로 개발했습니다.
+&lt;a class="link" href="https://fhdufhdu.github.io/post/11" >해당 게시글&lt;/a> 참고 해주세요!&lt;/p>
+&lt;h1 id="발단">발단&lt;/h1>
 &lt;p>Hudi님의 &lt;a class="link" href="https://hudi.blog/" target="_blank" rel="noopener"
 >블로그&lt;/a>를 보다 보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러 가지 방법을 찾아보았다.&lt;/p>
 &lt;p>찾아보니 제일 좋은 방법은 &lt;code>IntersectionObserver&lt;/code>를 이용하는 것이라고 한다.&lt;/p>
