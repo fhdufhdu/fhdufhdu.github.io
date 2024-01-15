@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Sun, 14 Jan 2024 14:16:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h1 id="이전-버전의-문제">이전 버전의 문제&lt;/h1>
-&lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/10" >저번 게시글&lt;/a>에서 무한 스크롤을 구현했지만, 하나의 html에 모든 데이터를 가지고 있는 구조였다. 해당 구조는 게시글이 1,000개 혹은 10,000개가 된다면, 메인 페이지를 불러오는데, 많은 네트워크 자원을 소비하게 될 것이다. 여러분들의 모바일 데이터 잔량은 소중하니까&amp;hellip;&lt;/p>
+&lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/10" >저번 게시글&lt;/a>에서 무한 스크롤을 구현했지만, 하나의 html에 모든 데이터를 가지고 있는 구조였다. 해당 구조는 게시글이 1,000개 혹은 10,000개가 된다면, 메인 페이지를 불러오는데, 많은 네트워크 자원을 소비하게 될 것이다. 실제로 게시글 200개 정도로 테스트해 보니, 요청에 600kb를 사용하는 것을 확인했다.&lt;/p>
 &lt;h1 id="방법을-찾자">방법을 찾자&lt;/h1>
 &lt;p>처음 발상은 이랬다.&lt;/p>
 &lt;blockquote>
