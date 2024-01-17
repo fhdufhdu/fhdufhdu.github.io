@@ -1,4 +1,193 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>javascript on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/javascript/</link><description>Recent content in javascript on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 03 Jan 2024 23:34:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/javascript/index.xml" rel="self" type="application/rss+xml"/><item><title>[JS] 이벤트 루프와 비동기 함수</title><link>https://fhdufhdu.github.io/post/5/</link><pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/5/</guid><description>&lt;p>오늘은 JS의 비동기에 관해 설명해 보고자 한다. JS에 대해 잘 모르고 비동기에 대한 개념이 희박하던 때, 단순히 콜백함수가 비동기 함수인 줄 알았다. 하지만 단순히 콜백함수를 만든다고 해서 비동기적으로 작동하는 것은 아니다. 특정 조건의 함수만 비동기 함수가 될 수 있다.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>javascript on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/javascript/</link><description>Recent content in javascript on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 17 Jan 2024 13:08:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/javascript/index.xml" rel="self" type="application/rss+xml"/><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h1 id="this란">this란?&lt;/h1>
+&lt;p>일반적으로 대부분의 언어에서 &lt;code>this&lt;/code> 키워드는 자기 자신의 인스턴스를 가리키는 용어이다.(python에서는 &lt;code>self&lt;/code> 키워드)&lt;/p>
+&lt;p>하지만, javascript의 &lt;code>this&lt;/code> 키워드는 다른 언어와는 다른 방식으로 작동한다.&lt;/p>
+&lt;p>* chrome 브라우저 환경에서 테스트한 결과입니다. node의 경우 &lt;code>window&lt;/code> 전역 객체 대신 &lt;code>global&lt;/code> 전역 객체를 사용하는데, &lt;code>global&lt;/code>이 제대로 반환되지 않아서 브라우저 환경에서 진행하였습니다.&lt;/p>
+&lt;h2 id="java에서의-this">Java에서의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> number;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> number){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> number
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Main&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(String&lt;span style="color:#f92672">[]&lt;/span> args){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Test t1 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> Test();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Test t2 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> Test();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> t1.&lt;span style="color:#a6e22e">setNumber&lt;/span>(1);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> t2.&lt;span style="color:#a6e22e">setNumber&lt;/span>(2);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.&lt;span style="color:#a6e22e">out&lt;/span>.&lt;span style="color:#a6e22e">println&lt;/span>(t1.&lt;span style="color:#a6e22e">number&lt;/span>); &lt;span style="color:#75715e">// 1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> System.&lt;span style="color:#a6e22e">out&lt;/span>.&lt;span style="color:#a6e22e">println&lt;/span>(t2.&lt;span style="color:#a6e22e">number&lt;/span>); &lt;span style="color:#75715e">// 2&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>당연하게도 Java에서의 &lt;code>this&lt;/code>는 Test 인스턴스를 가리킨다는 것을 알 수 있다. 그렇다면 js에서는 어떻게 작동할까?&lt;/p>
+&lt;h1 id="javascript에서의-this">javascript에서의 &lt;code>this&lt;/code>&lt;/h1>
+&lt;h2 id="this-바인딩-규칙">&lt;code>this&lt;/code> 바인딩 규칙&lt;/h2>
+&lt;p>우선 설명 이전에, 바인딩 규칙부터 알아보자.&lt;/p>
+&lt;ol>
+&lt;li>일반 함수(function 키워드 사용)에서 사용된 &lt;code>this&lt;/code>는 해당 함수를 호출하는 객체를 가리킨다.&lt;/li>
+&lt;li>화살표 함수에서 사용된 &lt;code>this&lt;/code>는 block을 타고 올라갔을 때, 맨 처음 만나는 일반 함수의 &lt;code>this&lt;/code>를 가리킨다.&lt;/li>
+&lt;li>&lt;code>new&lt;/code> 키워드를 사용할 경우 생성자 함수가 객체 그 자체가 된다. 생성자 함수는 일반 함수여야한다. 생성자 함수 호출 시 &lt;code>this&lt;/code>는 무조건 자기 자신이다.&lt;/li>
+&lt;/ol>
+&lt;h2 id="첫-번째-규칙---일반-함수의-this">첫 번째 규칙 - 일반 함수의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;blockquote>
+&lt;p>일반 함수(function 키워드 사용)에서 사용된 &lt;code>this&lt;/code>는 해당 함수를 호출하는 객체를 가리킨다.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">setNumber&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#66d9ef">function&lt;/span>(&lt;span style="color:#a6e22e">number&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 방식은 다른 언어와 유사하게 작동하는 것을 알 수 있다.&lt;/p>
+&lt;p>규칙에 맞게 따져보자.&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>setNumber&lt;/code> 함수가 일반 함수로 선언되어 있음.&lt;/li>
+&lt;li>&lt;code>setNumber&lt;/code> 함수를 &lt;code>test&lt;/code> 객체가 호출함.
+&lt;ul>
+&lt;li>ex. &lt;code>test.setNumber(1)&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>-&amp;gt; &lt;code>setNumber&lt;/code> 에서 &lt;code>this&lt;/code> = &lt;code>test&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>그렇다면 &lt;code>setNumber&lt;/code> 함수를 다른 객체에서 사용하면 어떻게 될까?&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">setNumber&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#66d9ef">function&lt;/span>(&lt;span style="color:#a6e22e">number&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">other&lt;/span> &lt;span style="color:#f92672">=&lt;/span> {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">other&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">other&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// undefined
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">other&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// false
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">other&lt;/span>) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>test&lt;/code> 의 &lt;code>setNumber&lt;/code> 를 &lt;code>other&lt;/code> 의 &lt;code>setNumber&lt;/code> 로 옮김.&lt;/li>
+&lt;li>&lt;code>other.setNubmer(1)&lt;/code> 을 실행.&lt;/li>
+&lt;li>-&amp;gt; &lt;code>this&lt;/code> = &lt;code>other&lt;/code> 임을 알 수 있음.&lt;/li>
+&lt;/ul>
+&lt;p>즉, 규칙에 따라, &lt;code>this&lt;/code>는 일반함수를 호출하는 객체임을 알 수 있다.&lt;/p>
+&lt;h2 id="두-번째-규칙---화살표-함수의-this">두 번째 규칙 - 화살표 함수의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;blockquote>
+&lt;p>화살표 함수에서 사용된 &lt;code>this&lt;/code> 는 block 계층을 타고 올라갔을 때, 맨 처음 만나는 일반 함수의 &lt;code>this&lt;/code> 를 가리킨다.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">setNumber&lt;/span>&lt;span style="color:#f92672">:&lt;/span> (&lt;span style="color:#a6e22e">number&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// undefined
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// false
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> window) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 코드를 보면, &lt;code>setNumber&lt;/code> 내부의 &lt;code>this&lt;/code> 가 window 객체임을 알 수 있다. 왜 이런 현상이 발생한 것 일까?&lt;/p>
+&lt;p>규칙에 맞게 한번 따져보자,&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>setNumber&lt;/code> 는 화살표 함수임.&lt;/li>
+&lt;li>&lt;code>setNumber&lt;/code> 의 상위 블록은 전역 객체인 &lt;code>window&lt;/code> 임.&lt;/li>
+&lt;li>맨 처음 만나는 일반 함수가 없었으므로, &lt;code>window&lt;/code> = &lt;code>this&lt;/code> 임을 알 수 있음.&lt;/li>
+&lt;/ul>
+&lt;p>이번엔 일반함수가 있는 경우를 알아보자&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">setNumber&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#66d9ef">function&lt;/span> (&lt;span style="color:#a6e22e">number&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#a6e22e">number&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span>(&lt;span style="color:#a6e22e">number&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> window) &lt;span style="color:#75715e">// false
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이번 코드의 결과는 위의 결과와 완전히 정반대라는 것을 알 수 있다.&lt;/p>
+&lt;p>다시한번 규칙에 맞게 따져보자.&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>setNumber&lt;/code> 는 일반 함수임.&lt;/li>
+&lt;li>&lt;code>setNumber&lt;/code> 내부에 &lt;code>run&lt;/code> 이라는 화살표 함수가 존재함.&lt;/li>
+&lt;li>&lt;code>setNumber&lt;/code> 는 &lt;code>run&lt;/code> 을 실행한 후 결과를 반환함.&lt;/li>
+&lt;li>&lt;code>run&lt;/code> 의 상위 계층 블록은 &lt;code>setNumber&lt;/code>이고, &lt;code>setNumber&lt;/code> 의 상위 계층 블록은 &lt;code>window&lt;/code> 임.&lt;/li>
+&lt;li>&lt;code>run&lt;/code> 에게는 &lt;code>setNumber&lt;/code> 가 상위 계층 블록 중 처음 만나는 일반 함수이므로 &lt;code>setNumber&lt;/code> 의 &lt;code>this&lt;/code> 가 바로 &lt;code>run&lt;/code> 의 &lt;code>this&lt;/code> 임.&lt;/li>
+&lt;li>&lt;code>setNumber&lt;/code> 를 호출한 객체는 &lt;code>test&lt;/code> 객체임&lt;/li>
+&lt;li>그러므로 &lt;code>this&lt;/code> = &lt;code>test&lt;/code> 임을 알 수 있음.&lt;/li>
+&lt;/ul>
+&lt;h2 id="세-번째-규칙---new-키워드">세 번째 규칙 - new 키워드&lt;/h2>
+&lt;blockquote>
+&lt;p>&lt;code>new&lt;/code> 키워드를 사용할 경우 생성자 함수가 객체 그 자체가 된다. 생성자 함수는 일반 함수여야한다. 생성자 함수 호출 시 &lt;code>this&lt;/code>는 무조건 자기 자신이다.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#a6e22e">number&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 코드는 &lt;code>setNumber&lt;/code>가 일반함수이므로 당연히 &lt;code>this&lt;/code> 가 &lt;code>test&lt;/code> 임을 알 수 있다.&lt;/p>
+&lt;p>그런데 만약 아래와 같은 코드가 있다면 어떨까?&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">setNumber&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#a6e22e">number&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 코드는 &lt;code>setNumber&lt;/code>가 화살표 함수이므로, 앞서 말했던 것 처럼 &lt;code>this&lt;/code>가 &lt;code>window&lt;/code>가 될 것 같지 않은가?&lt;/p>
+&lt;p>그렇지 않다. 위 코드는 아래와 같은 코드이다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">function&lt;/span> () {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#a6e22e">number&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">number&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">setNumber&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">test&lt;/span>.&lt;span style="color:#a6e22e">number&lt;/span>) &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>js에서는 함수에 &lt;code>new&lt;/code>를 붙여버리면, 그 함수가 생성자 함수가 되어버린다. 그리고 &lt;code>new&lt;/code>는 일반 함수에만 붙일 수 있다.&lt;/p>
+&lt;p>그렇다면 &lt;code>setNumber&lt;/code>의 맨 처음 만나는 상위 블록의 일반 함수가 생성자이고, 생성자의 호출시 &lt;code>this&lt;/code>는 자기자신이므로 &lt;code>setNumber&lt;/code>의 &lt;code>this&lt;/code>는 &lt;code>test&lt;/code>가 된다.&lt;/p>
+&lt;h1 id="정리">정리&lt;/h1>
+&lt;p>해당 내용은 &lt;a class="link" href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/this" target="_blank" rel="noopener"
+>mdn web docs - this&lt;/a>을 참고해서 작성한 글이다. 더 자세한 정보를 얻고 싶다면 문서에서 확인해보자.&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>this&lt;/code> 바인딩 정리
+&lt;ol>
+&lt;li>일반 함수(function 키워드 사용)에서 사용된 &lt;code>this&lt;/code>는 해당 함수를 호출하는 객체를 가리킨다.&lt;/li>
+&lt;li>화살표 함수에서 사용된 &lt;code>this&lt;/code>는 block을 타고 올라갔을 때, 맨 처음 만나는 일반 함수의 &lt;code>this&lt;/code>를 가리킨다.&lt;/li>
+&lt;li>&lt;code>new&lt;/code> 키워드를 사용할 경우 생성자 함수가 객체 그 자체가 된다. 생성자 함수는 일반 함수여야한다. 생성자 함수 호출 시 &lt;code>this&lt;/code>는 무조건 자기 자신이다.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>최상위 &lt;code>this&lt;/code>는 &lt;code>window&lt;/code> 이다.(node.js에서는 global)&lt;/li>
+&lt;/ul></description></item><item><title>[JS] 이벤트 루프와 비동기 함수</title><link>https://fhdufhdu.github.io/post/5/</link><pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/5/</guid><description>&lt;p>오늘은 JS의 비동기에 관해 설명해 보고자 한다. JS에 대해 잘 모르고 비동기에 대한 개념이 희박하던 때, 단순히 콜백함수가 비동기 함수인 줄 알았다. 하지만 단순히 콜백함수를 만든다고 해서 비동기적으로 작동하는 것은 아니다. 특정 조건의 함수만 비동기 함수가 될 수 있다.&lt;/p>
 &lt;p>동기와 비동기 작업에 대해 알아보고 싶다면 해당&lt;a class="link" href="https://fhdufhdu.github.io/page/4" >게시글&lt;/a>을 참고하자.&lt;/p>
 &lt;p>조금 더 자세히 알아보자.&lt;/p>
 &lt;h1 id="콜백-함수는-동기이다">콜백 함수는 동기이다.&lt;/h1>
