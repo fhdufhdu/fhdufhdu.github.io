@@ -1,4 +1,32 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>postgresql on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/postgresql/</link><description>Recent content in postgresql on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Thu, 11 Jan 2024 08:54:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/postgresql/index.xml" rel="self" type="application/rss+xml"/><item><title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title><link>https://fhdufhdu.github.io/post/9/</link><pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/9/</guid><description>&lt;h1 id="with-절이란">With 절이란?&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>postgresql on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/postgresql/</link><description>Recent content in postgresql on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 23 Jan 2024 09:33:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/postgresql/index.xml" rel="self" type="application/rss+xml"/><item><title>[PostgreSQL] [실무] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h1 id="문제와-원인">문제와 원인&lt;/h1>
+&lt;p>회사에서 챗봇에 대한 선톡을 릴리즈한 이후에, 에러가 엄청나게 발생하면서 DB CPU 점유율이 100%까지 올랐다. 챗봇 서버는 에러 로그를 데이터베이스에 저장하는데, 에러가 많이 발생했으니 그것을 저장한다고 DB CPU 점유율이 높아진 듯 보였다.&lt;/p>
+&lt;p>현재 DB는 AWS의 RDS를 사용한다. RDS의 경우 &lt;strong>&amp;ldquo;성능 개선 도우미&amp;rdquo;&lt;/strong> 라는 도구가 있는데, 이 도구를 통해 확인해 본 결과 예상과는 전혀 달랐다.&lt;/p>
+&lt;p>챗봇과의 대화 기록을 가져오는 데에서 2.5초가 걸리고 있었다. 이 쿼리는 챗봇과의 대화마다 호출되는 것이기 때문에, 이 속도가 지연된다면, 지연된 시간에 동시에 다른 쿼리가 많이 실행되고 있을 것이고, 그래서 CPU 점유율이 올라간 것이었다.&lt;/p>
+&lt;p>결국 해당 쿼리를 최적화하거나, 다른 해결 방법을 모색해야했다.&lt;/p>
+&lt;h1 id="해결-방법-후보들">해결 방법 후보들&lt;/h1>
+&lt;h2 id="1-쿼리-최적화">1. 쿼리 최적화&lt;/h2>
+&lt;p>대화 기록을 호출하는 쿼리는 서브 쿼리를 사용하고 있다. 그것이 문제라고 생각했다. &lt;em>&amp;ldquo;그 쿼리를 &lt;a class="link" href="https://fhdufhdu.github.io/post/7" >with절&lt;/a>로 빼면, 해결되지 않을까?&amp;rdquo;&lt;/em> 라고 생각하고 테스트를 해보았으나, 기대한 만큼의 결과가 나오지 않았다. 2.5s -&amp;gt; 1.5s 로 시간이 줄기는 했으나, 해당 시간 또한 오래 걸리는 것은 마찬가지였다. 해당 테이블의 row의 개수가 200만+ 인 것을 그때 인지했다.&lt;/p>
+&lt;h2 id="2-인덱스">2. 인덱스&lt;/h2>
+&lt;p>1번으로도 해결이 안되고, row의 개수가 많은 것도 인지해서, select 자체에 문제가 있음을 인지했다. 보통 이런 경우 인덱스가 문제였길래, 인덱스가 지정되어 있는지를 확인했다.&lt;/p>
+&lt;p>역시, 인덱스가 걸려있지 않았다. 사수에게 듣기로는 row가 100만 건 넘어가면, 그때부터 인덱스의 부재가 느껴진다고 했다. 이번 문제의 테이블은 200만+건이니까, 인덱스가 문제였다는 확신이 들었다.&lt;/p>
+&lt;p>그런데 바로 인덱스를 적용하기에는 조금 걱정이 되었다. CPU 점유율이 100%였다가 계속 50% 정도를 유지하고 있는 상황에서 인덱스를 걸면 점유율이 또 올라서 문제가 생길 수도 있으니까 말이다. (기존에는 평균 5%~10%를 유지했다.)&lt;/p>
+&lt;p>200만+건이라서 그렇게 오래 안 걸리지 않을까 하는 예상은 했지만, 잘 못 건드렸다가 상용 데이터베이스 재부팅 해야 하면, 그 시간 동안 서비스가 멈추는 것이니까 말이다.&lt;/p>
+&lt;p>그래서 어떻게 했냐면&amp;hellip;&lt;/p>
+&lt;h3 id="복제-db-생성하기">복제 DB 생성하기&lt;/h3>
+&lt;p>RDS에는 매일매일 특정 시간에 스냅샷을 저장하는 옵션이 있다. 상용 DB에는 그 옵션이 적용되어 있었다. 그래서 해당 스냅샷을 이용해서 복제 데이터베이스를 만들어 놓고 거기서 인덱스를 거는 실험을 해보았다. 만약 시간이 오래걸리고 CPU 점유율도 높아지는 것이 보인다면 사람이 잘 사용하지 않는 새벽에 인덱스 적용 작업을 해야할 것이다.&lt;/p>
+&lt;p>전날 스냅샷을 기반으로 데이터베이스를 새롭게 만들고, 테스트를 진행했다. 예상외로 4개 정도 컬럼에 인덱스를 적용하는 것에 2초 정도 걸렸다. 이 정도면 할 만하겠다 싶어서, PM에게 보고하고 바로 적용을 시작했다.&lt;/p>
+&lt;h1 id="후기">후기&lt;/h1>
+&lt;p>현재 사용중인 DB라서 그런진 몰라도 4초 정도 걸렸지만, 다행히도 매우 빠르게 끝났다. 이후 쿼리를 테스트해보니 0.2초만에 끝나는 것을 확인했다.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/13/image.png"
+width="2418"
+height="608"
+loading="lazy"
+alt="Database CPU Load"
+class="gallery-image"
+data-flex-grow="397"
+data-flex-basis="954px"
+>&lt;/p>
+&lt;p>위 사진처럼 CPU 점유율이 확 떨어진 것을 볼 수 있다. 이거 보고나서 안도감이 밀려왔다. 앞으로 잘 쌓이는 테이블에는 조회 쿼리를 보고 인덱스를 잘 걸어둬야겠다.&lt;/p></description></item><item><title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title><link>https://fhdufhdu.github.io/post/9/</link><pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/9/</guid><description>&lt;h1 id="with-절이란">With 절이란?&lt;/h1>
 &lt;p>복잡한 쿼리를 작성하다 보면, 비슷한 쿼리를 여러 번 사용해야 할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한 번만 실행하고 싶을 때가 있을 것이다.&lt;/p>
 &lt;p>이럴 때 필요한 것이 &lt;code>with&lt;/code> 절이다. with 절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code>CTE(common table expression)&lt;/code>라고 한다.&lt;/p>
 &lt;h1 id="사용법">사용법&lt;/h1>
