@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>python on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/python/</link><description>Recent content in python on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Thu, 04 Jan 2024 23:10:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/python/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>python on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/python/</link><description>Recent content in python on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Thu, 04 Jan 2024 23:10:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/python/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
 &lt;p>​
 회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔 너무 챗봇이 느려요&amp;quot;였다.
 ​
@@ -10,17 +10,7 @@
 ​&lt;/p>
 &lt;h2 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h2>
 &lt;p>​
-우선 간략하게 현재 개발 환경을 말하자면 아래와 같다.
-​&lt;/p>
-&lt;ul>
-&lt;li>AWS Lambda(람다)&lt;/li>
-&lt;li>AWS Api Gateway&lt;/li>
-&lt;li>PostgreSQL&lt;/li>
-&lt;li>Python&lt;/li>
-&lt;li>웹 프레임워크 사용하지 않음
-​&lt;/li>
-&lt;/ul>
-&lt;p>챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
+챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
 ​
 예를 들어 body에 &lt;code>chatbotId&lt;/code>가 &lt;code>Foo&lt;/code>이면 &lt;code>FooFacade&lt;/code> 클래스를 import 해서 쓰거나, &lt;code>Bar&lt;/code>이면 &lt;code>BarFacade&lt;/code> 클래스를 import해서 쓰거나 하는 식으로 진행했다.
 ​

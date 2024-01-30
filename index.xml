@@ -1,32 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 23 Jan 2024 09:33:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[PostgreSQL] [실무] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h1 id="문제와-원인">문제와 원인&lt;/h1>
-&lt;p>회사에서 챗봇에 대한 선톡을 릴리즈한 이후에, 에러가 엄청나게 발생하면서 DB CPU 점유율이 100%까지 올랐다. 챗봇 서버는 에러 로그를 데이터베이스에 저장하는데, 에러가 많이 발생했으니 그것을 저장한다고 DB CPU 점유율이 높아진 듯 보였다.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 23 Jan 2024 09:33:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[PostgreSQL] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h1 id="문제와-원인">문제와 원인&lt;/h1>
+&lt;p>갑자기 에러가 엄청나게 발생하면서 DB CPU 점유율이 100%까지 올랐던 경험이 있다. 해당 서버는 에러 로그를 데이터베이스에 저장하는데, 에러가 많이 발생했으니 그것을 저장한다고 DB CPU 점유율이 높아진 듯 보였다.&lt;/p>
 &lt;p>현재 DB는 AWS의 RDS를 사용한다. RDS의 경우 &lt;strong>&amp;ldquo;성능 개선 도우미&amp;rdquo;&lt;/strong> 라는 도구가 있는데, 이 도구를 통해 확인해 본 결과 예상과는 전혀 달랐다.&lt;/p>
-&lt;p>챗봇과의 대화 기록을 가져오는 데에서 2.5초가 걸리고 있었다. 이 쿼리는 챗봇과의 대화마다 호출되는 것이기 때문에, 이 속도가 지연된다면, 지연된 시간에 동시에 다른 쿼리가 많이 실행되고 있을 것이고, 그래서 CPU 점유율이 올라간 것이었다.&lt;/p>
+&lt;p>특정 쿼리를 실행하는 곳에서 2.5초가 걸리고 있었다. 이 쿼리는 매우 자주 호출되는 것이기 때문에, 이 속도가 지연된다면, 지연된 시간에 동시에 다른 쿼리가 많이 실행되고 있을 것이고, 그래서 CPU 점유율이 올라간 것이었다.&lt;/p>
 &lt;p>결국 해당 쿼리를 최적화하거나, 다른 해결 방법을 모색해야했다.&lt;/p>
 &lt;h1 id="해결-방법-후보들">해결 방법 후보들&lt;/h1>
 &lt;h2 id="1-쿼리-최적화">1. 쿼리 최적화&lt;/h2>
-&lt;p>대화 기록을 호출하는 쿼리는 서브 쿼리를 사용하고 있다. 그것이 문제라고 생각했다. &lt;em>&amp;ldquo;그 쿼리를 &lt;a class="link" href="https://fhdufhdu.github.io/post/7" >with절&lt;/a>로 빼면, 해결되지 않을까?&amp;rdquo;&lt;/em> 라고 생각하고 테스트를 해보았으나, 기대한 만큼의 결과가 나오지 않았다. 2.5s -&amp;gt; 1.5s 로 시간이 줄기는 했으나, 해당 시간 또한 오래 걸리는 것은 마찬가지였다. 해당 테이블의 row의 개수가 200만+ 인 것을 그때 인지했다.&lt;/p>
+&lt;p>해당 쿼리는 서브 쿼리를 사용하고 있다. 그것이 문제라고 생각했다. &lt;em>&amp;ldquo;그 쿼리를 &lt;a class="link" href="https://fhdufhdu.github.io/post/7" >with절&lt;/a>로 빼면, 해결되지 않을까?&amp;rdquo;&lt;/em> 라고 생각하고 테스트를 해보았으나, 기대한 만큼의 결과가 나오지 않았다. 2.5s -&amp;gt; 1.5s 로 시간이 줄기는 했으나, 해당 시간 또한 오래 걸리는 것은 마찬가지였다. 해당 테이블의 row의 개수가 200만+ 인 것을 그때 인지했다.&lt;/p>
 &lt;h2 id="2-인덱스">2. 인덱스&lt;/h2>
 &lt;p>1번으로도 해결이 안되고, row의 개수가 많은 것도 인지해서, select 자체에 문제가 있음을 인지했다. 보통 이런 경우 인덱스가 문제였길래, 인덱스가 지정되어 있는지를 확인했다.&lt;/p>
 &lt;p>역시, 인덱스가 걸려있지 않았다. 사수에게 듣기로는 row가 100만 건 넘어가면, 그때부터 인덱스의 부재가 느껴진다고 했다. 이번 문제의 테이블은 200만+건이니까, 인덱스가 문제였다는 확신이 들었다.&lt;/p>
 &lt;p>그런데 바로 인덱스를 적용하기에는 조금 걱정이 되었다. CPU 점유율이 100%였다가 계속 50% 정도를 유지하고 있는 상황에서 인덱스를 걸면 점유율이 또 올라서 문제가 생길 수도 있으니까 말이다. (기존에는 평균 5%~10%를 유지했다.)&lt;/p>
-&lt;p>200만+건이라서 그렇게 오래 안 걸리지 않을까 하는 예상은 했지만, 잘 못 건드렸다가 상용 데이터베이스 재부팅 해야 하면, 그 시간 동안 서비스가 멈추는 것이니까 말이다.&lt;/p>
 &lt;p>그래서 어떻게 했냐면&amp;hellip;&lt;/p>
 &lt;h3 id="복제-db-생성하기">복제 DB 생성하기&lt;/h3>
-&lt;p>RDS에는 매일매일 특정 시간에 스냅샷을 저장하는 옵션이 있다. 상용 DB에는 그 옵션이 적용되어 있었다. 그래서 해당 스냅샷을 이용해서 복제 데이터베이스를 만들어 놓고 거기서 인덱스를 거는 실험을 해보았다. 만약 시간이 오래걸리고 CPU 점유율도 높아지는 것이 보인다면 사람이 잘 사용하지 않는 새벽에 인덱스 적용 작업을 해야할 것이다.&lt;/p>
-&lt;p>전날 스냅샷을 기반으로 데이터베이스를 새롭게 만들고, 테스트를 진행했다. 예상외로 4개 정도 컬럼에 인덱스를 적용하는 것에 2초 정도 걸렸다. 이 정도면 할 만하겠다 싶어서, PM에게 보고하고 바로 적용을 시작했다.&lt;/p>
+&lt;p>RDS에는 매일매일 특정 시간에 스냅샷을 저장하는 옵션이 있다. 해당 DB에는 그 옵션이 적용되어 있었다. 그래서 해당 스냅샷을 이용해서 복제 데이터베이스를 만들어 놓고 거기서 인덱스를 거는 실험을 해보았다. 만약 시간이 오래걸리고 CPU 점유율도 높아지는 것이 보인다면 사람이 잘 사용하지 않는 시간대에 인덱스 적용 작업을 해야할 것이다.&lt;/p>
+&lt;p>전날 스냅샷을 기반으로 데이터베이스를 새롭게 만들고, 테스트를 진행했다. 예상외로 4개 정도 컬럼에 인덱스를 적용하는 것에 2초 정도 걸렸다. 이 정도면 할 만하겠다 싶어서, 바로 적용을 시작했다.&lt;/p>
 &lt;h1 id="후기">후기&lt;/h1>
-&lt;p>현재 사용중인 DB라서 그런진 몰라도 4초 정도 걸렸지만, 다행히도 매우 빠르게 끝났다. 이후 쿼리를 테스트해보니 0.2초만에 끝나는 것을 확인했다.&lt;/p>
-&lt;p>&lt;img src="https://fhdufhdu.github.io/post/13/image.png"
-width="2418"
-height="608"
-loading="lazy"
-alt="Database CPU Load"
-class="gallery-image"
-data-flex-grow="397"
-data-flex-basis="954px"
->&lt;/p>
-&lt;p>위 사진처럼 CPU 점유율이 확 떨어진 것을 볼 수 있다. 이거 보고나서 안도감이 밀려왔다. 앞으로 잘 쌓이는 테이블에는 조회 쿼리를 보고 인덱스를 잘 걸어둬야겠다.&lt;/p></description></item><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h1 id="this란">this란?&lt;/h1>
+&lt;p>현재 사용중인 DB라서 그런진 몰라도 4초 정도 걸렸지만, 다행히도 매우 빠르게 끝났다. 이후 쿼리를 테스트해보니 0.2초만에 끝나는 것을 확인했다.&lt;/p></description></item><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h1 id="this란">this란?&lt;/h1>
 &lt;p>일반적으로 대부분의 언어에서 &lt;code>this&lt;/code> 키워드는 자기 자신의 인스턴스를 가리키는 용어이다.(python에서는 &lt;code>self&lt;/code> 키워드)&lt;/p>
 &lt;p>하지만, javascript의 &lt;code>this&lt;/code> 키워드는 다른 언어와는 다른 방식으로 작동한다.&lt;/p>
 &lt;p>* chrome 브라우저 환경에서 테스트한 결과입니다. node의 경우 &lt;code>window&lt;/code> 전역 객체 대신 &lt;code>global&lt;/code> 전역 객체를 사용하는데, &lt;code>global&lt;/code>이 제대로 반환되지 않아서 브라우저 환경에서 진행하였습니다.&lt;/p>
@@ -461,7 +450,7 @@ data-flex-basis="2206px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">from&lt;/span> temp_user u1
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">left&lt;/span> &lt;span style="color:#66d9ef">join&lt;/span> temp_user2 u2
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">on&lt;/span> u1.locale &lt;span style="color:#f92672">=&lt;/span> u2.locale
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위와 같이 &lt;code>,&lt;/code>기호로 하나의 쿼리에서 여러 개의 with 절을 사용할 수 있다.&lt;/p></description></item><item><title>[PostgreSQL] [실무] 데이터를 일관되게 전달해 보자</title><link>https://fhdufhdu.github.io/post/8/</link><pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/8/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위와 같이 &lt;code>,&lt;/code>기호로 하나의 쿼리에서 여러 개의 with 절을 사용할 수 있다.&lt;/p></description></item><item><title>[PostgreSQL] 데이터를 일관되게 전달해 보자</title><link>https://fhdufhdu.github.io/post/8/</link><pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/8/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/7" >1편의 문제&lt;/a>를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 &lt;code>게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요&lt;/code> 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/8/image.png"
 width="678"
@@ -473,8 +462,8 @@ data-flex-grow="249"
 data-flex-basis="598px"
 >&lt;/p>
 &lt;p>위 이미지의 &lt;code>델 oem 4090의 모험(완)&lt;/code> 게시글을 보면 댓글이 6개라고 나와 있다. 그런데, 실제로 해당 게시글을 클릭해서 들어가면 5개, 4개 같이 댓글 개수가 줄어드는 버그가 있었다.&lt;/p>
-&lt;p>이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 &lt;code>삭제, 차단, 신고, 위치, 순서&lt;/code> 등의 조건에 영향을 받는 정책이다. 단순히 봐도 복잡할 것이 예상되지 않는가?&lt;/p>
-&lt;p>그래서 그랬을까? 애초에 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 개수를 가져와서 반환하고, 게시글 상세 정보 조회 시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.&lt;/p>
+&lt;p>이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 필요한 조건이 복잡하다.&lt;/p>
+&lt;p>그래서 그랬을까? 애초에 기존 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 개수를 가져와서 반환하고, 게시글 상세 정보 조회 시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.&lt;/p>
 &lt;p>솔직히 처음 코드를 보고 조금 벙쪘다. 아무리 그래도 그렇지&amp;hellip; 두개의 댓글 개수 카운팅 방식이 같지 않다니&amp;hellip;&lt;/p>
 &lt;h1 id="문제를-어떻게-해결할-것인가">문제를 어떻게 해결할 것인가&lt;/h1>
 &lt;p>문제의 원인을 파악하고 나서, 어떻게 해결할 지 고민이 많이 되었다. 곰곰히 생각하면서 세가지의 생각이 떠올랐다.&lt;/p>
@@ -527,14 +516,12 @@ data-flex-basis="598px"
 &lt;p>대상 게시글과 댓글 정보를 이용해 join을 맺는다. 이를 통해 &lt;code>게시글-댓글리스트&lt;/code>를 json으로 만들고 전달할 수 있게 된다.&lt;/p>
 &lt;h1 id="후기">후기&lt;/h1>
 &lt;p>해당 쿼리를 게시글 리스트 조회 API와 게시글 상세 조회 API 모두에 사용했다. 같은 쿼리를 사용함으로써 두 API의 데이터를 일관적으로 전달할 수 있었다. 또한 앞서 언급한 jsonb를 이용해서 response dto도 그대로 유지할 수 있었다.&lt;/p>
-&lt;p>의외로 추가적인 소득도 있었다. 속도가 &lt;strong>1s에서 200ms 대로 줄었던 것이다.&lt;/strong> with절을 이용한 방식이 효과가 컸던 것 같다. 이번 문제를 해결하기 위해 처음으로 사용해본 것인데, 앞으로도 애용할 것 같다.&lt;/p></description></item><item><title>[PostgreSQL] [실무] Select 쿼리 속도를 개선해 보자</title><link>https://fhdufhdu.github.io/post/7/</link><pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/7/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
-&lt;p>챗봇들의 게시글을 조회하는 데 15초가 걸려버리는 일이 발생했다. 해당 이슈를 듣자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p>
-&lt;p>정확히 말하면, ORM이 문제였다. 해당 백엔드 서버는 초기 개발을 외주업체에서 진행했는데, 듣자 하니 되게 시간이 촉박했다고 한다. 그래서 그런지 모든 데이터베이스 접근이 ORM으로만 되어 있었다.&lt;/p>
-&lt;p>그래서 서버 코드를 인수·인계받고 필자가 제일 먼저 했던 작업이 raw SQL도 사용할 수 있게끔 하는 것이었다.&lt;/p>
-&lt;p>이번 문제의 쿼리도 ORM으로 작성된 쿼리였다.&lt;/p>
-&lt;p>이제 한번 문제를 살펴보자&lt;/p>
+&lt;p>의외로 추가적인 소득도 있었다. 속도가 &lt;strong>1s에서 200ms 대로 줄었던 것이다.&lt;/strong> with절을 이용한 방식이 효과가 컸던 것 같다. 이번 문제를 해결하기 위해 처음으로 사용해본 것인데, 앞으로도 애용할 것 같다.&lt;/p></description></item><item><title>[PostgreSQL] Select 쿼리 속도를 개선해 보자</title><link>https://fhdufhdu.github.io/post/7/</link><pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/7/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
+&lt;p>SQL 쿼리를 조회하는데 15초가 걸려버리는 일이 발생했다. 이 문제를 보자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p>
+&lt;p>정확히 말하면, ORM이 문제였다. ORM으로 작성하다보니, 쿼리 최적화를 마음대로 할 수 없었고, 그래서 문제가 발생했던 것이다.&lt;/p>
+&lt;p>이제 한번 문제를 자세히 살펴보자&lt;/p>
 &lt;h2 id="원인">원인&lt;/h2>
-&lt;p>회사의 특정 쿼리의 결과가 아래와 같았다. 그리고 해당 쿼리에는 select에 서브쿼리가 작성되어 있다.&lt;/p>
+&lt;p>특정 쿼리의 결과가 아래와 같았다. 그리고 해당 쿼리에는 select에 서브쿼리가 작성되어 있다.&lt;/p>
 &lt;table>
 &lt;thead>
 &lt;tr>
@@ -584,13 +571,10 @@ data-flex-basis="598px"
 &lt;p>ORM 코드를 잘 살펴보니 특정 조건이 빠져있었다. 그래서 필요한 행 말고 모든 행에 대해 join을 걸면서 row의 갯수가 늘어났던 것이었다.&lt;/p>
 &lt;p>그 조건을 넣어서 테스트 해봤더니 row의 갯수도 잘 줄어들었고, 15s -&amp;gt; 1s로 속도가 빨라진 것을 확인했다.&lt;/p>
 &lt;h1 id="후기">후기&lt;/h1>
-&lt;blockquote>
-&lt;p>사실 코드와 테이블 구조를 보여주면서 설명하려고 했지만 회사의 코드여서 그렇게 하지 못했다.&lt;/p>
-&lt;/blockquote>
 &lt;p>생각보다 간단하게 수정되어서 조금은 허탈했다.&lt;/p>
 &lt;p>코드의 의도를 읽기 위해서 온갖 시도를 했었는데(실제 코드는 많이 복잡하다.) 의도를 파악하고, 문제를 파악하고 나니, 정말 어이없는 곳에서 문제가 있었던 케이스였던 것 같다.&lt;/p>
 &lt;p>이 트러블슈팅 경험으로 인해 ORM에 대한 단점이 더 눈에 들어오더라. ORM이 마냥 좋은 것만은 아니라는 건 체감하고 있었지만, 이번 경험으로 인해 그 생각이 확고히 굳어진 것 같다. SQL, 그리고 DBMS에 대한 이해 없이 ORM만 사용하게 된다면, 좋은 개발자가 될 수 없을 것이라고 생각한다.&lt;/p>
-&lt;p>앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다.&lt;/p></description></item><item><title>[Python] [실무] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
+&lt;p>앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다.&lt;/p></description></item><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
 &lt;p>​
 회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔 너무 챗봇이 느려요&amp;quot;였다.
 ​
@@ -602,17 +586,7 @@ data-flex-basis="598px"
 ​&lt;/p>
 &lt;h2 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h2>
 &lt;p>​
-우선 간략하게 현재 개발 환경을 말하자면 아래와 같다.
-​&lt;/p>
-&lt;ul>
-&lt;li>AWS Lambda(람다)&lt;/li>
-&lt;li>AWS Api Gateway&lt;/li>
-&lt;li>PostgreSQL&lt;/li>
-&lt;li>Python&lt;/li>
-&lt;li>웹 프레임워크 사용하지 않음
-​&lt;/li>
-&lt;/ul>
-&lt;p>챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
+챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
 ​
 예를 들어 body에 &lt;code>chatbotId&lt;/code>가 &lt;code>Foo&lt;/code>이면 &lt;code>FooFacade&lt;/code> 클래스를 import 해서 쓰거나, &lt;code>Bar&lt;/code>이면 &lt;code>BarFacade&lt;/code> 클래스를 import해서 쓰거나 하는 식으로 진행했다.
 ​
