@@ -575,18 +575,11 @@ data-flex-basis="598px"
 &lt;p>코드의 의도를 읽기 위해서 온갖 시도를 했었는데(실제 코드는 많이 복잡하다.) 의도를 파악하고, 문제를 파악하고 나니, 정말 어이없는 곳에서 문제가 있었던 케이스였던 것 같다.&lt;/p>
 &lt;p>이 트러블슈팅 경험으로 인해 ORM에 대한 단점이 더 눈에 들어오더라. ORM이 마냥 좋은 것만은 아니라는 건 체감하고 있었지만, 이번 경험으로 인해 그 생각이 확고히 굳어진 것 같다. SQL, 그리고 DBMS에 대한 이해 없이 ORM만 사용하게 된다면, 좋은 개발자가 될 수 없을 것이라고 생각한다.&lt;/p>
 &lt;p>앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다.&lt;/p></description></item><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
-&lt;p>​
-회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔 너무 챗봇이 느려요&amp;quot;였다.
-​
-챗봇 모델 쪽에서 응답이 늦는 경우는 자주 있었기에, 이번에도 그렇겠거니 하고 확인을 해보았다.
-​
-그런데, 로그에 찍힌 시간을 보니, 모델은 빠른 시간 내에 응답을 해주는 것을 확인했다. 거기서 문제가 있다는 것을 깨닫고, 문제점을 찾아가기 시작했다.
-​
-문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
+&lt;p>문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
 ​&lt;/p>
 &lt;h2 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h2>
 &lt;p>​
-챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
+해당 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
 ​
 예를 들어 body에 &lt;code>chatbotId&lt;/code>가 &lt;code>Foo&lt;/code>이면 &lt;code>FooFacade&lt;/code> 클래스를 import 해서 쓰거나, &lt;code>Bar&lt;/code>이면 &lt;code>BarFacade&lt;/code> 클래스를 import해서 쓰거나 하는 식으로 진행했다.
 ​
@@ -698,12 +691,10 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 ​
 그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)&lt;/p>
 &lt;p>​
-필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.
-(아쉽게도 회사의 코드는 공개할 수 없으므로 비슷하게도 공개할 수 없다..)
-​&lt;/p>
+필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.&lt;/p>
 &lt;h1 id="결과">결과&lt;/h1>
 &lt;p>​
-무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 동료 개발자와 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[JS] 이벤트 루프와 비동기 함수</title><link>https://fhdufhdu.github.io/post/5/</link><pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/5/</guid><description>&lt;p>오늘은 JS의 비동기에 관해 설명해 보고자 한다. JS에 대해 잘 모르고 비동기에 대한 개념이 희박하던 때, 단순히 콜백함수가 비동기 함수인 줄 알았다. 하지만 단순히 콜백함수를 만든다고 해서 비동기적으로 작동하는 것은 아니다. 특정 조건의 함수만 비동기 함수가 될 수 있다.&lt;/p>
+무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[JS] 이벤트 루프와 비동기 함수</title><link>https://fhdufhdu.github.io/post/5/</link><pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/5/</guid><description>&lt;p>오늘은 JS의 비동기에 관해 설명해 보고자 한다. JS에 대해 잘 모르고 비동기에 대한 개념이 희박하던 때, 단순히 콜백함수가 비동기 함수인 줄 알았다. 하지만 단순히 콜백함수를 만든다고 해서 비동기적으로 작동하는 것은 아니다. 특정 조건의 함수만 비동기 함수가 될 수 있다.&lt;/p>
 &lt;p>동기와 비동기 작업에 대해 알아보고 싶다면 해당&lt;a class="link" href="https://fhdufhdu.github.io/page/4" >게시글&lt;/a>을 참고하자.&lt;/p>
 &lt;p>조금 더 자세히 알아보자.&lt;/p>
 &lt;h1 id="콜백-함수는-동기이다">콜백 함수는 동기이다.&lt;/h1>

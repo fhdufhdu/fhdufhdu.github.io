@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>python on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/python/</link><description>Recent content in python on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Thu, 04 Jan 2024 23:10:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/python/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
-&lt;p>​
-회사에서 필자가 개발한, 멀티 챗봇 시스템에 VOC가 들어오게 되었다. 해당 내용은 &amp;ldquo;가끔 너무 챗봇이 느려요&amp;quot;였다.
-​
-챗봇 모델 쪽에서 응답이 늦는 경우는 자주 있었기에, 이번에도 그렇겠거니 하고 확인을 해보았다.
-​
-그런데, 로그에 찍힌 시간을 보니, 모델은 빠른 시간 내에 응답을 해주는 것을 확인했다. 거기서 문제가 있다는 것을 깨닫고, 문제점을 찾아가기 시작했다.
-​
-문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
+&lt;p>문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
 ​&lt;/p>
 &lt;h2 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h2>
 &lt;p>​
-챗봇 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
+해당 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
 ​
 예를 들어 body에 &lt;code>chatbotId&lt;/code>가 &lt;code>Foo&lt;/code>이면 &lt;code>FooFacade&lt;/code> 클래스를 import 해서 쓰거나, &lt;code>Bar&lt;/code>이면 &lt;code>BarFacade&lt;/code> 클래스를 import해서 쓰거나 하는 식으로 진행했다.
 ​
@@ -122,12 +115,10 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 ​
 그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)&lt;/p>
 &lt;p>​
-필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.
-(아쉽게도 회사의 코드는 공개할 수 없으므로 비슷하게도 공개할 수 없다..)
-​&lt;/p>
+필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.&lt;/p>
 &lt;h1 id="결과">결과&lt;/h1>
 &lt;p>​
-무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 동료 개발자와 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h1 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h1>
+무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h1 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h1>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> abc
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BaseClass&lt;/span>(metaclass&lt;span style="color:#f92672">=&lt;/span>abc&lt;span style="color:#f92672">.&lt;/span>ABCMeta):
