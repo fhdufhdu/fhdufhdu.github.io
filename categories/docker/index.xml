@@ -43,4 +43,28 @@ data-flex-basis="2097px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>af7ed92504ae: Mounted from library/elasticsearch
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1.0: digest: sha256:018de9cde96f6304cb8967a5747fe123244af76ef502fd7c5e446dd91b6aa765 size: &lt;span style="color:#ae81ff">2417&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위 명령어를 실행하면, 이미지를 Repository에 올릴 것이다.&lt;/p>
-&lt;p>이후 이미지를 받아와서 컨테이너에 올리는 작업은 기존 방식과 동일하게 진행하면 된다.&lt;/p></description></item></channel></rss>
+&lt;p>이후 이미지를 받아와서 컨테이너에 올리는 작업은 기존 방식과 동일하게 진행하면 된다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item></channel></rss>

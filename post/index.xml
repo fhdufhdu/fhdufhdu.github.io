@@ -1,4 +1,192 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on fhdufhdu</title><link>https://fhdufhdu.github.io/post/</link><description>Recent content in Posts on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 23 Jan 2024 09:33:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>[PostgreSQL] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h1 id="문제와-원인">문제와 원인&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on fhdufhdu</title><link>https://fhdufhdu.github.io/post/</link><description>Recent content in Posts on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 06 Feb 2024 21:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] WSGI 서버를 직접!! 만들어보자 1편</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h1 id="계기">계기&lt;/h1>
+&lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 제일 코딩하기 편한 파이썬을 이용해서 시작했다.&lt;/p>
+&lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
+>깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
+&lt;h1 id="osi-7계층">OSI 7계층&lt;/h1>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image.png"
+width="1462"
+height="1184"
+loading="lazy"
+alt="OSI 7계층과 TCP/IP 4계층"
+class="gallery-image"
+data-flex-grow="123"
+data-flex-basis="296px"
+>&lt;/p>
+&lt;p>우선 OSI 7계층에 대해 알아보자.&lt;/p>
+&lt;p>네트워크 통신 체계는 계층마다 특정 프로토콜로 이루어져 있고, 데이터 전달은 높은 계층에서 낮은 계층으로 각각의 프로토콜에 맞게 캡슐화(encapsulation)되고 데이터 수신은 낮은 계층에서 높은 계층으로 역캡슐화(decapsulation)된다.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-1.png"
+width="1464"
+height="1184"
+loading="lazy"
+alt="OSI 7계층에서 전송과 수신"
+class="gallery-image"
+data-flex-grow="123"
+data-flex-basis="296px"
+>&lt;/p>
+&lt;p>OSI 7계층에서의 L1, L2, L3, L4의 저수준 계층의 경우 하드웨어를 직접 조작하는 것이 아니면, 일반적으로 접근할 방법이 없다. 그래서 추상화가 중요해지는데 OS 단계에서 제공하는 추상화가 바로 소켓이다.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>여기서 말하는 추상화란?&lt;/strong> &lt;br> 추상화는 비슷하지만, 다른 두 가지의 타입을 하나로 여기고 작업을 할 수 있도록 하는 것을 말한다. 소켓은 모두 다른 L1, L2, L3, L4 하드웨어 드라이버를 신경 쓰지 않고 하나의 코드로 네트워크 작업을 할 수 있도록 도와준다. 만약 소켓이 없었다면, 개발자는 L1, L2, L3, L4 하드웨어 드라이버에 맞게 코드를 짜야 한다. 또한 그렇게 작성한 코드는 동일한 하드웨어 구조가 아니면 다른 기기에서 작동하지 않는다.&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="소켓">소켓&lt;/h1>
+&lt;p>소켓은 앞서 말한 것처럼, 추상화된 네트워크 접속 방법이다. 그렇다면 그 위치는 어디 있을까?&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-2.png"
+width="1462"
+height="1184"
+loading="lazy"
+alt="소켓 위치"
+class="gallery-image"
+data-flex-grow="123"
+data-flex-basis="296px"
+>&lt;/p>
+&lt;p>바로 전송 계층 위에 존재한다. 대부분의 유명한 프로토콜들은(HTTP, SMTP, FTP, DNS)등은 응용 계층 프로토콜이다. 소켓을 사용할 줄 알고, 프로토콜에 대한 명세를 알고 있다면, 대부분 비슷하게 따라 만들 수 있다.&lt;/p>
+&lt;p>그래서 필자도 직접 웹서버를 만들어 볼 생각을 할 수 있었다.&lt;/p>
+&lt;h1 id="http">HTTP&lt;/h1>
+&lt;p>그럼 HTTP는 실제로 어떻게 요청을 받고 어떻게 응답할까?&lt;/p>
+&lt;p>생각보다 간단하다.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>요청(Request)&lt;/p>
+&lt;ul>
+&lt;li>기본 구조
+&lt;pre tabindex="0">&lt;code>{method} {path} {version}
+{header_key_1}: {header_value_1}
+{header_key_2}: {header_value_2}
+{header_key_3}: {header_value_3}
+...
+{body}
+&lt;/code>&lt;/pre>&lt;/li>
+&lt;li>예시
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">GET&lt;/span> / &lt;span style="color:#66d9ef">HTTP&lt;/span>&lt;span style="color:#f92672">/&lt;/span>&lt;span style="color:#ae81ff">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">fhdufhdu.github.io&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">*/*&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;br>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">POST&lt;/span> / &lt;span style="color:#66d9ef">HTTP&lt;/span>&lt;span style="color:#f92672">/&lt;/span>&lt;span style="color:#ae81ff">1.1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Host&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">fhdufhdu.github.io&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">*/*&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">application/json&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#f92672">&amp;#34;test&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;테스트 데이터 입니다.&amp;#34;&lt;/span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>응답(Reponse)&lt;/p>
+&lt;ul>
+&lt;li>기본 구조
+&lt;pre tabindex="0">&lt;code>{version} {status}
+{header_key_1}: {header_value_1}
+{header_key_2}: {header_value_2}
+{header_key_3}: {header_value_3}
+...
+{body}
+&lt;/code>&lt;/pre>&lt;/li>
+&lt;li>예시
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-http" data-lang="http">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">HTTP&lt;/span>&lt;span style="color:#f92672">/&lt;/span>&lt;span style="color:#ae81ff">1.1&lt;/span> &lt;span style="color:#ae81ff">200&lt;/span> &lt;span style="color:#a6e22e">OK&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Date&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">Sat, 09 Oct 2010 14:28:02 GMT&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Server&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">Apache&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Last-Modified&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">Tue, 01 Dec 2009 20:18:22 GMT&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>ETag&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">&amp;#34;51142bc1-7449-479b075b2891b&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Accept-Ranges&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">bytes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Length&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">29769&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Content-Type&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">text/html&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">html&lt;/span>&amp;gt;...&amp;lt;/&lt;span style="color:#f92672">html&lt;/span>&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>위의 형태를 소켓에 주고 받기를 하면 된다.&lt;/p>
+&lt;h1 id="wsgi">WSGI&lt;/h1>
+&lt;p>파이썬에는 WSGI라는 것이 있다. Web Server Gateway Interface 라는 것의 약자로, 웹 서버와 웹 어플리케이션 사이의 요청/응답 방법을 정의해놓은 것이다.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-3.png"
+width="1542"
+height="864"
+loading="lazy"
+alt="구조도"
+class="gallery-image"
+data-flex-grow="178"
+data-flex-basis="428px"
+>&lt;/p>
+&lt;p>WSGI는 WSGI Server와 WSGI Application으로 구성된다.&lt;/p>
+&lt;ul>
+&lt;li>WSGI Server
+&lt;ul>
+&lt;li>소켓을 이용해서 TCP 통신을 하는 곳&lt;/li>
+&lt;li>받은 데이터에서 &lt;code>path&lt;/code>, &lt;code>method&lt;/code>, &lt;code>query&lt;/code>, &lt;code>body&lt;/code>, &lt;code>header&lt;/code> 등 HTTP Request 데이터 역캡슐화&lt;/li>
+&lt;li>WSGI Application에서 받은 응답 데이터를 HTTP Response 명세에 맞게 캡슐화&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>WSGI Application
+&lt;ul>
+&lt;li>WSGI Server에게 받은 데이터로 처리 후 응답&lt;/li>
+&lt;li>대표적인 WSGI Application에는 &lt;code>Django&lt;/code>가 있음&lt;/li>
+&lt;li>&lt;code>Django&lt;/code>가 하는 일이 WSGI Application의 역할임&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="wsgi-application-구현">WSGI Application 구현&lt;/h2>
+&lt;p>WSGI Application은 WSGI Server가 전달한 데이터를 받고 처리를 거친 후 데이터를 반환할 것이다.&lt;/p>
+&lt;p>그렇게하기 위해서는 WSGI Server(이하 server)와 WSGI Application(이하 app) 간에 약속된 호출 방식과 데이터 구조가 있어야한다.&lt;/p>
+&lt;p>app은 &lt;em>Callable Object&lt;/em> 이어야한다. server는 이 app에게 두 가지 정보를 전달해준다.&lt;/p>
+&lt;ol>
+&lt;li>envrion
+&lt;ul>
+&lt;li>method, path, query, version, host, body 등의 정보를 담은 &lt;code>Dict 객체&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>start_response
+&lt;ul>
+&lt;li>status, headers를 파라미터로 가지는 &lt;code>Callback 함수&lt;/code>&lt;/li>
+&lt;li>app에서 이 함수를 호출해서 server에게 status와 header를 전달함&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>그리고 이 app은 &lt;code>Iterator[bytes]&lt;/code>를 반환해야한다. 다르게 말하면, &lt;code>for x in app(environ, start_response)&lt;/code> 가 구동되어야 한다는 의미이다.&lt;/p>
+&lt;p>그럼 간단한 app 구현체를 보자. 파이썬의 빌트인 라이브러리에서 간단한 app을 제공해준다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># from wsgiref.simple_server import demo_app&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">demo_app&lt;/span>(environ, start_response):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> start_response(&lt;span style="color:#e6db74">&amp;#34;200 OK&amp;#34;&lt;/span>, [(&lt;span style="color:#e6db74">&amp;#39;Content-Type&amp;#39;&lt;/span>,&lt;span style="color:#e6db74">&amp;#39;text/plain; charset=utf-8&amp;#39;&lt;/span>)])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> [&lt;span style="color:#e6db74">&amp;#34;Hello World!!&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)]
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 app은 함수로 구성되어 있다. 파이썬에서는 함수도 Callable Object이기 때문에 유효한 구현이다.&lt;/p>
+&lt;p>그리고 start_response를 통해 status와 header를 서버에게 전달해준다. return 또한 list로 반환하기 때문에 &lt;code>for x in demo_app(environ, start_response)&lt;/code>가 구동 가능하므로 WSGI를 충족한다.&lt;/p>
+&lt;p>이제 함수로 구성된 app을 클래스로 변경해보자&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">DemoApp&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self, environ, start_response):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>environ &lt;span style="color:#f92672">=&lt;/span> environ
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>start_response &lt;span style="color:#f92672">=&lt;/span> start_response
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __iter__(self):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>start_response(&lt;span style="color:#e6db74">&amp;#34;200 OK&amp;#34;&lt;/span>, [(&lt;span style="color:#e6db74">&amp;#39;Content-Type&amp;#39;&lt;/span>,&lt;span style="color:#e6db74">&amp;#39;text/plain; charset=utf-8&amp;#39;&lt;/span>)])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">yield&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Hello World!!&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>조금은 복잡해졌다. 이 코드를 이해하려면 &lt;code>__iter__&lt;/code>, &lt;code>__next__&lt;/code>, &lt;code>generator&lt;/code>를 이해해야 한다. 이 게시글에서는 설명하지 않도록 하겠다.&lt;/p>
+&lt;p>&lt;code>__iter__&lt;/code>함수가 generator이므로 &lt;code>for x in DemoApp(environ, start_response)&lt;/code>가 구동 가능하다. 그러므로 WSGI를 충족한다.&lt;/p>
+&lt;h1 id="2편에서-계속">2편에서 계속!&lt;/h1>
+&lt;p>app 구현까지 알아보았으니, 2편에서는 server 구현에 대해 알아보겠다. 사실 server 구현이 핵심이라고 할 수 있다. 처음부터 동시성을 충족하는 서버를 직접 구현해보는 것이 목표였기 때문이다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[PostgreSQL] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h1 id="문제와-원인">문제와 원인&lt;/h1>
 &lt;p>갑자기 에러가 엄청나게 발생하면서 DB CPU 점유율이 100%까지 올랐던 경험이 있다. 해당 서버는 에러 로그를 데이터베이스에 저장하는데, 에러가 많이 발생했으니 그것을 저장한다고 DB CPU 점유율이 높아진 듯 보였다.&lt;/p>
 &lt;p>현재 DB는 AWS의 RDS를 사용한다. RDS의 경우 &lt;strong>&amp;ldquo;성능 개선 도우미&amp;rdquo;&lt;/strong> 라는 도구가 있는데, 이 도구를 통해 확인해 본 결과 예상과는 전혀 달랐다.&lt;/p>
 &lt;p>특정 쿼리를 실행하는 곳에서 2.5초가 걸리고 있었다. 이 쿼리는 매우 자주 호출되는 것이기 때문에, 이 속도가 지연된다면, 지연된 시간에 동시에 다른 쿼리가 많이 실행되고 있을 것이고, 그래서 CPU 점유율이 올라간 것이었다.&lt;/p>
@@ -204,7 +392,31 @@
 &lt;/ol>
 &lt;/li>
 &lt;li>최상위 &lt;code>this&lt;/code>는 &lt;code>window&lt;/code> 이다.(node.js에서는 global)&lt;/li>
-&lt;/ul></description></item><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h1 id="이전-버전의-문제">이전 버전의 문제&lt;/h1>
+&lt;/ul>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h1 id="이전-버전의-문제">이전 버전의 문제&lt;/h1>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/10" >저번 게시글&lt;/a>에서 무한 스크롤을 구현했지만, 하나의 html에 모든 데이터를 가지고 있는 구조였다. 해당 구조는 게시글이 1,000개 혹은 10,000개가 된다면, 메인 페이지를 불러오는데, 많은 네트워크 자원을 소비하게 될 것이다. 실제로 게시글 200개 정도로 테스트해 보니, 요청에 600kb를 사용하는 것을 확인했다.&lt;/p>
 &lt;h1 id="방법을-찾자">방법을 찾자&lt;/h1>
 &lt;p>처음 발상은 이랬다.&lt;/p>
@@ -323,7 +535,31 @@ data-flex-basis="263px"
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="후기">후기&lt;/h1>
 &lt;p>이전 게시글에서 무한 스크롤을 구현하고나서 많이 뿌듯했지만, 한편으로는 가슴속에 남아있는 불편함이 있었다. 보기에는 무한 스크롤이지만, 실제로는 무한 스크롤이라고 부르기는 좀 좋지 않은 구조였기 때문이다. 실제로 게시글 수가 많아질수록 쓸데없이 네트워크 자원을 소비한다는 문제가 있는 구조이다.&lt;/p>
 &lt;p>어쨌든, 좀 더 나은 코드를 작성하는 것이 바로 개발자의 역할이 아니겠는가? 이 불편한 감정을 해결하기 위해 고민을 오래 했던 것 같다. 샤워하다가도 생각나고, 밥먹다가도 생각나고, 출근하다가도 생각이 났다.&lt;/p>
-&lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
+&lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
 &lt;p>해당 방법보다 더 좋은 아이디어로 개발했습니다.
 &lt;a class="link" href="https://fhdufhdu.github.io/post/11" >해당 게시글&lt;/a> 참고 해주세요!&lt;/p>
 &lt;h1 id="발단">발단&lt;/h1>
@@ -415,7 +651,31 @@ data-flex-basis="2206px"
 &lt;p>쉬울듯 하면서도 생각보다 너무 어려웠다. &lt;code>hugo 템플릿은 브라우저에서 동적으로 작동하지 않는다.&lt;/code> 라는 것을 모르는 상태에서 js와 결합하려고 하니 그랬던 것 같다. 그래도 &lt;code>IntersectionObserver&lt;/code>를 알게되고, &lt;code>hugo 템플릿의 작동 방식&lt;/code>을 알게된 좋은 기회였다.&lt;/p>
 &lt;p>하지만 조금은 아쉬운 방식이다. 저 방식은 한 html에 모든 데이터를 가지고 있고 보여주는 것만 잘라서 보여주는 것이니까, 본질적으로 한번에 모든 데이터를 보여주는 것과 똑같다고 느껴진다.
 조금 더 hugo의 정보를 찾아봐서 다른 방식을 찾아봐야 겠다.&lt;/p>
-&lt;p>오랜만에 하나하나 내가 원하는 것을 만들어가는 재미를 느낀 것 같다. 앞으로도 더 많이 꾸며봐야지.&lt;/p></description></item><item><title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title><link>https://fhdufhdu.github.io/post/9/</link><pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/9/</guid><description>&lt;h1 id="with-절이란">With 절이란?&lt;/h1>
+&lt;p>오랜만에 하나하나 내가 원하는 것을 만들어가는 재미를 느낀 것 같다. 앞으로도 더 많이 꾸며봐야지.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title><link>https://fhdufhdu.github.io/post/9/</link><pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/9/</guid><description>&lt;h1 id="with-절이란">With 절이란?&lt;/h1>
 &lt;p>복잡한 쿼리를 작성하다 보면, 비슷한 쿼리를 여러 번 사용해야 할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한 번만 실행하고 싶을 때가 있을 것이다.&lt;/p>
 &lt;p>이럴 때 필요한 것이 &lt;code>with&lt;/code> 절이다. with 절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code>CTE(common table expression)&lt;/code>라고 한다.&lt;/p>
 &lt;h1 id="사용법">사용법&lt;/h1>
@@ -516,7 +776,31 @@ data-flex-basis="598px"
 &lt;p>대상 게시글과 댓글 정보를 이용해 join을 맺는다. 이를 통해 &lt;code>게시글-댓글리스트&lt;/code>를 json으로 만들고 전달할 수 있게 된다.&lt;/p>
 &lt;h1 id="후기">후기&lt;/h1>
 &lt;p>해당 쿼리를 게시글 리스트 조회 API와 게시글 상세 조회 API 모두에 사용했다. 같은 쿼리를 사용함으로써 두 API의 데이터를 일관적으로 전달할 수 있었다. 또한 앞서 언급한 jsonb를 이용해서 response dto도 그대로 유지할 수 있었다.&lt;/p>
-&lt;p>의외로 추가적인 소득도 있었다. 속도가 &lt;strong>1s에서 200ms 대로 줄었던 것이다.&lt;/strong> with절을 이용한 방식이 효과가 컸던 것 같다. 이번 문제를 해결하기 위해 처음으로 사용해본 것인데, 앞으로도 애용할 것 같다.&lt;/p></description></item><item><title>[PostgreSQL] Select 쿼리 속도를 개선해 보자</title><link>https://fhdufhdu.github.io/post/7/</link><pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/7/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
+&lt;p>의외로 추가적인 소득도 있었다. 속도가 &lt;strong>1s에서 200ms 대로 줄었던 것이다.&lt;/strong> with절을 이용한 방식이 효과가 컸던 것 같다. 이번 문제를 해결하기 위해 처음으로 사용해본 것인데, 앞으로도 애용할 것 같다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[PostgreSQL] Select 쿼리 속도를 개선해 보자</title><link>https://fhdufhdu.github.io/post/7/</link><pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/7/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
 &lt;p>SQL 쿼리를 조회하는데 15초가 걸려버리는 일이 발생했다. 이 문제를 보자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p>
 &lt;p>정확히 말하면, ORM이 문제였다. ORM으로 작성하다보니, 쿼리 최적화를 마음대로 할 수 없었고, 그래서 문제가 발생했던 것이다.&lt;/p>
 &lt;p>이제 한번 문제를 자세히 살펴보자&lt;/p>
@@ -883,7 +1167,31 @@ data-flex-basis="426px"
 &lt;li>&lt;code>일정 주기(틱)&lt;/code>마다 콜백 함수 큐를 검사하고, 콜백 함수가 존재하면 콜 스택에 해당 함수를 삽입한다.&lt;/li>
 &lt;/ul>
 &lt;/li>
-&lt;/ul></description></item><item><title>[CS] 동기/비동기에 대해서 알아보자(sync/async)</title><link>https://fhdufhdu.github.io/post/4/</link><pubDate>Tue, 02 Jan 2024 22:15:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/4/</guid><description>&lt;p>오늘은 동기와 비동기에 대해서 설명하고자 한다.&lt;/p>
+&lt;/ul>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[CS] 동기/비동기에 대해서 알아보자(sync/async)</title><link>https://fhdufhdu.github.io/post/4/</link><pubDate>Tue, 02 Jan 2024 22:15:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/4/</guid><description>&lt;p>오늘은 동기와 비동기에 대해서 설명하고자 한다.&lt;/p>
 &lt;p>해당 개념은 설명만 들으면 쉽게 이해가 될 수도 있지만, 헷갈릴 여지도 많은 개념이라고 생각한다.&lt;/p>
 &lt;p>특히 스레드 개념과 엮이기 시작하면 많이 헷갈리기 시작하는 개념이다.&lt;/p>
 &lt;h1 id="동기sync">동기(Sync)&lt;/h1>
@@ -980,7 +1288,31 @@ data-flex-basis="623px"
 &lt;h1 id="마무리">마무리&lt;/h1>
 &lt;p>간단하게 비동기와 콜백에 대해 알아보았다.&lt;/p>
 &lt;p>이렇게 보면 비동기 자체는 크게 어렵지 않은 것 같다. 하지만 필자도 이 개념을 오해 없이 이해하기에 많은 시간이 들었다.&lt;/p>
-&lt;p>여러분들도 오해없이 비동기를 이해할 수 있게 되었으면 좋겠다.&lt;/p></description></item><item><title>[Docker] 컨테이너를 Docker Hub에 올리기</title><link>https://fhdufhdu.github.io/post/3/</link><pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/3/</guid><description>&lt;p>Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p>
+&lt;p>여러분들도 오해없이 비동기를 이해할 수 있게 되었으면 좋겠다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Docker] 컨테이너를 Docker Hub에 올리기</title><link>https://fhdufhdu.github.io/post/3/</link><pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/3/</guid><description>&lt;p>Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p>
 &lt;h1 id="docker-hub-로그인하기">Docker Hub 로그인하기&lt;/h1>
 &lt;p>&lt;a class="link" href="https://hub.docker.com/" target="_blank" rel="noopener"
 >Docker Hub&lt;/a>에 들어가서 로그인을 먼저 한다. 회원가입을 진행하지 않았다면 회원가입을 먼저 하자.&lt;/p>
@@ -1025,7 +1357,31 @@ data-flex-basis="2097px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>af7ed92504ae: Mounted from library/elasticsearch
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1.0: digest: sha256:018de9cde96f6304cb8967a5747fe123244af76ef502fd7c5e446dd91b6aa765 size: &lt;span style="color:#ae81ff">2417&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위 명령어를 실행하면, 이미지를 Repository에 올릴 것이다.&lt;/p>
-&lt;p>이후 이미지를 받아와서 컨테이너에 올리는 작업은 기존 방식과 동일하게 진행하면 된다.&lt;/p></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h1 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h1>
+&lt;p>이후 이미지를 받아와서 컨테이너에 올리는 작업은 기존 방식과 동일하게 진행하면 된다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h1 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h1>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> abc
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BaseClass&lt;/span>(metaclass&lt;span style="color:#f92672">=&lt;/span>abc&lt;span style="color:#f92672">.&lt;/span>ABCMeta):

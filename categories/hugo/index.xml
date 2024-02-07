@@ -117,7 +117,31 @@ data-flex-basis="263px"
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="후기">후기&lt;/h1>
 &lt;p>이전 게시글에서 무한 스크롤을 구현하고나서 많이 뿌듯했지만, 한편으로는 가슴속에 남아있는 불편함이 있었다. 보기에는 무한 스크롤이지만, 실제로는 무한 스크롤이라고 부르기는 좀 좋지 않은 구조였기 때문이다. 실제로 게시글 수가 많아질수록 쓸데없이 네트워크 자원을 소비한다는 문제가 있는 구조이다.&lt;/p>
 &lt;p>어쨌든, 좀 더 나은 코드를 작성하는 것이 바로 개발자의 역할이 아니겠는가? 이 불편한 감정을 해결하기 위해 고민을 오래 했던 것 같다. 샤워하다가도 생각나고, 밥먹다가도 생각나고, 출근하다가도 생각이 났다.&lt;/p>
-&lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
+&lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
 &lt;p>해당 방법보다 더 좋은 아이디어로 개발했습니다.
 &lt;a class="link" href="https://fhdufhdu.github.io/post/11" >해당 게시글&lt;/a> 참고 해주세요!&lt;/p>
 &lt;h1 id="발단">발단&lt;/h1>
@@ -209,4 +233,28 @@ data-flex-basis="2206px"
 &lt;p>쉬울듯 하면서도 생각보다 너무 어려웠다. &lt;code>hugo 템플릿은 브라우저에서 동적으로 작동하지 않는다.&lt;/code> 라는 것을 모르는 상태에서 js와 결합하려고 하니 그랬던 것 같다. 그래도 &lt;code>IntersectionObserver&lt;/code>를 알게되고, &lt;code>hugo 템플릿의 작동 방식&lt;/code>을 알게된 좋은 기회였다.&lt;/p>
 &lt;p>하지만 조금은 아쉬운 방식이다. 저 방식은 한 html에 모든 데이터를 가지고 있고 보여주는 것만 잘라서 보여주는 것이니까, 본질적으로 한번에 모든 데이터를 보여주는 것과 똑같다고 느껴진다.
 조금 더 hugo의 정보를 찾아봐서 다른 방식을 찾아봐야 겠다.&lt;/p>
-&lt;p>오랜만에 하나하나 내가 원하는 것을 만들어가는 재미를 느낀 것 같다. 앞으로도 더 많이 꾸며봐야지.&lt;/p></description></item></channel></rss>
+&lt;p>오랜만에 하나하나 내가 원하는 것을 만들어가는 재미를 느낀 것 같다. 앞으로도 더 많이 꾸며봐야지.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item></channel></rss>
