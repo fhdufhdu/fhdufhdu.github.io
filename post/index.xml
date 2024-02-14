@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on fhdufhdu</title><link>https://fhdufhdu.github.io/post/</link><description>Recent content in Posts on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 06 Feb 2024 21:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] WSGI 서버를 직접!! 만들어보자 1편</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h1 id="계기">계기&lt;/h1>
-&lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 제일 코딩하기 편한 파이썬을 이용해서 시작했다.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on fhdufhdu</title><link>https://fhdufhdu.github.io/post/</link><description>Recent content in Posts on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 06 Feb 2024 21:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] WSGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h1 id="계기">계기&lt;/h1>
+&lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 제일 코딩하기 편한 파이썬을 이용해서 시작했다.
+// gil을 언급하면서 어떻게 멀티 프로세싱으로 동시성이 가능한지&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
 &lt;h1 id="osi-7계층">OSI 7계층&lt;/h1>
@@ -127,7 +128,13 @@ data-flex-basis="428px"
 &lt;h2 id="wsgi-application-구현">WSGI Application 구현&lt;/h2>
 &lt;p>WSGI Application은 WSGI Server가 전달한 데이터를 받고 처리를 거친 후 데이터를 반환할 것이다.&lt;/p>
 &lt;p>그렇게하기 위해서는 WSGI Server(이하 server)와 WSGI Application(이하 app) 간에 약속된 호출 방식과 데이터 구조가 있어야한다.&lt;/p>
-&lt;p>app은 &lt;em>Callable Object&lt;/em> 이어야한다. server는 이 app에게 두 가지 정보를 전달해준다.&lt;/p>
+&lt;ul>
+&lt;li>app은 &lt;em>Callable Object&lt;/em> 이어야한다
+&lt;ul>
+&lt;li>&lt;code>app(environ, start_response)&lt;/code> 형태로 실행 가능 해야 한다&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>server는 app에게 두 가지 정보를 전달해주어야 한다.
 &lt;ol>
 &lt;li>envrion
 &lt;ul>
@@ -137,11 +144,19 @@ data-flex-basis="428px"
 &lt;li>start_response
 &lt;ul>
 &lt;li>status, headers를 파라미터로 가지는 &lt;code>Callback 함수&lt;/code>&lt;/li>
-&lt;li>app에서 이 함수를 호출해서 server에게 status와 header를 전달함&lt;/li>
+&lt;li>app에서 이 함수를 호출해서 server에게 status와 header를 전달해야한다.&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;/ol>
-&lt;p>그리고 이 app은 &lt;code>Iterator[bytes]&lt;/code>를 반환해야한다. 다르게 말하면, &lt;code>for x in app(environ, start_response)&lt;/code> 가 구동되어야 한다는 의미이다.&lt;/p>
+&lt;/li>
+&lt;li>app은 &lt;code>Iterator[bytes]&lt;/code>를 반환해야한다.
+&lt;ul>
+&lt;li>이 데이터는 HTTP body에 들어갈 데이터이다.&lt;/li>
+&lt;li>이터레이터를 반환해야 한다는 말은, &lt;br>
+&lt;code>for x in app(environ, start_response)&lt;/code>가 작동해야 한다는 의미이다.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
 &lt;p>그럼 간단한 app 구현체를 보자. 파이썬의 빌트인 라이브러리에서 간단한 app을 제공해준다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># from wsgiref.simple_server import demo_app&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -161,8 +176,413 @@ data-flex-basis="428px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">yield&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Hello World!!&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>조금은 복잡해졌다. 이 코드를 이해하려면 &lt;code>__iter__&lt;/code>, &lt;code>__next__&lt;/code>, &lt;code>generator&lt;/code>를 이해해야 한다. 이 게시글에서는 설명하지 않도록 하겠다.&lt;/p>
 &lt;p>&lt;code>__iter__&lt;/code>함수가 generator이므로 &lt;code>for x in DemoApp(environ, start_response)&lt;/code>가 구동 가능하다. 그러므로 WSGI를 충족한다.&lt;/p>
-&lt;h1 id="2편에서-계속">2편에서 계속!&lt;/h1>
-&lt;p>app 구현까지 알아보았으니, 2편에서는 server 구현에 대해 알아보겠다. 사실 server 구현이 핵심이라고 할 수 있다. 처음부터 동시성을 충족하는 서버를 직접 구현해보는 것이 목표였기 때문이다.&lt;/p>
+&lt;h1 id="wsgi-server-구현">WSGI Server 구현&lt;/h1>
+&lt;p>app이 어떻게 구성되는지 알아보았다. 이제 핵심은 server를 구현해보고자 한다. 앞서 간단한 app을 만들어 보았지만, app 부분은 이번 구현 목적에서 크게 중요한 것이 아니기 때문에 Django로 대체하고자 한다.&lt;/p>
+&lt;h2 id="소켓으로-http-서버-만들기">소켓으로 HTTP 서버 만들기&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> socket
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># TCP로 소켓 연결&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">with&lt;/span> socket&lt;span style="color:#f92672">.&lt;/span>socket(socket&lt;span style="color:#f92672">.&lt;/span>AF_INET, socket&lt;span style="color:#f92672">.&lt;/span>SOCK_STREAM) &lt;span style="color:#66d9ef">as&lt;/span> ss:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓이 사용하던 포트가 종료되면, 기본적으로 해당 포트를 일정시간 동안 사용을 막음. 그 설정을 풀어주는 코드&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss&lt;span style="color:#f92672">.&lt;/span>setsockopt(socket&lt;span style="color:#f92672">.&lt;/span>SOL_SOCKET, socket&lt;span style="color:#f92672">.&lt;/span>SO_REUSEADDR, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 포트에서 사용할 host와 port&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss&lt;span style="color:#f92672">.&lt;/span>bind((&lt;span style="color:#e6db74">&amp;#39;localhost&amp;#39;&lt;/span>, &lt;span style="color:#ae81ff">1026&lt;/span>))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 포트를 실제로 점유하고, accept 요청을 얼마나 저장할 지 설정(=100)&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss&lt;span style="color:#f92672">.&lt;/span>listen(&lt;span style="color:#ae81ff">100&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#66d9ef">True&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 클라이언트 접속&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cc, address &lt;span style="color:#f92672">=&lt;/span> ss&lt;span style="color:#f92672">.&lt;/span>accept()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 클라이언트로부터 데이터 수신&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> recv_data &lt;span style="color:#f92672">=&lt;/span> cc&lt;span style="color:#f92672">.&lt;/span>recv(&lt;span style="color:#ae81ff">1048576&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># http request 양식대로 분류 작업&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> recv_data &lt;span style="color:#f92672">=&lt;/span> recv_data&lt;span style="color:#f92672">.&lt;/span>replace(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> splited_recv_data &lt;span style="color:#f92672">=&lt;/span> recv_data&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#ae81ff">\n\n&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> len(splited_recv_data) &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> http_info, body &lt;span style="color:#f92672">=&lt;/span> splited_recv_data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> http_info &lt;span style="color:#f92672">=&lt;/span> recv_data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> body &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 분류 작업 끝&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 받은 데이터 출력&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;[http 정보]&amp;#34;&lt;/span>, http_info&lt;span style="color:#f92672">.&lt;/span>decode(&lt;span style="color:#e6db74">&amp;#39;utf-8&amp;#39;&lt;/span>))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;body 정보&amp;#34;&lt;/span>, body)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 클라이언트에게 데이터 발신&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cc&lt;span style="color:#f92672">.&lt;/span>sendall(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#39;HTTP/1.1 200 OK&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">Date: Sat, 09 Oct 2010 14:28:02 GMT&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">Server: Apache&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">Last-Modified: Tue, 01 Dec 2009 20:18:22 GMT&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">ETag: &amp;#34;51142bc1-7449-479b075b2891b&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">Accept-Ranges: bytes&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">Content-Length: 29769&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">Content-Type: text/html&lt;/span>&lt;span style="color:#ae81ff">\n\n&lt;/span>&lt;span style="color:#e6db74">&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;Hello World!!&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> cc&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 코드를 실행시키고 &lt;code>localhost:1026&lt;/code>으로 접속하면 아래와 같이 접속이 잘 되는 것을 확인 할 수 있다.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-4.png"
+width="656"
+height="242"
+loading="lazy"
+alt="소켓 서버 HTTP로 접속 성공"
+class="gallery-image"
+data-flex-grow="271"
+data-flex-basis="650px"
+>&lt;/p>
+&lt;p>또한 서버 내 로그도 아래와 같이 잘 작동하는 모습을 보여준다.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-5.png"
+width="2020"
+height="632"
+loading="lazy"
+alt="소켓 서버 로그"
+class="gallery-image"
+data-flex-grow="319"
+data-flex-basis="767px"
+>&lt;/p>
+&lt;h2 id="소켓-서버를-wsgi로-변경하기">소켓 서버를 WSGI로 변경하기&lt;/h2>
+&lt;p>자 이제 소켓으로 HTTP 서버를 열어보았다. 이제 WSGI에 충족하도록 WSGI Server를 제작해보자.&lt;/p>
+&lt;p>전체코드는 아래와 같다. 코드는 계속해서 업데이트 될 예정이므로, &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
+>깃허브 링크&lt;/a>도 참고하자!&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> importlib
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> io
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> multiprocessing
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> re
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> signal
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> socket
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">from&lt;/span> multiprocessing &lt;span style="color:#f92672">import&lt;/span> Process
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">MyGunicornHandler&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self, ss: socket&lt;span style="color:#f92672">.&lt;/span>socket, app_path: str):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss &lt;span style="color:#f92672">=&lt;/span> ss
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>app_path &lt;span style="color:#f92672">=&lt;/span> app_path
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#e6db74">&amp;#34;status&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">200&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;headers&amp;#34;&lt;/span>: []}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span>(self):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> c_proc &lt;span style="color:#f92672">=&lt;/span> multiprocessing&lt;span style="color:#f92672">.&lt;/span>current_process()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> _from, _import &lt;span style="color:#f92672">=&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>app_path&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">&amp;#34;:&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> module &lt;span style="color:#f92672">=&lt;/span> importlib&lt;span style="color:#f92672">.&lt;/span>import_module(_from)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> app &lt;span style="color:#f92672">=&lt;/span> getattr(module, _import)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">while&lt;/span> &lt;span style="color:#66d9ef">True&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;START: &amp;#34;&lt;/span>, c_proc&lt;span style="color:#f92672">.&lt;/span>name, &lt;span style="color:#e6db74">&amp;#34; || &amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;PID: &amp;#34;&lt;/span>, c_proc&lt;span style="color:#f92672">.&lt;/span>pid)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn, address &lt;span style="color:#f92672">=&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>accept()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> raw_data &lt;span style="color:#f92672">=&lt;/span> conn&lt;span style="color:#f92672">.&lt;/span>recv(&lt;span style="color:#ae81ff">1048576&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#f92672">not&lt;/span> raw_data:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> raw_data &lt;span style="color:#f92672">=&lt;/span> raw_data&lt;span style="color:#f92672">.&lt;/span>replace(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> splited_raw_data &lt;span style="color:#f92672">=&lt;/span> raw_data&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> len(splited_raw_data) &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> b_headers, b_body &lt;span style="color:#f92672">=&lt;/span> splited_raw_data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> b_headers, b_body &lt;span style="color:#f92672">=&lt;/span> (raw_data, &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> headers &lt;span style="color:#f92672">=&lt;/span> b_headers&lt;span style="color:#f92672">.&lt;/span>decode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> headers &lt;span style="color:#f92672">=&lt;/span> headers&lt;span style="color:#f92672">.&lt;/span>rsplit(&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> method, path, version_of_protocol &lt;span style="color:#f92672">=&lt;/span> headers[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">&amp;#34; &amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#e6db74">&amp;#34;?&amp;#34;&lt;/span> &lt;span style="color:#f92672">in&lt;/span> path:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path, query &lt;span style="color:#f92672">=&lt;/span> path&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">&amp;#34;?&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path, query &lt;span style="color:#f92672">=&lt;/span> path, &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;REQUEST_METHOD&amp;#34;&lt;/span>: method,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;SERVER_PROTOCOL&amp;#34;&lt;/span>: version_of_protocol,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;SERVER_SOFTWARE&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;WOOSEONG_WSGI&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;PATH_INFO&amp;#34;&lt;/span>: path,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;QUERY_STRING&amp;#34;&lt;/span>: query,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;REMOTE_HOST&amp;#34;&lt;/span>: address[&lt;span style="color:#ae81ff">0&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;REMOTE_ADDR&amp;#34;&lt;/span>: address[&lt;span style="color:#ae81ff">0&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;wsgi.input&amp;#34;&lt;/span>: io&lt;span style="color:#f92672">.&lt;/span>BytesIO(b_body),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;wsgi.url_scheme&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;http&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;wsgi.version&amp;#34;&lt;/span>: (&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> idx, header &lt;span style="color:#f92672">in&lt;/span> enumerate(headers):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> idx &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> key, value &lt;span style="color:#f92672">=&lt;/span> re&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">r&lt;/span>&lt;span style="color:#e6db74">&amp;#34;\s*:\s*&amp;#34;&lt;/span>, header, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> key &lt;span style="color:#f92672">=&lt;/span> key&lt;span style="color:#f92672">.&lt;/span>replace(&lt;span style="color:#e6db74">&amp;#34;-&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;_&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>upper()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> value &lt;span style="color:#f92672">=&lt;/span> value&lt;span style="color:#f92672">.&lt;/span>strip()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> make_key &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">lambda&lt;/span> x: &lt;span style="color:#e6db74">&amp;#34;HTTP_&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> x
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> key &lt;span style="color:#f92672">in&lt;/span> (&lt;span style="color:#e6db74">&amp;#34;CONTENT_TYPE&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;CONTENT_LENGTH&amp;#34;&lt;/span>):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ[key] &lt;span style="color:#f92672">=&lt;/span> value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">elif&lt;/span> make_key(key) &lt;span style="color:#f92672">in&lt;/span> environ:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ[make_key(key)] &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;,&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ[make_key(key)] &lt;span style="color:#f92672">=&lt;/span> value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">start_response&lt;/span>(status, headers):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#34;status&amp;#34;&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> status
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#34;headers&amp;#34;&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> headers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_body &lt;span style="color:#f92672">=&lt;/span> app(environ, start_response)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 응답 첫번째 라인 구성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_first &lt;span style="color:#f92672">=&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#e6db74">{&lt;/span>version_of_protocol&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74"> &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#39;status&amp;#39;&lt;/span>]&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 응답 헤더부분 구성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_headers &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>join(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> list(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">lambda&lt;/span> x: &lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#e6db74">{&lt;/span>x[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">: &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>]&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#34;headers&amp;#34;&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 응답 첫번째 라인 + 헤더 부분&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">=&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_first
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">+&lt;/span> (&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> response_headers &lt;span style="color:#66d9ef">else&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">+&lt;/span> response_headers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># byte로 인코딩&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">=&lt;/span> response&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># response_body 붙이기&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> b &lt;span style="color:#f92672">in&lt;/span> response_body:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">+=&lt;/span> b
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>send(response)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;END: &amp;#34;&lt;/span>, c_proc&lt;span style="color:#f92672">.&lt;/span>name, &lt;span style="color:#e6db74">&amp;#34; || &amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;PID: &amp;#34;&lt;/span>, c_proc&lt;span style="color:#f92672">.&lt;/span>pid)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">except&lt;/span> &lt;span style="color:#a6e22e">KeyboardInterrupt&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">MyGunicorn&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓 생성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss &lt;span style="color:#f92672">=&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>__init_socket__()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 프로세스 리스트&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ps &lt;span style="color:#f92672">=&lt;/span> []
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># graceful shutdown 추가&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> signal&lt;span style="color:#f92672">.&lt;/span>signal(signal&lt;span style="color:#f92672">.&lt;/span>SIGINT, self&lt;span style="color:#f92672">.&lt;/span>close)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> signal&lt;span style="color:#f92672">.&lt;/span>signal(signal&lt;span style="color:#f92672">.&lt;/span>SIGTERM, self&lt;span style="color:#f92672">.&lt;/span>close)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓 생성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">__init_socket__&lt;/span>(self):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss &lt;span style="color:#f92672">=&lt;/span> socket&lt;span style="color:#f92672">.&lt;/span>socket(socket&lt;span style="color:#f92672">.&lt;/span>AF_INET, socket&lt;span style="color:#f92672">.&lt;/span>SOCK_STREAM)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss&lt;span style="color:#f92672">.&lt;/span>setsockopt(socket&lt;span style="color:#f92672">.&lt;/span>SOL_SOCKET, socket&lt;span style="color:#f92672">.&lt;/span>SO_REUSEADDR, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> ss
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> app_path: str,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> host: str &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;localhost&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: int &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1026&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> backlog: int &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">100&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> worker&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">4&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>bind((host, port))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>listen(backlog)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> _ &lt;span style="color:#f92672">in&lt;/span> range(worker):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Process(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> target&lt;span style="color:#f92672">=&lt;/span>MyGunicornHandler&lt;span style="color:#f92672">.&lt;/span>run_on_process, args&lt;span style="color:#f92672">=&lt;/span>(self&lt;span style="color:#f92672">.&lt;/span>ss, app_path)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )&lt;span style="color:#f92672">.&lt;/span>start()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">close&lt;/span>(self, signum, frame):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;shutdown: &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>signum&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;__main__&amp;#34;&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MyGunicorn()&lt;span style="color:#f92672">.&lt;/span>run(app_path&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;wsgiserver.wsgi:application&amp;#34;&lt;/span>, worker&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, backlog&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">1000&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="소켓을-사용하는-서버부분">소켓을 사용하는 서버부분&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">MyGunicorn&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓 생성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss &lt;span style="color:#f92672">=&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>__init_socket__()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># graceful shutdown 추가&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> signal&lt;span style="color:#f92672">.&lt;/span>signal(signal&lt;span style="color:#f92672">.&lt;/span>SIGINT, self&lt;span style="color:#f92672">.&lt;/span>close)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> signal&lt;span style="color:#f92672">.&lt;/span>signal(signal&lt;span style="color:#f92672">.&lt;/span>SIGTERM, self&lt;span style="color:#f92672">.&lt;/span>close)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓 생성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">__init_socket__&lt;/span>(self):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss &lt;span style="color:#f92672">=&lt;/span> socket&lt;span style="color:#f92672">.&lt;/span>socket(socket&lt;span style="color:#f92672">.&lt;/span>AF_INET, socket&lt;span style="color:#f92672">.&lt;/span>SOCK_STREAM)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ss&lt;span style="color:#f92672">.&lt;/span>setsockopt(socket&lt;span style="color:#f92672">.&lt;/span>SOL_SOCKET, socket&lt;span style="color:#f92672">.&lt;/span>SO_REUSEADDR, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> ss
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> app_path: str,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> host: str &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;localhost&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> port: int &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1026&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> backlog: int &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">100&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> worker&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">4&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>bind((host, port))
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>listen(backlog)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> _ &lt;span style="color:#f92672">in&lt;/span> range(worker):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> handler &lt;span style="color:#f92672">=&lt;/span> MyGunicornHandler(ss&lt;span style="color:#f92672">=&lt;/span>ss, app_path&lt;span style="color:#f92672">=&lt;/span>app_path)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Process(target&lt;span style="color:#f92672">=&lt;/span>handler&lt;span style="color:#f92672">.&lt;/span>run)&lt;span style="color:#f92672">.&lt;/span>start()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">close&lt;/span>(self, signum, frame):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;shutdown: &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>signum&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>서버가 생성되면, 소켓을 먼저 설정한다. 그리고 종료시 안전하게 종료될 수 있도록 signal를 이용해서 종료 신호에 반응하도록 한다.&lt;/p>
+&lt;p>이후 &lt;strong>동시성을 위해&lt;/strong> 멀티 프로세싱을 이용해 프로세스를 여러 개 띄운다. 이 프로세스에서 클라이언트의 요청을 실제로 처리하게 된다.&lt;/p>
+&lt;h3 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h3>
+&lt;p>각 프로세스마다 Handler 클래스를 하나씩 만들어 실행시킨다.&lt;/p>
+&lt;p>이후 해당 run 함수 부분에서는 크게 request 파싱해서 &lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분, app에게 response를 받아서 소켓을 통해 발신하는 부분으로 나뉜다.&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분
+&lt;ul>
+&lt;li>상세 명세는 해당 &lt;a class="link" href="https://wsgi.readthedocs.io/en/latest/definitions.html" target="_blank" rel="noopener"
+>문서&lt;/a>를 확인하자&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 클라이언트 연결&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn, address &lt;span style="color:#f92672">=&lt;/span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>accept()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 데이터 수신&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> raw_data &lt;span style="color:#f92672">=&lt;/span> conn&lt;span style="color:#f92672">.&lt;/span>recv(&lt;span style="color:#ae81ff">1048576&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 데이터가 없으면 종료&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#f92672">not&lt;/span> raw_data:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 데이터를 받아서 http info 부분과 body 부분 분리&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> raw_data &lt;span style="color:#f92672">=&lt;/span> raw_data&lt;span style="color:#f92672">.&lt;/span>replace(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> splited_raw_data &lt;span style="color:#f92672">=&lt;/span> raw_data&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> len(splited_raw_data) &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> b_headers, b_body &lt;span style="color:#f92672">=&lt;/span> splited_raw_data
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> b_headers, b_body &lt;span style="color:#f92672">=&lt;/span> (raw_data, &lt;span style="color:#e6db74">b&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> headers &lt;span style="color:#f92672">=&lt;/span> b_headers&lt;span style="color:#f92672">.&lt;/span>decode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> headers &lt;span style="color:#f92672">=&lt;/span> headers&lt;span style="color:#f92672">.&lt;/span>rsplit(&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># http info 첫 번째 라인에서 method, paht, version_of_protocol 추출&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> method, path, version_of_protocol &lt;span style="color:#f92672">=&lt;/span> headers[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">&amp;#34; &amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#e6db74">&amp;#34;?&amp;#34;&lt;/span> &lt;span style="color:#f92672">in&lt;/span> path:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path, query &lt;span style="color:#f92672">=&lt;/span> path&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">&amp;#34;?&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path, query &lt;span style="color:#f92672">=&lt;/span> path, &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># environ 제작&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;REQUEST_METHOD&amp;#34;&lt;/span>: method,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;SERVER_PROTOCOL&amp;#34;&lt;/span>: version_of_protocol,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;SERVER_SOFTWARE&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;WOOSEONG_WSGI&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;PATH_INFO&amp;#34;&lt;/span>: path,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;QUERY_STRING&amp;#34;&lt;/span>: query,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;REMOTE_HOST&amp;#34;&lt;/span>: address[&lt;span style="color:#ae81ff">0&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;REMOTE_ADDR&amp;#34;&lt;/span>: address[&lt;span style="color:#ae81ff">0&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;wsgi.input&amp;#34;&lt;/span>: io&lt;span style="color:#f92672">.&lt;/span>BytesIO(b_body),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;wsgi.url_scheme&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;http&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#34;wsgi.version&amp;#34;&lt;/span>: (&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># environ에 http header 정보 추가&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> idx, header &lt;span style="color:#f92672">in&lt;/span> enumerate(headers):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> idx &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> key, value &lt;span style="color:#f92672">=&lt;/span> re&lt;span style="color:#f92672">.&lt;/span>split(&lt;span style="color:#e6db74">r&lt;/span>&lt;span style="color:#e6db74">&amp;#34;\s*:\s*&amp;#34;&lt;/span>, header, &lt;span style="color:#ae81ff">1&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> key &lt;span style="color:#f92672">=&lt;/span> key&lt;span style="color:#f92672">.&lt;/span>replace(&lt;span style="color:#e6db74">&amp;#34;-&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;_&amp;#34;&lt;/span>)&lt;span style="color:#f92672">.&lt;/span>upper()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> value &lt;span style="color:#f92672">=&lt;/span> value&lt;span style="color:#f92672">.&lt;/span>strip()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> make_key &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">lambda&lt;/span> x: &lt;span style="color:#e6db74">&amp;#34;HTTP_&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> x
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> key &lt;span style="color:#f92672">in&lt;/span> (&lt;span style="color:#e6db74">&amp;#34;CONTENT_TYPE&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;CONTENT_LENGTH&amp;#34;&lt;/span>):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ[key] &lt;span style="color:#f92672">=&lt;/span> value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">elif&lt;/span> make_key(key) &lt;span style="color:#f92672">in&lt;/span> environ:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ[make_key(key)] &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;,&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> environ[make_key(key)] &lt;span style="color:#f92672">=&lt;/span> value
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># app에게서 response status와 header를 받는 함수 개발&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">start_response&lt;/span>(status, headers):
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#34;status&amp;#34;&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> status
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#34;headers&amp;#34;&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> headers
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>app에게 response를 받아서 소켓을 통해 발신하는 부분&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>response_body &lt;span style="color:#f92672">=&lt;/span> app(environ, start_response)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 응답 첫번째 라인 구성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_first &lt;span style="color:#f92672">=&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#e6db74">{&lt;/span>version_of_protocol&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74"> &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#39;status&amp;#39;&lt;/span>]&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 응답 헤더부분 구성&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_headers &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>join(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> list(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> map(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">lambda&lt;/span> x: &lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#e6db74">{&lt;/span>x[&lt;span style="color:#ae81ff">0&lt;/span>]&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">: &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>x[&lt;span style="color:#ae81ff">1&lt;/span>]&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>status_and_headers[&lt;span style="color:#e6db74">&amp;#34;headers&amp;#34;&lt;/span>],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 응답 첫번째 라인 + 헤더 부분&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">=&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response_first
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">+&lt;/span> (&lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> response_headers &lt;span style="color:#66d9ef">else&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">+&lt;/span> response_headers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#ae81ff">\r\n\r\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># byte로 인코딩&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">=&lt;/span> response&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># response_body 붙이기&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> b &lt;span style="color:#f92672">in&lt;/span> response_body:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">+=&lt;/span> b
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>send(response)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>close()
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-6.png"
+width="524"
+height="526"
+loading="lazy"
+alt="실행 시"
+class="gallery-image"
+data-flex-grow="99"
+data-flex-basis="239px"
+>&lt;/p>
+&lt;p>첫 실행에 프로세스가 제대로 띄워지는 것을 볼 수 있다.&lt;/p>
+&lt;p>이후 브라우저에서 접속을 하면&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-7.png"
+width="2396"
+height="972"
+loading="lazy"
+alt="접속 시"
+class="gallery-image"
+data-flex-grow="246"
+data-flex-basis="591px"
+>&lt;/p>
+&lt;p>아래 처럼 잘 접속되는 것을 볼 수 있다.&lt;/p>
+&lt;p>동시성 테스트도 진행해보았다.
+조건은 아래와 같다.&lt;/p>
+&lt;ul>
+&lt;li>0.1초 단위로 요청 전송&lt;/li>
+&lt;li>동시에 1000명 접속&lt;/li>
+&lt;li>worker=16&lt;/li>
+&lt;li>backlog =1000&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-8.png"
+width="3686"
+height="2584"
+loading="lazy"
+alt="동시성 테스트 결과"
+class="gallery-image"
+data-flex-grow="142"
+data-flex-basis="342px"
+>&lt;/p>
+&lt;p>왼쪽이 필자가 구현한 MyGunicorn이고 오른쪽이 Gunicorn이다.
+상당히 유사한 그래프를 그리는 것을 볼 수 있다.&lt;/p>
+&lt;p>이 결과를 보고나서, 정말 기뻤다. 생각보다 성능이 밀리지 않는 것 같아서 기분이 매우 좋더라. 물론, Gunicorn에 비해 많은 허점이 있을 것이다.&lt;/p>
+&lt;p>그렇지만 처음부터 공식문서만 보고 하나하나 시도해서 성공했다는 것에 너무 기쁘고 성장한 것 같아서 기분이 좋다.&lt;/p>
 &lt;div id="fhdufhdu-card">
 &lt;/div>
 &lt;script>
