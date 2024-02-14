@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 06 Feb 2024 21:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] WSGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h1 id="계기">계기&lt;/h1>
-&lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 제일 코딩하기 편한 파이썬을 이용해서 시작했다.
-// gil을 언급하면서 어떻게 멀티 프로세싱으로 동시성이 가능한지&lt;/p>
+&lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 파이썬을 이용해 개발했다. 파이썬에서는 GIL 때문에 동시성이 어려운데, 이를 어떻게 해결했는지도 궁금해서 파이썬으로 골랐다.&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
 &lt;h1 id="osi-7계층">OSI 7계층&lt;/h1>
