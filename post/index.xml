@@ -433,7 +433,7 @@ data-flex-basis="767px"
 &lt;p>이후 &lt;strong>동시성을 위해&lt;/strong> 멀티 프로세싱을 이용해 프로세스를 여러 개 띄운다. 이 프로세스에서 클라이언트의 요청을 실제로 처리하게 된다.&lt;/p>
 &lt;h2 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h2>
 &lt;p>각 프로세스마다 Handler 클래스를 하나씩 만들어 실행시킨다.&lt;/p>
-&lt;p>이후 해당 run 함수 부분에서는 크게 request 파싱해서 &lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분, app에게 response를 받아서 소켓을 통해 발신하는 부분으로 나뉜다.&lt;/p>
+&lt;p>이후 해당 run 함수 부분에서는 크게 &amp;ldquo;request를 파싱해서 &lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분&amp;rdquo;, &amp;ldquo;app에게 response를 받아서 소켓을 통해 발신하는 부분&amp;quot;으로 나뉜다.&lt;/p>
 &lt;ol>
 &lt;li>&lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분
 &lt;ul>
