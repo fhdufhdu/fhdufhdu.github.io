@@ -135,7 +135,7 @@ data-flex-basis="428px"
 &lt;/li>
 &lt;li>server는 app에게 두 가지 정보를 전달해주어야 한다.
 &lt;ol>
-&lt;li>envrion
+&lt;li>environ
 &lt;ul>
 &lt;li>method, path, query, version, host, body 등의 정보를 담은 &lt;code>Dict 객체&lt;/code>&lt;/li>
 &lt;/ul>
@@ -430,7 +430,10 @@ data-flex-basis="767px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">f&lt;/span>&lt;span style="color:#e6db74">&amp;#34;shutdown: &lt;/span>&lt;span style="color:#e6db74">{&lt;/span>signum&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self&lt;span style="color:#f92672">.&lt;/span>ss&lt;span style="color:#f92672">.&lt;/span>close()
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>서버가 생성되면, 소켓을 먼저 설정한다. 그리고 종료시 안전하게 종료될 수 있도록 signal를 이용해서 종료 신호에 반응하도록 한다.&lt;/p>
-&lt;p>이후 &lt;strong>동시성을 위해&lt;/strong> 멀티 프로세싱을 이용해 프로세스를 여러 개 띄운다. 이 프로세스에서 클라이언트의 요청을 실제로 처리하게 된다.&lt;/p>
+&lt;p>이후 &lt;strong>동시성을 위해&lt;/strong> 멀티 프로세싱을 이용해 프로세스를 여러 개 띄운다. 이 프로세스에서 클라이언트의 요청을 실제로 처리하게 된다. 실제로 Gunicorn은 동시성을 위해 스레드를 사용하는 것이 아니라, 프로세스를 사용한다. 그 이유는 맨 처음 언급했듯이, GIL 때문이다.&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>GIL(Global Interpreter Lock)&lt;/strong> &lt;br> GIL은 하나의 스레드가 활성화 되면 다른 스레드가 활성화 되지 않도록 락을 걸고 사용하는 것을 의미한다. 이는 CPython에만 존재하며 다른 파이썬 구현체에는 존재하지 않는다. I/O 바운드에는 GIL이 잘 적용되지 않아서 스레드가 효율적이고, CPU 바운드에는 GIL이 적극적으로 적용된다고 한다. 웹 서버의 경우 CPU 바운드와 I/O 바운드가 적절하게 존재하므로 스레드를 사용하는 것보다 프로세스를 사용하는 것이 더 효율적이다.&lt;/p>
+&lt;/blockquote>
 &lt;h2 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h2>
 &lt;p>각 프로세스마다 Handler 클래스를 하나씩 만들어 실행시킨다.&lt;/p>
 &lt;p>이후 해당 run 함수 부분에서는 크게 &amp;ldquo;request를 파싱해서 &lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분&amp;rdquo;, &amp;ldquo;app에게 response를 받아서 소켓을 통해 발신하는 부분&amp;quot;으로 나뉜다.&lt;/p>
