@@ -1,4 +1,120 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Sat, 17 Feb 2024 21:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[CS] 왜 음수를 표현할 때 2의 보수를 사용할까?</title><link>https://fhdufhdu.github.io/post/16/</link><pubDate>Sat, 17 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/16/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Fri, 23 Feb 2024 13:14:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+&lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/16" >이전 글&lt;/a>에서 코틀린 해시 결과인 byte를 string으로 변환하는 과정을 탐구하던 중에, 2의 보수까지 알아야 해서 2의 보수에 관해 공부했다. 이번 포스팅에는 왜 2의 보수를 공부해야 했는지 설명하면서, 어떻게 byte를 hex string으로 변환하는지 알아보자.&lt;/p>
+&lt;h1 id="문제">문제&lt;/h1>
+&lt;p>&lt;code>val b = 244.toByte()&lt;/code>를 실행하면, 어떤 값이 나올까? 답은 &lt;code>-12&lt;/code>이다. 왜 그럴까??&lt;/p>
+&lt;p>답은 2의 보수다. byte는 8bit이고 244는 $1111\ 0100_2$이다. 최상위 비트가 1이므로 2의 보수를 취하면 $0000\ 1100_2$이고 이 값은 12이다. 그러므로 결괏값은 -12가 된다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(b.toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// -C
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>여기서 문제는 &lt;code>244&lt;/code>는 hex로 &lt;code>F4&lt;/code>이다. 그런데 Kotlin에서는 &lt;code>244.toByte().toStrint(16)&lt;/code>를 &lt;code>-C&lt;/code>로 표현한다. 같은 입력값인데 서로 다른 결괏값을 표현하게 된다.&lt;/p>
+&lt;h1 id="이유가-뭘까">이유가 뭘까?&lt;/h1>
+&lt;p>이는 &lt;code>toString()&lt;/code> 함수의 구현 방식에 문제가 있다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Integer&lt;/span> &lt;span style="color:#66d9ef">extends&lt;/span> Number
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">implements&lt;/span> Comparable&lt;span style="color:#f92672">&amp;lt;&lt;/span>Integer&lt;span style="color:#f92672">&amp;gt;&lt;/span>, Constable, ConstantDesc {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ... 중략
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">char&lt;/span>&lt;span style="color:#f92672">[]&lt;/span> digits &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;0&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;1&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;2&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;3&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;4&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;5&amp;#39;&lt;/span> ,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;6&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;7&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;8&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;9&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;a&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;b&amp;#39;&lt;/span> ,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;c&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;d&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;e&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;f&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;g&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;h&amp;#39;&lt;/span> ,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;i&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;j&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;k&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;l&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;m&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;n&amp;#39;&lt;/span> ,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;o&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;p&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;q&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;r&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;s&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;t&amp;#39;&lt;/span> ,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;u&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;v&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;w&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;x&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;y&amp;#39;&lt;/span> , &lt;span style="color:#e6db74">&amp;#39;z&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ... 중략
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> String &lt;span style="color:#a6e22e">toString&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> i, &lt;span style="color:#66d9ef">int&lt;/span> radix) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (radix &lt;span style="color:#f92672">&amp;lt;&lt;/span> Character.&lt;span style="color:#a6e22e">MIN_RADIX&lt;/span> &lt;span style="color:#f92672">||&lt;/span> radix &lt;span style="color:#f92672">&amp;gt;&lt;/span> Character.&lt;span style="color:#a6e22e">MAX_RADIX&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> radix &lt;span style="color:#f92672">=&lt;/span> 10;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">/* Use the faster version */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (radix &lt;span style="color:#f92672">==&lt;/span> 10) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> toString(i);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (COMPACT_STRINGS) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">byte&lt;/span>&lt;span style="color:#f92672">[]&lt;/span> buf &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">byte&lt;/span>&lt;span style="color:#f92672">[&lt;/span>33&lt;span style="color:#f92672">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">boolean&lt;/span> negative &lt;span style="color:#f92672">=&lt;/span> (i &lt;span style="color:#f92672">&amp;lt;&lt;/span> 0);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> charPos &lt;span style="color:#f92672">=&lt;/span> 32;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#f92672">!&lt;/span>negative) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">-&lt;/span>i;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">while&lt;/span> (i &lt;span style="color:#f92672">&amp;lt;=&lt;/span> &lt;span style="color:#f92672">-&lt;/span>radix) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> buf&lt;span style="color:#f92672">[&lt;/span>charPos&lt;span style="color:#f92672">--]&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#66d9ef">byte&lt;/span>)digits&lt;span style="color:#f92672">[-&lt;/span>(i &lt;span style="color:#f92672">%&lt;/span> radix)&lt;span style="color:#f92672">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> i &lt;span style="color:#f92672">=&lt;/span> i &lt;span style="color:#f92672">/&lt;/span> radix;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> buf&lt;span style="color:#f92672">[&lt;/span>charPos&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#66d9ef">byte&lt;/span>)digits&lt;span style="color:#f92672">[-&lt;/span>i&lt;span style="color:#f92672">]&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (negative) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> buf&lt;span style="color:#f92672">[--&lt;/span>charPos&lt;span style="color:#f92672">]&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;-&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> StringLatin1.&lt;span style="color:#a6e22e">newString&lt;/span>(buf, charPos, (33 &lt;span style="color:#f92672">-&lt;/span> charPos));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> toStringUTF16(i, radix);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ... 중략
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>구현 방식을 살펴보면, i는 변환하고자 하는 값이고, radix는 n진수를 의미한다. 이때 i의 타입이 integer이므로 byte가 들어와도 integer로 형변환된다. 그리고 radix씩 나눈 나머지를 합친 것이 n진수 변환 string이다.&lt;/p>
+&lt;p>앞서 i가 byte가 integer로 형변환 된다고 했다. 낮은 비트 타입에서 높은 비트 타입으로 형변환 될 때 낮은 비트의 최상위 비트로 확장되는 부분을 채운다.&lt;/p>
+&lt;ul>
+&lt;li>예시) $1111\ 0100_2$(-12)를 32비트 integer로 변환&lt;/li>
+&lt;li>결과) $1111\ 1111\ 1111\ 1111\ 1111\ 1111\ 1111\ 0100_2$&lt;/li>
+&lt;/ul>
+&lt;p>확장된 나머지 24개의 비트가 최상위 비트인 1로 모두 채워져 있는 것을 알 수 있다.&lt;/p>
+&lt;p>즉, 244는 byte로 -12로 표현되는데, 이를 integer로 확장해도 -12로 표현되는 것이다.&lt;/p>
+&lt;p>그럼 byte -12를 inteager -12가 아니라 integer 244로 표현하고 싶다면 어떻게 해야 할까?&lt;/p>
+&lt;ul>
+&lt;li>예시) $1111\ 0100_2$(-12)를 32비트 integer로 변환&lt;/li>
+&lt;li>결과) $0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 1111\ 0100_2$(244) 로 변환하고 싶다면?&lt;/li>
+&lt;/ul>
+&lt;h1 id="비트-연산을-사용하자">비트 연산을 사용하자&lt;/h1>
+&lt;p>비트 연산을 이용하면 된다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) &lt;span style="color:#75715e">// 244 출력
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>b.toInt()&lt;/code> = $1111\ 1111\ 1111\ 1111\ 1111\ 1111\ 1111\ 0100_2$&lt;/li>
+&lt;li>&lt;code>0xFF&lt;/code> = $0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 1111\ 1111_2$&lt;/li>
+&lt;/ul>
+&lt;p>애초에 0xFF는 integer이기 때문에 부호 확장이 일어나지 않는다. 이 두개의 값을 and 연산하면, $0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 1111\ 0100_2$를 얻을 수 있다.&lt;/p>
+&lt;p>이를 한번 hex 변환해보자.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println((b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// f4 출력
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>정상적으로 &lt;code>f4&lt;/code>가 나오는 것을 알 수 있다.&lt;/p>
+&lt;p>하지만 여기서 끝이 아니다.&lt;/p>
+&lt;h1 id="뭔가-이상하게-출력되는데">뭔가 이상하게 출력되는데&amp;hellip;?&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> blist = arrayOf(&lt;span style="color:#ae81ff">244.&lt;/span>toByte(), &lt;span style="color:#ae81ff">0.&lt;/span>toByte(), &lt;span style="color:#ae81ff">12.&lt;/span>toByte(), &lt;span style="color:#ae81ff">255.&lt;/span>toByte())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>blist.forEach{ println((&lt;span style="color:#66d9ef">it&lt;/span>.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">/* 결과
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">f4
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">0
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">c
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">ff
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>뭔가 좀 이상하다. byte를 hex로 바꾸면 &lt;code>f4 00 0c ff&lt;/code>가 출력되어야 하는데, 그렇지 않은 것을 알 수 있다. &lt;code>toString()&lt;/code>가 integer의 나눗셈을 기반으로 변환하다 보니 $0000_2$으로 표현되는 부분은 모두 생략하게 된다. 이를 어떻게 해결해야 할까?&lt;/p>
+&lt;h1 id="다시-비트연산을-이용하자">다시 비트연산을 이용하자&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">12.&lt;/span>toByte()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(((b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) + &lt;span style="color:#ae81ff">0x100&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// 10c 출력
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>+ 0x100&lt;/code>이 추가되었다. 이렇게 되면
+$0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 0000\ 1100_2$을 가지고 string으로 변환하게 된다. 그렇다면 항상 3개의 문자를 가진 문자열로 변환할 수 있다.&lt;/p>
+&lt;p>이제 다 왔다. 3개의 문자중 첫 문자인 1만 제거하면 byte를 hex로 변환할 수 있다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> blist = arrayOf(&lt;span style="color:#ae81ff">244.&lt;/span>toByte(), &lt;span style="color:#ae81ff">0.&lt;/span>toByte(), &lt;span style="color:#ae81ff">12.&lt;/span>toByte(), &lt;span style="color:#ae81ff">255.&lt;/span>toByte())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>blist.forEach{ println(((&lt;span style="color:#66d9ef">it&lt;/span>.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) + &lt;span style="color:#ae81ff">0x100&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>).substring(&lt;span style="color:#ae81ff">1&lt;/span>)) }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">/* 결과
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">f4
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">00
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">0c
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">ff
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">*/&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>끝이다.&lt;/p>
+&lt;h1 id="마무리하며">마무리하며&lt;/h1>
+&lt;p>자료형 간의 차이를 명확하게 알지 않는 이상, 해결하기 쉽지 않은 문제였다고 생각한다. 비트 연산 또한 잘 이용하지 않았던 것이었는데, 비트 연산을 활용해서 문제를 해결하는 방법이 꽤 인상적이었다. 홀수/짝수 구분도 최하위비트로 판단할 수 있는 것처럼 비트 연산이 최적화에 도움이 많이 될 것 같다.&lt;/p></description></item><item><title>[CS] 왜 음수를 표현할 때 2의 보수를 사용할까?</title><link>https://fhdufhdu.github.io/post/16/</link><pubDate>Sat, 17 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/16/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
 &lt;p>최근에 kotlin으로 Spring boot 프로젝트를 제작하고 있던 중에, SHA-512를 사용해야 했었다.
 방법을 찾아보니, 굉장히 특이한 코드가 보였다&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Integer&lt;/span>.toString((digest[i] and &lt;span style="color:#ae81ff">0xff&lt;/span>.toByte()) + &lt;span style="color:#ae81ff">0x100&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>).substring(&lt;span style="color:#ae81ff">1&lt;/span>)
