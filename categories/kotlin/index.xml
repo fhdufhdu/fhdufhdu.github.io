@@ -198,7 +198,31 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
 &lt;p>실제로 테스트 해본 결과 로그인 한 이후 인증 전용 URL에도 접근이 잘 되는 것을 확인했다. 사실 JWT를 사용해볼까도 싶었지만, 이번 개발의 목적이 MSA가 아닌 대규모 트래픽 대응 서버를 만들어보는 것이기 때문에 세션을 사용하기로 결정했다.&lt;/p>
 &lt;p>JWT는 MSA 시스템이 아닌 이상 큰 장점을 가지지는 않는다고 생각한다. 생각보다 검증해야할 것이 많고, 탈취 당했을 때 대응도 어렵다.
-모놀리식 서버 구조라면 세션 방식이 더 효율적이라고 생각한다.&lt;/p></description></item><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+모놀리식 서버 구조라면 세션 방식이 더 효율적이라고 생각한다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/16" >이전 글&lt;/a>에서 코틀린 해시 결과인 byte를 string으로 변환하는 과정을 탐구하던 중에, 2의 보수까지 알아야 해서 2의 보수에 관해 공부했다. 이번 포스팅에는 왜 2의 보수를 공부해야 했는지 설명하면서, 어떻게 byte를 hex string으로 변환하는지 알아보자.&lt;/p>
 &lt;h1 id="문제">문제&lt;/h1>
 &lt;p>&lt;code>val b = 244.toByte()&lt;/code>를 실행하면, 어떤 값이 나올까? 답은 &lt;code>-12&lt;/code>이다. 왜 그럴까??&lt;/p>
