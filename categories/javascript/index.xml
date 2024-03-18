@@ -43,7 +43,31 @@ data-flex-basis="596px"
 &lt;p>가상 돔은 총 두 가지가 존재한다. 원본 가상 돔과, 변경 가상 돔이다. 실제로 상태 값이 업데이트된다면, 리액트는 변경 가상 돔을 건드려 값을 업데이트 한다. 이후 diffing을 통해서 원본 가상 돔과 변경 가상 돔을 비교해서 어느 부분이 업데이트 되었는지를 확인한다.&lt;/p>
 &lt;p>이후 리액트는 위의 코드처럼 실제 돔에 한 번에 업데이트 할 수 있도록 코드를 작성하고, 실제 돔에 업데이트를 진행한다. 그렇다면 리렌더링을 최소화할 수 있다.&lt;/p>
 &lt;h1 id="마치며">마치며&lt;/h1>
-&lt;p>오늘은 궁금했던 가상 돔에 대해서 얘기해 보았다. 사실 프론트엔드 개발자가 아니라서 자세하게 작성하지는 않았지만, 왜 필요한지는 정리해야 할 것 같아서 포스팅하게 되었다. 언젠가 이런 구조를 내가 백엔드에서 써먹을 수도 있을 수도 있으니까! 개발한 코드와 구조는 돌고 돈다고 생각한다.&lt;/p></description></item><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h1 id="this란">this란?&lt;/h1>
+&lt;p>오늘은 궁금했던 가상 돔에 대해서 얘기해 보았다. 사실 프론트엔드 개발자가 아니라서 자세하게 작성하지는 않았지만, 왜 필요한지는 정리해야 할 것 같아서 포스팅하게 되었다. 언젠가 이런 구조를 내가 백엔드에서 써먹을 수도 있을 수도 있으니까! 개발한 코드와 구조는 돌고 돈다고 생각한다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 15
+else if(width &lt; 0) return 0
+return (15/767) * width - (11520/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h1 id="this란">this란?&lt;/h1>
 &lt;p>일반적으로 대부분의 언어에서 &lt;code>this&lt;/code> 키워드는 자기 자신의 인스턴스를 가리키는 용어이다.(python에서는 &lt;code>self&lt;/code> 키워드)&lt;/p>
 &lt;p>하지만, javascript의 &lt;code>this&lt;/code> 키워드는 다른 언어와는 다른 방식으로 작동한다.&lt;/p>
 &lt;p>* chrome 브라우저 환경에서 테스트한 결과입니다. node의 경우 &lt;code>window&lt;/code> 전역 객체 대신 &lt;code>global&lt;/code> 전역 객체를 사용하는데, &lt;code>global&lt;/code>이 제대로 반환되지 않아서 브라우저 환경에서 진행하였습니다.&lt;/p>
