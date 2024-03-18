@@ -1,4 +1,49 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on fhdufhdu</title><link>https://fhdufhdu.github.io/post/</link><description>Recent content in Posts on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 12 Mar 2024 15:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] ASGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/19/</link><pubDate>Tue, 12 Mar 2024 15:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/19/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on fhdufhdu</title><link>https://fhdufhdu.github.io/post/</link><description>Recent content in Posts on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Mon, 18 Mar 2024 18:34:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>[React] 가상 돔(Virtual DOM)이 왜 필요할까?</title><link>https://fhdufhdu.github.io/post/20/</link><pubDate>Mon, 18 Mar 2024 18:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/20/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+&lt;p>나는 백엔드 개발자이지만 프론트, nlp, 보안 등등 여러 방면으로 공부하는 것을 좋아한다. 새로운 지식은 항상 재밌게 느껴지더라고&amp;hellip;&lt;/p>
+&lt;p>그래서 오늘은 그냥 지극히 개인적인 궁금증으로 찾아본 가상 돔에 대해서 이야기해보고자 한다. 사실, 혼자 공부한 건 아니고 회사의 프론트엔드 개발자 분하고 같이 공부했다.&lt;/p>
+&lt;h1 id="dom">DOM&lt;/h1>
+&lt;p>DOM은 Document Object Model의 약자이다. 이는 HTML 요소들을 객체화해서 구조화해놓은 것을 의미한다. 이 DOM을 조작하기 위해서 JS가 탄생했다.&lt;/p>
+&lt;p>하여튼, 이 DOM을 조작하게 되면, 다시 DOM이 구조화되고 새롭게 화면으로 그려진다. 이것을 리렌더링이라고 한다. 리렌더링이 반복되고 무수히 많이 일어난다면? 매우 느릴 것이다.&lt;/p>
+&lt;p>한번 예를 들어보자.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-js" data-lang="js">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">nums&lt;/span> &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>, &lt;span style="color:#ae81ff">4&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">rootNode&lt;/span> &lt;span style="color:#f92672">=&lt;/span> document.&lt;span style="color:#a6e22e">getElementById&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;root&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">nums&lt;/span>.&lt;span style="color:#a6e22e">forEach&lt;/span>((&lt;span style="color:#a6e22e">num&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> &lt;span style="color:#a6e22e">newNode&lt;/span> &lt;span style="color:#f92672">=&lt;/span> document.&lt;span style="color:#a6e22e">createElement&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;div&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">newNode&lt;/span>.&lt;span style="color:#a6e22e">innerHTML&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">num&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">rootNode&lt;/span>.&lt;span style="color:#a6e22e">appendChild&lt;/span>(&lt;span style="color:#a6e22e">newNode&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>})
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이런 코드가 있다고 해보자.
+이 코드는 forEach를 돌 때마다, 계속해서 리렌더링이 일어난다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-js" data-lang="js">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">nums&lt;/span> &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>, &lt;span style="color:#ae81ff">4&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">rootNode&lt;/span> &lt;span style="color:#f92672">=&lt;/span> document.&lt;span style="color:#a6e22e">getElementById&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;root&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">let&lt;/span> &lt;span style="color:#a6e22e">html&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">nums&lt;/span>.&lt;span style="color:#a6e22e">forEach&lt;/span>((&lt;span style="color:#a6e22e">num&lt;/span>)=&amp;gt;{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> &lt;span style="color:#a6e22e">newNode&lt;/span> &lt;span style="color:#f92672">=&lt;/span> document.&lt;span style="color:#a6e22e">createElement&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;div&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">newNode&lt;/span>.&lt;span style="color:#a6e22e">innerHTML&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">num&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">html&lt;/span> &lt;span style="color:#f92672">+=&lt;/span> &lt;span style="color:#a6e22e">newNode&lt;/span>.&lt;span style="color:#a6e22e">outerHTML&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>})
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">rootNode&lt;/span>.&lt;span style="color:#a6e22e">innerHTML&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">html&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 코드는 어떨까? 단 한 번 업데이트하는 것이기 때문에 리렌더링도 단 한 번 일어날 것이다.&lt;/p>
+&lt;p>이렇듯 한 번에 모아서 업데이트를 하면 렌더링 횟수를 줄일 수 있다.&lt;/p>
+&lt;h1 id="가상-돔virtual-dom">가상 돔(Virtual DOM)&lt;/h1>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/20/image.png"
+width="755"
+height="304"
+loading="lazy"
+alt="출처 https://callmedevmomo.medium.com/virtual-dom-react-%ED%95%B5%EC%8B%AC%EC%A0%95%EB%A6%AC-bfbfcecc4fbb"
+class="gallery-image"
+data-flex-grow="248"
+data-flex-basis="596px"
+>&lt;/p>
+&lt;p>리액트는 이렇게 변경점을 한 번에 업데이트 하기 위해서, 가상 돔이라는 것을 만들어 냈다. 이 가상 돔은 실제 돔을 복사한 것이다. 그래서 아무리 이 가상 돔을 업데이트해도 실제로 업데이트가 일어나지는 않는다.&lt;/p>
+&lt;p>가상 돔은 총 두 가지가 존재한다. 원본 가상 돔과, 변경 가상 돔이다. 실제로 상태 값이 업데이트된다면, 리액트는 변경 가상 돔을 건드려 값을 업데이트 한다. 이후 diffing을 통해서 원본 가상 돔과 변경 가상 돔을 비교해서 어느 부분이 업데이트 되었는지를 확인한다.&lt;/p>
+&lt;p>이후 리액트는 위의 코드처럼 실제 돔에 한 번에 업데이트 할 수 있도록 코드를 작성하고, 실제 돔에 업데이트를 진행한다. 그렇다면 리렌더링을 최소화할 수 있다.&lt;/p>
+&lt;h1 id="마치며">마치며&lt;/h1>
+&lt;p>오늘은 궁금했던 가상 돔에 대해서 얘기해 보았다. 사실 프론트엔드 개발자가 아니라서 자세하게 작성하지는 않았지만, 왜 필요한지는 정리해야 할 것 같아서 포스팅하게 되었다. 언젠가 이런 구조를 내가 백엔드에서 써먹을 수도 있을 수도 있으니까! 개발한 코드와 구조는 돌고 돈다고 생각한다.&lt;/p></description></item><item><title>[Python] ASGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/19/</link><pubDate>Tue, 12 Mar 2024 15:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/19/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
 &lt;p>이전에 &lt;a class="link" href="https://fhdufhdu.github.io/post/14" >WSGI 서버를 직접!! 만들어보자&lt;/a>라는 게시글을 통해 WSGI 서버를 만들어보았다. WSGI만 하면 아쉬우니 이번에는 ASGI 서버를 만들어보도록 하겠다.&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyUvicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
