@@ -1,4 +1,157 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Mon, 18 Mar 2024 18:34:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[React] 가상 돔(Virtual DOM)이 왜 필요할까?</title><link>https://fhdufhdu.github.io/post/20/</link><pubDate>Mon, 18 Mar 2024 18:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/20/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 30 Apr 2024 09:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring Boot] Controller, Service, Repository에서의 DTO 분리 그리고 네이밍에 대해서</title><link>https://fhdufhdu.github.io/post/21/</link><pubDate>Tue, 30 Apr 2024 09:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/21/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+&lt;p>오랜만에 포스팅하게 되었다. 그동안 회사도 바빴고, 개인적으로 Spring boot를 이용한 게시판을 만들고 있었다. 예전과는 다르게, 실무에서 겪었던 문제들을 바탕으로 해결책들을 녹여내기 위해서 노력했다. (&lt;a class="link" href="http://fhdufhdu.hopto.org" target="_blank" rel="noopener"
+>해당 게시판&lt;/a> &amp;hellip;홍보도 겸사겸사)&lt;/p>
+&lt;p>사실 백엔드 개발을 하며 제일 크게 문제라고 느꼈던 건, 네이밍과 관심사 분리였다.&lt;/p>
+&lt;p>필자는 서버를 Controller, Service, Repository, Infrasturcture 계층으로 나누어서 주로 개발한다. 여기까지는 관습적으로 잘 지켜오고 있었는데, 그 외의 DTO가 문제였다.&lt;/p>
+&lt;p>이에 대한 이야기와, 나름대로 해결책을 정리해 보겠다.&lt;/p>
+&lt;h1 id="request-dto를-모든-곳에서-사용하지-말자">Request DTO를 모든 곳에서 사용하지 말자&lt;/h1>
+&lt;p>제일 크게 문제였던 것은, Request DTO였다. 필자는 이전까지 Request DTO를 모든 계층에서 돌려쓸 때가 있었다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> fooService: FooService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">getData&lt;/span>(&lt;span style="color:#a6e22e">@RequestBody&lt;/span>() body: DataRequest){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> fooService.fetchData(body)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooService&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> fooRepository: FooRepository
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">fetchData&lt;/span>(body: DataRequest){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> fooRepository.findOne(body.id)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 코드를 보면 Controller, Service 계층에서 같은 DataRequest 를 쓰고 있다.&lt;/p>
+&lt;p>실제로 겪어본 결과, 이 방식은 문제점이 많았다.&lt;/p>
+&lt;ol>
+&lt;li>&lt;code>FooService&lt;/code>의 &lt;code>fetchData&lt;/code> 메소드는 &lt;code>FooController&lt;/code>에서만 사용되는 것이 아니다.
+&lt;ul>
+&lt;li>다른 곳에서 사용될 수가 있을 텐데, 파라미터가 &lt;code>DataRequest&lt;/code>인 것은 이상하다. 마치 &lt;code>FooController&lt;/code>에 종속된 것처럼 보인다.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;code>DataRequest&lt;/code>가 변경되면 모든 레이어에 영향을 끼친다. 이때 컴파일 시 에러가 발생하지 않고 런타임 때 발생할 수 있다.
+&lt;ul>
+&lt;li>이를 추적하여 수정하는 것은 많은 비용이 든다.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>그렇다면 어떻게 해야 할까&amp;hellip;?&lt;/p>
+&lt;h1 id="dto를-모든-계층에서-분리하자">DTO를 모든 계층에서 분리하자!&lt;/h1>
+&lt;p>문제를 해결하기 위해 모든 계층에서 DTO를 만들어보려고 했다. 다만 이럴 때 문제점은 DTO 이름이 너무나도 중복이 많이 되는 것이 문제였다.&lt;/p>
+&lt;p>그래서 주위에 물어보거나, 많은 자료조사 끝에, 나름대로 철칙을 만들었다.&lt;/p>
+&lt;ol>
+&lt;li>모든 계층에서의 parameter, return type을 분리한다.&lt;/li>
+&lt;li>네이밍을 아래와 같이 정한다.
+&lt;ul>
+&lt;li>Controller
+&lt;ul>
+&lt;li>prameter: &lt;code>...Request&lt;/code>&lt;/li>
+&lt;li>return: &lt;code>...Response&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Service
+&lt;ul>
+&lt;li>parameter: &lt;code>...Command&lt;/code>,&lt;/li>
+&lt;li>return: 서비스 메소드에 맞게 정한다.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Repository
+&lt;ul>
+&lt;li>parameter: &lt;code>...Condition&lt;/code>&lt;/li>
+&lt;li>return: &lt;code>...Projection&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;p>이렇게 분리하게 되면, 앞서 이야기한 문제가 해결된다. 단점은 DTO를 많이 만들고 수정해야 한다는 것이다. 하지만 런타임 에러를 방지한다는 목적으로 보자면 매우 효율적인 비용이라고 생각한다.&lt;/p>
+&lt;p>이제 적용 예시를 보자.&lt;/p>
+&lt;h2 id="게시글-목록-조회">게시글 목록 조회&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 컨트롤러
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">@Controller&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BoardController&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> boardService: BoardService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@PreAuthorize&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;permitAll&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@GetMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">getPostSummaries&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@ModelAttribute&lt;/span> query: PostSummariesRequest): PostSummaries {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> page = &lt;span style="color:#a6e22e">PostSummariesCommand&lt;/span>.Page(query.pageNumber, query.pageSize)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> sort = &lt;span style="color:#a6e22e">PostSummariesCommand&lt;/span>.Sort(query.sortCriteria, query.sortDirection)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> search: &lt;span style="color:#a6e22e">PostSummariesCommand&lt;/span>.Search? = &lt;span style="color:#66d9ef">null&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (query.searchQuery &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> query.searchCriteria &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> search = &lt;span style="color:#a6e22e">PostSummariesCommand&lt;/span>.Search(query.searchQuery&lt;span style="color:#f92672">!!&lt;/span>, query.searchCriteria&lt;span style="color:#f92672">!!&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> findPostsInput = PostSummariesCommand(page, sort, search)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> boardService.filterPostSummaries(findPostsInput)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">//서비스
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">@Service&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BoardService&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> postRepository: PostRepository,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> commentRepository: CommentRepository,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> userRepository: UserRepository
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">filterPostSummaries&lt;/span>(input: PostSummariesCommand): PostSummaries {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> orderCondition = &lt;span style="color:#a6e22e">PostSummariesCondition&lt;/span>.Order(input.sort.direction.queryDslOrder, input.sort.criteria.&lt;span style="color:#66d9ef">value&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> searchCondition = &lt;span style="color:#a6e22e">PostSummariesCondition&lt;/span>.Search(input.search&lt;span style="color:#f92672">?.&lt;/span>searchQuery, input.search&lt;span style="color:#f92672">?.&lt;/span>searchCriteria&lt;span style="color:#f92672">?.&lt;/span>&lt;span style="color:#66d9ef">value&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 페이지네이션 조건 객체
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> pageable = &lt;span style="color:#a6e22e">PageRequest&lt;/span>.of(input.page.number, input.page.size)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 객체 조회
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> page = postRepository.findPostSummaries(PostSummariesCondition(searchCondition, orderCondition), pageable)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> postDtoList = page.content.stream().map {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">PostSummaries&lt;/span>.PostSummary(&lt;span style="color:#66d9ef">it&lt;/span>.id, &lt;span style="color:#66d9ef">it&lt;/span>.userId, &lt;span style="color:#66d9ef">it&lt;/span>.title, &lt;span style="color:#66d9ef">it&lt;/span>.content, &lt;span style="color:#66d9ef">it&lt;/span>.createdAt, &lt;span style="color:#66d9ef">it&lt;/span>.updatedAt)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }.toList()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> PostSummaries(postDtoList, page.number, page.totalPages, page.totalElements)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// QueryDSL
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">PostQueryDslImpl&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> queryFactory: JPAQueryFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) : PostQueryDsl {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">override&lt;/span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">findPostSummaries&lt;/span>(condition: PostSummariesCondition, pageable: Pageable): Page&amp;lt;PostSummariesProjection&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> post = &lt;span style="color:#a6e22e">QPost&lt;/span>.post
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> whereConditions = arrayOf(&lt;span style="color:#a6e22e">QPost&lt;/span>.post.status.eq(&lt;span style="color:#a6e22e">Post&lt;/span>.&lt;span style="color:#a6e22e">Status&lt;/span>.PUBLISHED), condition.search.searchExpression)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 쿼리
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> query = queryFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .select(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Projections&lt;/span>.&lt;span style="color:#66d9ef">constructor&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> PostSummariesProjection&lt;span style="color:#f92672">::&lt;/span>&lt;span style="color:#66d9ef">class&lt;/span>.java,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> post.id,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> post.user.id,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> post.title,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> post.content.substring(&lt;span style="color:#ae81ff">0&lt;/span>, &lt;span style="color:#ae81ff">30&lt;/span>),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> post.createdAt,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> post.updatedAt
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .from(post)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#66d9ef">where&lt;/span>(*whereConditions)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .orderBy(condition.order.orderSpecifier)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .offset(pageable.offset)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .limit(pageable.pageSize.toLong())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> countQuery = queryFactory
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .select(post.count())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .from(post)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#66d9ef">where&lt;/span>(*whereConditions)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 쿼리 실행
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> posts = query.fetch()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> count = countQuery.fetchOne()&lt;span style="color:#f92672">!!&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> PageImpl(posts, pageable, count)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>모든 계층에서, 자신의 DTO를 다른 계층의 DTO로 변환해서 호출하는 것을 볼 수 있다. 이런 방식을 통해 하나의 DTO가 변경되더라도 런타임 에러를 방지할 수 있다.&lt;/p>
+&lt;h1 id="마무리하며">마무리하며&lt;/h1>
+&lt;p>DTO 이슈는 현업을 진행하며 많이 고민이 되었던 문제였다. 이번에 Spring 개발을 진행하며 나름대로 생각 정리가 되어서 후련하다. 사실 이번 DTO 관련 이슈를 제외하고서도 나름대로 정리된 내용이 많다. 다음 포스팅에서는 DTO의 역할에 대해서도 생각을 정리해 보는 시간을 가져보도록 하겠다.&lt;/p></description></item><item><title>[React] 가상 돔(Virtual DOM)이 왜 필요할까?</title><link>https://fhdufhdu.github.io/post/20/</link><pubDate>Mon, 18 Mar 2024 18:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/20/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
 &lt;p>나는 백엔드 개발자이지만 프론트, nlp, 보안 등등 여러 방면으로 공부하는 것을 좋아한다. 새로운 지식은 항상 재밌게 느껴지더라고&amp;hellip;&lt;/p>
 &lt;p>그래서 오늘은 그냥 지극히 개인적인 궁금증으로 찾아본 가상 돔에 대해서 이야기해보고자 한다. 사실, 혼자 공부한 건 아니고 회사의 프론트엔드 개발자 분하고 같이 공부했다.&lt;/p>
 &lt;h1 id="dom">DOM&lt;/h1>
