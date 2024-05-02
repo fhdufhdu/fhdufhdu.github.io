@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kotlin + Spring Boot 개발기 on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/kotlin-+-spring-boot-%EA%B0%9C%EB%B0%9C%EA%B8%B0/</link><description>Recent content in Kotlin + Spring Boot 개발기 on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 01 May 2024 16:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/kotlin-+-spring-boot-%EA%B0%9C%EB%B0%9C%EA%B8%B0/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring Boot][Kotlin] @Valid 사용시에 Enum 값을 검증해보자(Custom Validation, Enum Validation)</title><link>https://fhdufhdu.github.io/post/22/</link><pubDate>Wed, 01 May 2024 16:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/22/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
-&lt;p>필자는 Enum 값을 즐겨 사용한다. Enum은 코드로 값을 고정할 수 있다는 점에서 &lt;strong>컴파일 단계에서 안전&lt;/strong>하다. Spring Boot에서 &lt;code>@Valid&lt;/code> 어노테이션을 사용하는 Body, Query를 Enum으로 검증해보자.&lt;/p>
+&lt;p>필자는 Enum 값을 즐겨 사용한다. Enum은 코드로 값을 고정할 수 있다는 점에서 &lt;strong>컴파일 단계에서 안전&lt;/strong>하다. Spring Boot에서 &lt;code>@Valid&lt;/code> 어노테이션을 사용하는 Body, Query를 Enum으로 검증해 보자.&lt;/p>
 &lt;h2 id="주의사항">주의사항&lt;/h2>
 &lt;p>잘 알아야 하는 것은, &lt;em>&lt;strong>검증&lt;/strong>&lt;/em> 만 하는 것이다. 절대로 &lt;em>&lt;strong>변환&lt;/strong>&lt;/em> 을 하는 것이 아니다!&lt;/p>
-&lt;p>Body 혹은 Query의 String을 Enum으로 변환하고자 하는 것이 아니라, String이 Enum 값에 있는 지 확인하고자 하는 것이라는 것을 이해하자.&lt;/p>
-&lt;p>필자가 처음에 이것을 헷갈려 했다가 시간을 너무 낭비했던 경험이 있다.&lt;/p>
+&lt;p>Body 혹은 Query의 String을 Enum으로 변환하고자 하는 것이 아니라, String이 Enum 값에 있는지 확인하고자 하는 것이라는 것을 이해하자.&lt;/p>
+&lt;p>필자가 처음에 이것을 헷갈렸다가 시간을 너무 낭비했던 경험이 있다.&lt;/p>
 &lt;h2 id="valid">&lt;code>@Valid&lt;/code>&lt;/h2>
-&lt;p>스프링은 &lt;code>@Valid&lt;/code>가 달린 객체에 대해서 검증을 실시한다. 검증을 실시할 때는 어노테이션이 달린 멤버변수에 대해서 검증한다.&lt;/p>
+&lt;p>스프링은 &lt;code>@Valid&lt;/code>가 달린 객체에 대해서 검증을 실시한다. 검증을 실시할 때는 어노테이션이 달린 멤버 변수에 대해서 검증한다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Controller&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(){
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@GetMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
@@ -23,7 +23,7 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">/* GetFooRequest를 검증할 때
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * bar는 null이거나 빈 스트링이면 안되고,
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageNumer는 음수이면 안되고,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageSize는 3이상인지 검증함.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageSize는 3 이상인지 검증함.
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> */&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">GetFooRequest&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:NotBlank
@@ -39,8 +39,8 @@
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위의 &lt;code>@NotBlank&lt;/code>, &lt;code>@Min&lt;/code> 과 같은 어노테이션들을 &lt;strong>Bean Validation&lt;/strong>이라고 한다.(&lt;a class="link" href="https://beanvalidation.org/" target="_blank" rel="noopener"
 >문서&lt;/a>)&lt;/p>
 &lt;p>기본으로 제공되는 어노테이션 말고, 우리가 원하는 방식으로 검증하도록 수정할 수도 있다.&lt;/p>
-&lt;h2 id="간단한-spring-boot에서의-검증-플로우">간단한 Spring boot에서의 검증 플로우&lt;/h2>
-&lt;p>검증은 일반적으로 Dispatcher Servlet에서 Handler Adapter를 통해 Controller의 Method를 호출하기 전에 &lt;code>@Valid&lt;/code> 파라미터 메소드에 있는 지 확인하고 있다면 검증을 시도한다.&lt;/p>
+&lt;h2 id="간단한-spring-boot에서의-검증-흐름">간단한 Spring boot에서의 검증 흐름&lt;/h2>
+&lt;p>검증은 일반적으로 Dispatcher Servlet에서 Handler Adapter를 통해 Controller의 Method를 호출하기 전에 &lt;code>@Valid&lt;/code> 파라미터 메소드에 있는지 확인하고 있다면 검증을 시도한다.&lt;/p>
 &lt;ol>
 &lt;li>사용자 요청&lt;/li>
 &lt;li>Dispatcher Sevlet 실행&lt;/li>
@@ -54,7 +54,7 @@
 &lt;/ol>
 &lt;h2 id="custom-validator-구현">Custom Validator 구현&lt;/h2>
 &lt;h3 id="1-annotaion-만들기">1. Annotaion 만들기&lt;/h3>
-&lt;p>이제 &lt;code>@NotBlank&lt;/code> 같은 어노테이션을 만들어야한다. 아래와 같이 만들 수 있다.&lt;/p>
+&lt;p>이제 &lt;code>@NotBlank&lt;/code> 같은 어노테이션을 만들어야 한다. 아래와 같이 만들 수 있다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Constraint
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidator
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidatorContext
@@ -98,15 +98,15 @@
 &lt;/tr>
 &lt;tr>
 &lt;td>@Retention&lt;/td>
-&lt;td>언제 적용 되는지&lt;/td>
+&lt;td>언제 적용되는지&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>message&lt;/td>
-&lt;td>검증 실패시 출력할 에러 메시지&lt;/td>
+&lt;td>검증 실패 시 출력할 에러 메시지&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>groups&lt;/td>
-&lt;td>어떤 그룹에 속하는지(그룹 별로 검증할 지 안할 지 정할 수 있음)&lt;/td>
+&lt;td>어떤 그룹에 속하는지(그룹 별로 검증할지 안 할지 정할 수 있음)&lt;/td>
 &lt;/tr>
 &lt;tr>
 &lt;td>payload&lt;/td>
@@ -123,7 +123,7 @@
 &lt;/tbody>
 &lt;/table>
 &lt;p>&lt;code>message&lt;/code>, &lt;code>groups&lt;/code>, &lt;code>payload&lt;/code>는 필수 파라미터이다. 자세한 건 &lt;a class="link" href="https://jakarta.ee/specifications/bean-validation/3.0/jakarta-bean-validation-spec-3.0.html#constraintsdefinitionimplementation-constraintdefinition-properties" target="_blank" rel="noopener"
->공식 문서&lt;/a>를 참고해보자.&lt;/p>
+>공식 문서&lt;/a>를 참고해 보자.&lt;/p>
 &lt;h3 id="2-validator-만들기">2. Validator 만들기&lt;/h3>
 &lt;p>어노테이션을 만들었으니, 스프링이 검증 로직을 실행할 때 사용할 Validator가 필요하다.&lt;/p>
 &lt;p>따로 파일을 분리해서 만들어도 되고, 방금 만든 어노테이션 클래스의 inner class로 만들어도 된다. 필자는 inner class로 만들도록 한다.&lt;/p>
@@ -208,7 +208,7 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이렇게 사용할 수 있다.&lt;/p>
 &lt;h2 id="디버그-모드로-적용-확인">디버그 모드로 적용 확인&lt;/h2>
-&lt;p>이제 이 Custom Validation이 잘 적용되는지 확인해보자.&lt;/p>
+&lt;p>이제 이 Custom Validation이 잘 적용되는지 확인해 보자.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/22/image.png"
 width="1594"
 height="1336"
@@ -218,7 +218,7 @@ class="gallery-image"
 data-flex-grow="119"
 data-flex-basis="286px"
 >&lt;/p>
-&lt;p>해당 라인에 break point를 걸어서 디버그 모드로 확인해보자.&lt;/p>
+&lt;p>해당 라인에 break point를 걸어서 디버그 모드로 확인해 보자.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/22/image-1.png"
 width="1624"
 height="1306"
@@ -228,9 +228,9 @@ class="gallery-image"
 data-flex-grow="124"
 data-flex-basis="298px"
 >&lt;/p>
-&lt;p>&lt;a class="link" href="#%ea%b0%84%eb%8b%a8%ed%95%9c-spring-boot%ec%97%90%ec%84%9c%ec%9d%98-%ea%b2%80%ec%a6%9d-%ed%94%8c%eb%a1%9c%ec%9a%b0" >간단한 Spring boot에서의 검증 플로우&lt;/a>에서 말했던 것 처럼 검증 로직이 진행된다는 것을 알 수 있다.&lt;/p>
+&lt;p>&lt;a class="link" href="#%ea%b0%84%eb%8b%a8%ed%95%9c-spring-boot%ec%97%90%ec%84%9c%ec%9d%98-%ea%b2%80%ec%a6%9d-%ed%94%8c%eb%a1%9c%ec%9a%b0" >간단한 Spring boot에서의 검증 플로우&lt;/a>에서 말했던 것처럼 검증 로직이 진행된다는 것을 알 수 있다.&lt;/p>
 &lt;h2 id="마치며">마치며&lt;/h2>
-&lt;p>이 기능에 대해 구현을 하고 블로그를 작성하며 Spring boot의 내부 구조와 작동 방식에 대해서 다시 한번 공부를 하게 되었고, Bean Validation에 대한 공식 문서를 보면서 작동 방식에 대해 익숙해질 수 있었다.&lt;/p>
+&lt;p>이 기능에 대해 구현하고 블로그를 작성하며 Spring boot의 내부 구조와 작동 방식에 대해서 다시 한번 공부하게 되었고, Bean Validation에 대한 공식 문서를 보면서 작동 방식에 대해 익숙해질 수 있었다.&lt;/p>
 &lt;p>또한 디버그 모드를 통해 validation이 작동하는 위치에 대한 추측을 증명할 수 있었다.&lt;/p>
 &lt;p>블로그 글을 오랜만에 작성하면서 &amp;ldquo;알고 있는 지식은 공유해야 본인에게도 정리가 잘되는 것 같다&amp;quot;는 생각이 다시 한번 들었다. 앞으로도 게으름 피우지 말고 열심히 블로그 글을 작성해야겠다.&lt;/p>
 &lt;div id="fhdufhdu-card">
