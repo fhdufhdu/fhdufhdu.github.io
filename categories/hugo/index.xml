@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>hugo on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/hugo/</link><description>Recent content in hugo on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Sun, 14 Jan 2024 14:16:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h1 id="이전-버전의-문제">이전 버전의 문제&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>hugo on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/hugo/</link><description>Recent content in hugo on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Sun, 14 Jan 2024 14:16:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/hugo/index.xml" rel="self" type="application/rss+xml"/><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h2 id="이전-버전의-문제">이전 버전의 문제&lt;/h2>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/10" >저번 게시글&lt;/a>에서 무한 스크롤을 구현했지만, 하나의 html에 모든 데이터를 가지고 있는 구조였다. 해당 구조는 게시글이 1,000개 혹은 10,000개가 된다면, 메인 페이지를 불러오는데, 많은 네트워크 자원을 소비하게 될 것이다. 실제로 게시글 200개 정도로 테스트해 보니, 요청에 600kb를 사용하는 것을 확인했다.&lt;/p>
-&lt;h1 id="방법을-찾자">방법을 찾자&lt;/h1>
+&lt;h2 id="방법을-찾자">방법을 찾자&lt;/h2>
 &lt;p>처음 발상은 이랬다.&lt;/p>
 &lt;blockquote>
 &lt;p>특정 범위에 해당하는 게시글 리스트를 미리 저장해놓고, http GET 요청을 통해 그때그때 가져오면 되지 않을까?&lt;/p>
@@ -65,14 +65,14 @@ data-flex-basis="263px"
 &lt;/li>
 &lt;/ul>
 &lt;p>그래서 &lt;code>Pagination&lt;/code>을 이용해서 개발을 진행하기로 한다.&lt;/p>
-&lt;h1 id="구현">구현&lt;/h1>
-&lt;h2 id="hugotoml-수정">hugo.toml 수정&lt;/h2>
+&lt;h2 id="구현">구현&lt;/h2>
+&lt;h3 id="hugotoml-수정">hugo.toml 수정&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-toml" data-lang="toml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">baseURL&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;https://fhdufhdu.github.io/&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">languageCode&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;ko-KR&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">title&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;fhdufhdu&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">theme&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;hugo-theme-stack&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">paginate&lt;/span> = &lt;span style="color:#ae81ff">5&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">//추가&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="indexhtml-수정">index.html 수정&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="indexhtml-수정">index.html 수정&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">section&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">class&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;article-list&amp;#34;&lt;/span>&amp;gt;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ range $index, $element := $pag.Pages }}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ partial &amp;#34;article-list/default&amp;#34; . }}
@@ -114,7 +114,7 @@ data-flex-basis="263px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// element 구독
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">intersectionObserver&lt;/span>.&lt;span style="color:#a6e22e">observe&lt;/span>(document.&lt;span style="color:#a6e22e">querySelector&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;#posts-footer&amp;#39;&lt;/span>));
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#f92672">script&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="후기">후기&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="후기">후기&lt;/h2>
 &lt;p>이전 게시글에서 무한 스크롤을 구현하고나서 많이 뿌듯했지만, 한편으로는 가슴속에 남아있는 불편함이 있었다. 보기에는 무한 스크롤이지만, 실제로는 무한 스크롤이라고 부르기는 좀 좋지 않은 구조였기 때문이다. 실제로 게시글 수가 많아질수록 쓸데없이 네트워크 자원을 소비한다는 문제가 있는 구조이다.&lt;/p>
 &lt;p>어쨌든, 좀 더 나은 코드를 작성하는 것이 바로 개발자의 역할이 아니겠는가? 이 불편한 감정을 해결하기 위해 고민을 오래 했던 것 같다. 샤워하다가도 생각나고, 밥먹다가도 생각나고, 출근하다가도 생각이 났다.&lt;/p>
 &lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p>
@@ -128,9 +128,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -141,17 +141,17 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
+&lt;/script></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h2 id="새로운-방법-추가">새로운 방법 추가!&lt;/h2>
 &lt;p>해당 방법보다 더 좋은 아이디어로 개발했습니다.
 &lt;a class="link" href="https://fhdufhdu.github.io/post/11" >해당 게시글&lt;/a> 참고 해주세요!&lt;/p>
-&lt;h1 id="발단">발단&lt;/h1>
+&lt;h2 id="발단">발단&lt;/h2>
 &lt;p>Hudi님의 &lt;a class="link" href="https://hudi.blog/" target="_blank" rel="noopener"
 >블로그&lt;/a>를 보다 보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러 가지 방법을 찾아보았다.&lt;/p>
 &lt;p>찾아보니 제일 좋은 방법은 &lt;code>IntersectionObserver&lt;/code>를 이용하는 것이라고 한다.&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;code>InsersectionObserver&lt;/code>란 상위 요소와의 교차 영역에 대한 변화를 비동기적으로 감지하는 API. element가 화면에 노출되었는지 여부를 간단하게 구독할 수 있음.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="문제">문제&lt;/h1>
+&lt;h2 id="문제">문제&lt;/h2>
 &lt;p>그런데 문제는, hugo와 js가 궁합이 그렇게 좋지 않다는 것이다.&lt;/p>
 &lt;p>블로그 게시글 hugo 템플릿과 js는 공존이 불가능하다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">num&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
@@ -180,7 +180,7 @@ data-flex-basis="2206px"
 &lt;li>사용자가 해당 사이트에 접속할 때 js 실행&lt;/li>
 &lt;/ol>
 &lt;p>즉, hugo 빌드 시점에 템플릿에는 값이 설정되어야 하는데 js가 실행되지 않았으므로 빌드를 완료할 수 없는 것이다.&lt;/p>
-&lt;h1 id="해결-방법">해결 방법&lt;/h1>
+&lt;h2 id="해결-방법">해결 방법&lt;/h2>
 &lt;p>방법은 전체 html을 만들어 놓고, 필요에 따라 잘라서 집어 넣는 것이다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">section&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">class&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;article-list&amp;#34;&lt;/span>&amp;gt;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">&amp;lt;!-- 게시글 목록이 보여질 곳 --&amp;gt;&lt;/span>
@@ -229,7 +229,7 @@ data-flex-basis="2206px"
 &lt;lottie-player src="scroll.json" background="transparent" speed="1" style="width: auto; height: auto" controls>&lt;/lottie-player>
 &lt;/div>
 &lt;p>위 영상을 보면, 새로고침하고나서 &lt;code>Loaded new items&lt;/code>가 한번 출력되고, 이후 스크롤을 내리면서 &lt;code>&amp;lt;div id=&amp;quot;posts-footer&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;&lt;/code>가 화면에 노출될 때 마다 &lt;code>Loaded new items&lt;/code>가 계속해서 호출되는 것을 볼 수 있다.&lt;/p>
-&lt;h1 id="후기">후기&lt;/h1>
+&lt;h2 id="후기">후기&lt;/h2>
 &lt;p>쉬울듯 하면서도 생각보다 너무 어려웠다. &lt;code>hugo 템플릿은 브라우저에서 동적으로 작동하지 않는다.&lt;/code> 라는 것을 모르는 상태에서 js와 결합하려고 하니 그랬던 것 같다. 그래도 &lt;code>IntersectionObserver&lt;/code>를 알게되고, &lt;code>hugo 템플릿의 작동 방식&lt;/code>을 알게된 좋은 기회였다.&lt;/p>
 &lt;p>하지만 조금은 아쉬운 방식이다. 저 방식은 한 html에 모든 데이터를 가지고 있고 보여주는 것만 잘라서 보여주는 것이니까, 본질적으로 한번에 모든 데이터를 보여주는 것과 똑같다고 느껴진다.
 조금 더 hugo의 정보를 찾아봐서 다른 방식을 찾아봐야 겠다.&lt;/p>
@@ -244,9 +244,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`

@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Python on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/python/</link><description>Recent content in Python on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 12 Mar 2024 15:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/python/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] ASGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/19/</link><pubDate>Tue, 12 Mar 2024 15:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/19/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Python on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/python/</link><description>Recent content in Python on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 12 Mar 2024 15:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/python/index.xml" rel="self" type="application/rss+xml"/><item><title>[Python] ASGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/19/</link><pubDate>Tue, 12 Mar 2024 15:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/19/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>이전에 &lt;a class="link" href="https://fhdufhdu.github.io/post/14" >WSGI 서버를 직접!! 만들어보자&lt;/a>라는 게시글을 통해 WSGI 서버를 만들어보았다. WSGI만 하면 아쉬우니 이번에는 ASGI 서버를 만들어보도록 하겠다.&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyUvicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
-&lt;h1 id="asgi">ASGI&lt;/h1>
+&lt;h2 id="asgi">ASGI&lt;/h2>
 &lt;p>WSGI는 Web Server Gateway Interface의 약자다. 그럼 ASGI는 어떤 단어들의 약자일까?&lt;/p>
 &lt;p>정답은 Asynchronous Server Gateway Interface의 약자이다. 이름을 보면 알 수 있듯이, ASGI는 비동기 처리가 가능한 서버 인터페이스이다.&lt;/p>
 &lt;p>&lt;em>동기/비동기에 대해서 궁금하다면 해당 &lt;a class="link" href="https://fhdufhdu.github.io/post/4" >게시글&lt;/a>로!&lt;/em>&lt;/p>
 &lt;p>ASGI 공식문서를 보면 &lt;em>&lt;strong>ASGI (Asynchronous Server Gateway Interface) is a spiritual successor to WSGI&lt;/strong>&lt;/em> 라고 쓰여있다. ASGI는 WSGI의 정신적으로 계승했다는 것인데 그 말대로 WSGI와 전체적인 구조가 비슷하다.&lt;/p>
-&lt;h1 id="cpython의-gil">CPython의 GIL&lt;/h1>
+&lt;h2 id="cpython의-gil">CPython의 GIL&lt;/h2>
 &lt;p>자바의 경우 한 요청당 하나의 스레드가 배정된다. 이렇게 되면, 여러 개의 요청이 들어와도 동시에 처리할 수 있다.&lt;/p>
 &lt;p>그런데 이전의 WSGI는 왜 스레드를 사용하지 않고, 여러 개의 프로세스를 사용했을까? 안타깝게도, 이는 CPython의 GIL때문이다.&lt;/p>
 &lt;p>GIL이란 Global Interpreter Lock의 약자로, Python에서 하나의 스레드가 활성화되면 다른 스레드는 활성화되지 않도록 락을 거는 정책이다. 그래서 스레드를 여러 개 만들어도 제대로 실행되는 스레드는 단 하나밖에 없다. 그래서 멀티 프로세스로 처리하게 된 것이다.&lt;/p>
@@ -18,11 +18,11 @@
 &lt;p>&lt;strong>CPython?&lt;/strong> &lt;br>
 python은 인터프리터 언어로, python으로 작성된 스크립트를 실행시켜 주는 실행기가 존재한다. 이 실행기는 C, Java 등등의 언어로 작성되어 있다. 이때 C로 작성된 실행기를 CPython이라고 부른다. 맨 처음 Python이 릴리즈될 때 사용된 것이 CPython이고 대부분 CPython을 사용한다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="여기에-비동기를-한-스푼">여기에 비동기를 한 스푼&lt;/h1>
+&lt;h2 id="여기에-비동기를-한-스푼">여기에 비동기를 한 스푼&lt;/h2>
 &lt;p>잘 생각해 보면, 실행 로직이 CPU bound인 작업은 정말 웬만하면 처리 시간이 엄청 짧다. 문제인 것은 바로 네트워크 I/O이다. 예를 들어, DB 연결, 외부 API 호출 등등 네트워크를 사용하면 생각보다 딜레이 되는 시간이 많다. 그런 남는 시간에 CPU bound 작업을 처리한다면 매우 효율적이지 않을까?&lt;/p>
 &lt;p>그래서 탄생한 것이 ASGI다.&lt;/p>
-&lt;h1 id="python에서-비동기를-사용하는-방법">Python에서 비동기를 사용하는 방법&lt;/h1>
-&lt;h2 id="동기-코드">동기 코드&lt;/h2>
+&lt;h2 id="python에서-비동기를-사용하는-방법">Python에서 비동기를 사용하는 방법&lt;/h2>
+&lt;h3 id="동기-코드">동기 코드&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> requests
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get_response&lt;/span>():
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">=&lt;/span> requests&lt;span style="color:#f92672">.&lt;/span>get(&lt;span style="color:#e6db74">&amp;#34;https://www.naver.com&amp;#34;&lt;/span>) &lt;span style="color:#75715e"># 이 부분에서 3초가 걸림&lt;/span>
@@ -38,7 +38,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sum(&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>자, 이런 코드가 있다고 해보자. 이 코드는 1번이 출력되고, 2번이 출력될 것이다. get_response에 3초가 걸린다고 하더라도 순서대로 진행될 것이다.&lt;/p>
 &lt;p>근데 우리는 이 requests.post에 낭비되는 3초가 너무 아깝다고 생각한다. 이 3초 동안 sum을 실행시켜 보자.&lt;/p>
-&lt;h2 id="비동기-코드">비동기 코드&lt;/h2>
+&lt;h3 id="비동기-코드">비동기 코드&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> asyncio
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> aiohttp &lt;span style="color:#75715e"># pip install aiohttp&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">async&lt;/span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get_response&lt;/span>():
@@ -62,10 +62,10 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>asyncio&lt;span style="color:#f92672">.&lt;/span>run(main())
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 코드를 실행시키면, 2번이 먼저 출력되고, 1번이 출력되는 것을 볼 수 있다. http 요청에 3초가 걸릴 때, 이 시간에 다른 작업(&lt;code>sum&lt;/code>)을 진행한 것이다.&lt;/p>
-&lt;h1 id="asgi-구현">ASGI 구현&lt;/h1>
+&lt;h2 id="asgi-구현">ASGI 구현&lt;/h2>
 &lt;p>이제 python에서 비동기를 사용하는 방법도 알아보았으니, 본격적으로 ASGI를 구현해 보자.&lt;/p>
 &lt;p>WSGI랑 마찬가지로 Application과 Server로 구성되어 있다. Application은 앞으로 app이라고 부르겠다.&lt;/p>
-&lt;h2 id="asgi-application">ASGI Application&lt;/h2>
+&lt;h3 id="asgi-application">ASGI Application&lt;/h3>
 &lt;p>간단한 app의 구현체는 아래와 같이 생겼다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">SimpleASGIApp&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self):
@@ -90,7 +90,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;li>receive: app은 &lt;code>await receive()&lt;/code>처럼 receive를 호출해 request body를 가져올 수 있음&lt;/li>
 &lt;li>send: response를 하려면 해당 함수를 호출해야 함&lt;/li>
 &lt;/ul>
-&lt;h2 id="asgi-server">ASGI Server&lt;/h2>
+&lt;h3 id="asgi-server">ASGI Server&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> asyncio
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">from&lt;/span> fast_api_app &lt;span style="color:#f92672">import&lt;/span> app
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -219,7 +219,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;li>body 부분은 bytes 형태 그래도 receive 함수를 통해 반환하도록&lt;/li>
 &lt;li>send를 통해 받아온 response header와 response body를 하나로 합쳐서 소켓으로 전달&lt;/li>
 &lt;/ol>
-&lt;h1 id="결과">결과&lt;/h1>
+&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>테스트도 빼놓을 수는 없다.
 이번에는 두 가지의 테스트를 진행했다.&lt;/p>
 &lt;p>[조건]&lt;/p>
@@ -229,14 +229,14 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;li>MyGunicorn의 경우 worker = 16 으로 진행&lt;/li>
 &lt;li>아래 코드와 같이 2초 sleep하고 진행&lt;/li>
 &lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># asgi - FastAPI&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## asgi - FastAPI&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@app.get&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;/hello_world/&lt;/span>&lt;span style="color:#e6db74">{id}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">async&lt;/span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">hello_world&lt;/span>(request: Request, id: int, abcd:int &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">await&lt;/span> asyncio&lt;span style="color:#f92672">.&lt;/span>sleep(&lt;span style="color:#ae81ff">2&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id:abcd
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># wsgi - django&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## wsgi - django&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">HelloWorld&lt;/span>(GenericAPIView):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get&lt;/span>(self, request: Request, id:int):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(id)
@@ -244,7 +244,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> Response({
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: request&lt;span style="color:#f92672">.&lt;/span>GET[&lt;span style="color:#e6db74">&amp;#39;abcd&amp;#39;&lt;/span>]
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> })
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="uvicorn-vs-myuvicorn">Uvicorn vs MyUvicorn&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="uvicorn-vs-myuvicorn">Uvicorn vs MyUvicorn&lt;/h3>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/19/image.png"
 width="3682"
 height="2576"
@@ -254,7 +254,7 @@ class="gallery-image"
 data-flex-grow="142"
 data-flex-basis="343px"
 >&lt;/p>
-&lt;h2 id="asgi-vs-wsgi">ASGI vs WSGI&lt;/h2>
+&lt;h3 id="asgi-vs-wsgi">ASGI vs WSGI&lt;/h3>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/19/image-1.png"
 width="3670"
 height="2600"
@@ -264,7 +264,7 @@ class="gallery-image"
 data-flex-grow="141"
 data-flex-basis="338px"
 >&lt;/p>
-&lt;h2 id="총평">총평&lt;/h2>
+&lt;h3 id="총평">총평&lt;/h3>
 &lt;p>각 요청당 2초 딜레이됐을 뿐인데도, 16개의 프로세서가 작동하는 동기 방식이 매우 성능이 떨어지는 것을 볼 수 있다. 확실히 네트워크 I/O가 자주 발생할 경우에는 비동기 방식이 필수라고 생각이 된다.&lt;/p>
 &lt;p>또한 Uvicorn과 MyUvicorn이 성능에서 큰 차이를 보이지 않는 것을 확인했다. 하지만 간단한 상황에서만 비슷한 것이고, 실제 복잡한 상용 서버에 적용하기에는 문제가 있을 것이다.&lt;/p>
 &lt;p>오늘도 ASGI를 성공적으로 구현했다. WSGI에 이어, 매우 재미있었다. 아마도 다음에는 golang의 goroutine을 이용한 동시성 프로그래밍을 진행해 볼 것 같다.&lt;/p>
@@ -278,9 +278,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -291,11 +291,11 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Python] WSGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h1 id="계기">계기&lt;/h1>
+&lt;/script></description></item><item><title>[Python] WSGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h2 id="계기">계기&lt;/h2>
 &lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 파이썬을 이용해 개발했다. 파이썬에서는 GIL 때문에 동시성이 어려운데, 이를 어떻게 해결했는지도 궁금해서 파이썬으로 골랐다.&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
-&lt;h1 id="osi-7계층">OSI 7계층&lt;/h1>
+&lt;h2 id="osi-7계층">OSI 7계층&lt;/h2>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image.png"
 width="1462"
 height="1184"
@@ -320,7 +320,7 @@ data-flex-basis="296px"
 &lt;blockquote>
 &lt;p>&lt;strong>여기서 말하는 추상화란?&lt;/strong> &lt;br> 추상화는 비슷하지만, 다른 두 가지의 타입을 하나로 여기고 작업을 할 수 있도록 하는 것을 말한다. 소켓은 모두 다른 L1, L2, L3, L4 하드웨어 드라이버를 신경 쓰지 않고 하나의 코드로 네트워크 작업을 할 수 있도록 도와준다. 만약 소켓이 없었다면, 개발자는 L1, L2, L3, L4 하드웨어 드라이버에 맞게 코드를 짜야 한다. 또한 그렇게 작성한 코드는 동일한 하드웨어 구조가 아니면 다른 기기에서 작동하지 않는다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="소켓">소켓&lt;/h1>
+&lt;h2 id="소켓">소켓&lt;/h2>
 &lt;p>소켓은 앞서 말한 것처럼, 추상화된 네트워크 접속 방법이다. 그렇다면 그 위치는 어디 있을까?&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-2.png"
 width="1462"
@@ -333,7 +333,7 @@ data-flex-basis="296px"
 >&lt;/p>
 &lt;p>바로 전송 계층 위에 존재한다. 대부분의 유명한 프로토콜들은(HTTP, SMTP, FTP, DNS)등은 응용 계층 프로토콜이다. 소켓을 사용할 줄 알고, 프로토콜에 대한 명세를 알고 있다면, 대부분 비슷하게 따라 만들 수 있다.&lt;/p>
 &lt;p>그래서 필자도 직접 웹서버를 만들어 볼 생각을 할 수 있었다.&lt;/p>
-&lt;h1 id="http">HTTP&lt;/h1>
+&lt;h2 id="http">HTTP&lt;/h2>
 &lt;p>그럼 HTTP는 실제로 어떻게 요청을 받고 어떻게 응답할까?&lt;/p>
 &lt;p>생각보다 간단하다.&lt;/p>
 &lt;ul>
@@ -389,7 +389,7 @@ data-flex-basis="296px"
 &lt;/li>
 &lt;/ul>
 &lt;p>위의 형태를 소켓에 주고 받기를 하면 된다.&lt;/p>
-&lt;h1 id="wsgi">WSGI&lt;/h1>
+&lt;h2 id="wsgi">WSGI&lt;/h2>
 &lt;p>파이썬에는 WSGI라는 것이 있다. Web Server Gateway Interface 라는 것의 약자로, 웹 서버와 웹 어플리케이션 사이의 요청/응답 방법을 정의해놓은 것이다.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-3.png"
 width="1542"
@@ -417,7 +417,7 @@ data-flex-basis="428px"
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;h2 id="wsgi-application-구현">WSGI Application 구현&lt;/h2>
+&lt;h3 id="wsgi-application-구현">WSGI Application 구현&lt;/h3>
 &lt;p>WSGI Application은 WSGI Server가 전달한 데이터를 받고 처리를 거친 후 데이터를 반환할 것이다.&lt;/p>
 &lt;p>그렇게하기 위해서는 WSGI Server(이하 server)와 WSGI Application(이하 app) 간에 약속된 호출 방식과 데이터 구조가 있어야한다.&lt;/p>
 &lt;ul>
@@ -450,7 +450,7 @@ data-flex-basis="428px"
 &lt;/li>
 &lt;/ul>
 &lt;p>그럼 간단한 app 구현체를 보자. 파이썬의 빌트인 라이브러리에서 간단한 app을 제공해준다.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># from wsgiref.simple_server import demo_app&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## from wsgiref.simple_server import demo_app&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">demo_app&lt;/span>(environ, start_response):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> start_response(&lt;span style="color:#e6db74">&amp;#34;200 OK&amp;#34;&lt;/span>, [(&lt;span style="color:#e6db74">&amp;#39;Content-Type&amp;#39;&lt;/span>,&lt;span style="color:#e6db74">&amp;#39;text/plain; charset=utf-8&amp;#39;&lt;/span>)])
@@ -468,12 +468,12 @@ data-flex-basis="428px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">yield&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Hello World!!&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>조금은 복잡해졌다. 이 코드를 이해하려면 &lt;code>__iter__&lt;/code>, &lt;code>__next__&lt;/code>, &lt;code>generator&lt;/code>를 이해해야 한다. 이 게시글에서는 설명하지 않도록 하겠다.&lt;/p>
 &lt;p>&lt;code>__iter__&lt;/code>함수가 generator이므로 &lt;code>for x in DemoApp(environ, start_response)&lt;/code>가 구동 가능하다. 그러므로 WSGI를 충족한다.&lt;/p>
-&lt;h1 id="wsgi-server-구현">WSGI Server 구현&lt;/h1>
+&lt;h2 id="wsgi-server-구현">WSGI Server 구현&lt;/h2>
 &lt;p>app이 어떻게 구성되는지 알아보았다. 이제 핵심은 server를 구현해보고자 한다. 앞서 간단한 app을 만들어 보았지만, app 부분은 이번 구현 목적에서 크게 중요한 것이 아니기 때문에 Django로 대체하고자 한다.&lt;/p>
-&lt;h2 id="소켓으로-http-서버-만들기">소켓으로 HTTP 서버 만들기&lt;/h2>
+&lt;h3 id="소켓으로-http-서버-만들기">소켓으로 HTTP 서버 만들기&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> socket
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># TCP로 소켓 연결&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## TCP로 소켓 연결&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">with&lt;/span> socket&lt;span style="color:#f92672">.&lt;/span>socket(socket&lt;span style="color:#f92672">.&lt;/span>AF_INET, socket&lt;span style="color:#f92672">.&lt;/span>SOCK_STREAM) &lt;span style="color:#66d9ef">as&lt;/span> ss:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓이 사용하던 포트가 종료되면, 기본적으로 해당 포트를 일정시간 동안 사용을 막음. 그 설정을 풀어주는 코드&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -529,7 +529,7 @@ class="gallery-image"
 data-flex-grow="319"
 data-flex-basis="767px"
 >&lt;/p>
-&lt;h2 id="소켓-서버를-wsgi로-변경하기">소켓 서버를 WSGI로 변경하기&lt;/h2>
+&lt;h3 id="소켓-서버를-wsgi로-변경하기">소켓 서버를 WSGI로 변경하기&lt;/h3>
 &lt;p>자 이제 소켓으로 HTTP 서버를 열어보았다. 이제 WSGI에 충족하도록 WSGI Server를 제작해보자.&lt;/p>
 &lt;p>전체코드는 아래와 같다. 코드는 계속해서 업데이트 될 예정이므로, &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
 >깃허브 링크&lt;/a>도 참고하자!&lt;/p>
@@ -689,7 +689,7 @@ data-flex-basis="767px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;__main__&amp;#34;&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MyGunicorn()&lt;span style="color:#f92672">.&lt;/span>run(app_path&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;wsgiserver.wsgi:application&amp;#34;&lt;/span>, worker&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, backlog&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">1000&lt;/span>)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="소켓을-사용하는-서버부분">소켓을 사용하는 서버부분&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="소켓을-사용하는-서버부분">소켓을 사용하는 서버부분&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">MyGunicorn&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓 생성&lt;/span>
@@ -727,7 +727,7 @@ data-flex-basis="767px"
 &lt;blockquote>
 &lt;p>&lt;strong>GIL(Global Interpreter Lock)&lt;/strong> &lt;br> GIL은 하나의 스레드가 활성화 되면 다른 스레드가 활성화 되지 않도록 락을 걸고 사용하는 것을 의미한다. 이는 CPython에만 존재하며 다른 파이썬 구현체에는 존재하지 않는다. I/O 바운드에는 GIL이 잘 적용되지 않아서 스레드가 효율적이고, CPU 바운드에는 GIL이 적극적으로 적용된다고 한다. 웹 서버의 경우 CPU 바운드와 I/O 바운드가 적절하게 존재하므로 스레드를 사용하는 것보다 프로세스를 사용하는 것이 더 효율적이다.&lt;/p>
 &lt;/blockquote>
-&lt;h2 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h2>
+&lt;h3 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h3>
 &lt;p>각 프로세스마다 Handler 클래스를 하나씩 만들어 실행시킨다.&lt;/p>
 &lt;p>이후 해당 run 함수 부분에서는 크게 &amp;ldquo;request를 파싱해서 &lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분&amp;rdquo;, &amp;ldquo;app에게 response를 받아서 소켓을 통해 발신하는 부분&amp;quot;으로 나뉜다.&lt;/p>
 &lt;ol>
@@ -835,7 +835,7 @@ data-flex-basis="767px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>send(response)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>close()
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-6.png"
 width="524"
 height="526"
@@ -888,9 +888,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -901,10 +901,10 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
+&lt;/script></description></item><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h2 id="문제">문제&lt;/h2>
 &lt;p>문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
 ​&lt;/p>
-&lt;h2 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h2>
+&lt;h3 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h3>
 &lt;p>​
 해당 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
 ​
@@ -912,26 +912,26 @@ resize()
 ​
 그런데 &lt;code>importlib&lt;/code>이 느리다니&amp;hellip; 이해가 되지 않았다. &lt;code>importlib&lt;/code>은 결국 &lt;code>__import__&lt;/code> 함수의 래퍼이다. &lt;code>__import__&lt;/code>함수는 import 구문을 만나면 실행되는 기본적인 함수이다. 이게 느리다면, 파이썬을 사용해도 되는 것일까?
 ​&lt;/p>
-&lt;h2 id="import의-작동-방식에-대해서-알아보자">Import의 작동 방식에 대해서 알아보자&lt;/h2>
+&lt;h3 id="import의-작동-방식에-대해서-알아보자">Import의 작동 방식에 대해서 알아보자&lt;/h3>
 &lt;p>​
 해당 정보는 &lt;a class="link" href="https://medium.com/@likegondry/python-til-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%B4-import%EB%A1%9C-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%84-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95-76e268e7613b" target="_blank" rel="noopener"
 >김지연 님의 블로그&lt;/a>를 참고해서 작성했다.
 ​&lt;/p>
-&lt;h2 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기&lt;/h2>
+&lt;h3 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기&lt;/h3>
 &lt;p>​
 sys.module에는 이때까지 사용했던 module들이 딕셔너리 형태로 저장되어 있다. import시 해당 모듈이 이전에 import 된 것이라면 빠르게 가져올 수 있다.
 ​&lt;/p>
-&lt;h2 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기&lt;/h2>
+&lt;h3 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기&lt;/h3>
 &lt;p>​
 이 작업이 좀 오래 걸린다. 파일 리스트을 하나하나 탐색하면서 모듈을 가져오기 때문에 시간이 오래걸린다. 아마 필자의 생각으로는 File I/O 작업이라서 오래 걸리는 것 같다.
 ​&lt;/p>
-&lt;h2 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&amp;hellip;?&lt;/h2>
+&lt;h3 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&amp;hellip;?&lt;/h3>
 &lt;p>​
 만약 &lt;code>FooFacade&lt;/code> 클래스를 &lt;strong>처음&lt;/strong> 동적으로 import 한다면, 생각보다 시간이 오래 걸릴 수 있겠다는 생각이 들었다. 실제로도 처음 실행할 때와, 조금 유휴시간이 지난 후 실행하면 &lt;code>importlib&lt;/code> 동작 시간이 오래 걸리는 것을 확인할 수 있었다.
 ​
 심지어 AWS 람다를 이용하고 있어서, 일정 유휴시간이 지나면 컨테이너가 내려가버린다. 그렇다면 새롭게 컨테이너가 생성될 때마다, &lt;code>importlib&lt;/code>에서 시간을 많이 잡아먹었다.
 ​&lt;/p>
-&lt;h1 id="해결방법">해결방법&lt;/h1>
+&lt;h2 id="해결방법">해결방법&lt;/h2>
 &lt;p>​
 이제 문제점을 찾았으니 해결을 해보자.
 ​
@@ -976,7 +976,7 @@ FastAPI는 어떻게 라우팅을 사용하고 있을까?
 그렇다면 &lt;code>api_route&lt;/code> 함수를 보자.
 ​&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 너무 길어서 간략하게 축소한 버전이다.&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 너무 길어서 간략하게 축소한 버전이다.&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">api_route&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path: str,
@@ -1019,9 +1019,9 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)&lt;/p>
 &lt;p>​
 필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.&lt;/p>
-&lt;h1 id="결과">결과&lt;/h1>
+&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>​
-무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h1 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h1>
+무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h2 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> abc
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BaseClass&lt;/span>(metaclass&lt;span style="color:#f92672">=&lt;/span>abc&lt;span style="color:#f92672">.&lt;/span>ABCMeta):
@@ -1029,7 +1029,7 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span>(self):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 아래처럼 &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 아래처럼 &lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BaseClass&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> __metaclass__ &lt;span style="color:#f92672">=&lt;/span> abc&lt;span style="color:#f92672">.&lt;/span>ABCMeta
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@abc.abstractmethod&lt;/span>

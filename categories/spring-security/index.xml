@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Spring Security on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/spring-security/</link><description>Recent content in Spring Security on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 05 Mar 2024 17:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/spring-security/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring][Spring Security] REST api + Session 로그인을 구현해보자</title><link>https://fhdufhdu.github.io/post/18/</link><pubDate>Tue, 05 Mar 2024 17:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/18/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Spring Security on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/spring-security/</link><description>Recent content in Spring Security on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 05 Mar 2024 17:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/spring-security/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring][Spring Security] REST api + Session 로그인을 구현해보자</title><link>https://fhdufhdu.github.io/post/18/</link><pubDate>Tue, 05 Mar 2024 17:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/18/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>일반적으로 Spring Security는 from 로그인과 http basic 로그인을 지원한다. 이는 RESTful한 방식과는 맞지 않기 때문에, 따로 필터를 만들어야 한다.&lt;/p>
 &lt;p>간단한 플로우차트는 아래와 같다.
 &lt;img src="https://fhdufhdu.github.io/post/18/image.png"
@@ -10,7 +10,7 @@ class="gallery-image"
 data-flex-grow="66"
 data-flex-basis="160px"
 >&lt;/p>
-&lt;h1 id="authentication">Authentication&lt;/h1>
+&lt;h2 id="authentication">Authentication&lt;/h2>
 &lt;p>세션에 등록할 객체이다. 이 친구를 세션에 등록해서 Sprint Security의 인증, 인가를 사용할 수 있다. Authentication 자체는 인터페이스이며, 구현체를 직접 만들어야 한다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk.auth
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -57,7 +57,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 부분에서 제일 중요한 부분은, &lt;code>getAuthorities()&lt;/code>와 &lt;code>isAuthenticated()&lt;/code>이다. 이 두 가지가 인가, 인증을 검증할 때 사용된다.&lt;/p>
-&lt;h1 id="loginfilter-코드">LoginFilter 코드&lt;/h1>
+&lt;h2 id="loginfilter-코드">LoginFilter 코드&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk.auth
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -125,7 +125,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.sendError(&lt;span style="color:#ae81ff">401&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="스프링-설정-변경">스프링 설정 변경&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="스프링-설정-변경">스프링 설정 변경&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fhdufhdu.kiosk.auth.LoginFilter
@@ -195,7 +195,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>실제로 테스트 해본 결과 로그인 한 이후 인증 전용 URL에도 접근이 잘 되는 것을 확인했다. 사실 JWT를 사용해볼까도 싶었지만, 이번 개발의 목적이 MSA가 아닌 대규모 트래픽 대응 서버를 만들어보는 것이기 때문에 세션을 사용하기로 결정했다.&lt;/p>
 &lt;p>JWT는 MSA 시스템이 아닌 이상 큰 장점을 가지지는 않는다고 생각한다. 생각보다 검증해야할 것이 많고, 탈취 당했을 때 대응도 어렵다.
 모놀리식 서버 구조라면 세션 방식이 더 효율적이라고 생각한다.&lt;/p>
@@ -209,9 +209,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`

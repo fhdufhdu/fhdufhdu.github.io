@@ -1,10 +1,268 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kotlin on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/kotlin/</link><description>Recent content in Kotlin on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 30 Apr 2024 09:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/kotlin/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring Boot] Controller, Service, Repository에서의 DTO 분리 그리고 네이밍에 대해서</title><link>https://fhdufhdu.github.io/post/21/</link><pubDate>Tue, 30 Apr 2024 09:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/21/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Kotlin on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/kotlin/</link><description>Recent content in Kotlin on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 01 May 2024 16:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/kotlin/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring Boot][Kotlin] @Valid 사용시에 Enum 값을 검증해보자(Custom Validation, Enum Validation)</title><link>https://fhdufhdu.github.io/post/22/</link><pubDate>Wed, 01 May 2024 16:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/22/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
+&lt;p>필자는 Enum 값을 즐겨 사용한다. Enum은 코드로 값을 고정할 수 있다는 점에서 &lt;strong>컴파일 단계에서 안전&lt;/strong>하다. Spring Boot에서 &lt;code>@Valid&lt;/code> 어노테이션을 사용하는 Body, Query를 Enum으로 검증해보자.&lt;/p>
+&lt;h2 id="주의사항">주의사항&lt;/h2>
+&lt;p>잘 알아야 하는 것은, &lt;em>&lt;strong>검증&lt;/strong>&lt;/em> 만 하는 것이다. 절대로 &lt;em>&lt;strong>변환&lt;/strong>&lt;/em> 을 하는 것이 아니다!&lt;/p>
+&lt;p>Body 혹은 Query의 String을 Enum으로 변환하고자 하는 것이 아니라, String이 Enum 값에 있는 지 확인하고자 하는 것이라는 것을 이해하자.&lt;/p>
+&lt;p>필자가 처음에 이것을 헷갈려 했다가 시간을 너무 낭비했던 경험이 있다.&lt;/p>
+&lt;h2 id="valid">&lt;code>@Valid&lt;/code>&lt;/h2>
+&lt;p>스프링은 &lt;code>@Valid&lt;/code>가 달린 객체에 대해서 검증을 실시한다. 검증을 실시할 때는 어노테이션이 달린 멤버변수에 대해서 검증한다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Controller&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@GetMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// GetFooRequest 와 PostFooRequest가 값이 올바른지 검증한다.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">getFoo&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@ModelAttribute&lt;/span> query: GetFooRequest) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">..&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@PostMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">postFoo&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@RequestBody&lt;/span> body: PostFooRequest) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">..&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">/* GetFooRequest를 검증할 때
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * bar는 null이거나 빈 스트링이면 안되고,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageNumer는 음수이면 안되고,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageSize는 3이상인지 검증함.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">GetFooRequest&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:NotBlank
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> bar: String,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:Min(&lt;span style="color:#ae81ff">0&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> pageNumber: Int,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:Min(&lt;span style="color:#ae81ff">3&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> pageSize: Int,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// field는 kotlin에서 사용하는 방식. kotlin에서는 생성자 부분에 멤버변수를 선언할 수 있으므로 생성자 부분에 있는 필드가 어느 부분에 적용되는지를 알려줘야한다.
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위의 &lt;code>@NotBlank&lt;/code>, &lt;code>@Min&lt;/code> 과 같은 어노테이션들을 &lt;strong>Bean Validation&lt;/strong>이라고 한다.(&lt;a class="link" href="https://beanvalidation.org/" target="_blank" rel="noopener"
+>문서&lt;/a>)&lt;/p>
+&lt;p>기본으로 제공되는 어노테이션 말고, 우리가 원하는 방식으로 검증하도록 수정할 수도 있다.&lt;/p>
+&lt;h2 id="간단한-spring-boot에서의-검증-플로우">간단한 Spring boot에서의 검증 플로우&lt;/h2>
+&lt;p>검증은 일반적으로 Dispatcher Servlet에서 Handler Adapter를 통해 Controller의 Method를 호출하기 전에 &lt;code>@Valid&lt;/code> 파라미터 메소드에 있는 지 확인하고 있다면 검증을 시도한다.&lt;/p>
+&lt;ol>
+&lt;li>사용자 요청&lt;/li>
+&lt;li>Dispatcher Sevlet 실행&lt;/li>
+&lt;li>Handler Mapping을 통해 실행할 컨트롤러와 메소드를 확인&lt;/li>
+&lt;li>Handler Adapter를 통해 컨트롤러의 메소드 실행
+&lt;ol>
+&lt;li>실행하기 이전 &lt;code>@ModelAttriBute&lt;/code>, &lt;code>@RequestBody&lt;/code>, &lt;code>@AuthenticationPrincipal&lt;/code> 같은 어노테이션 확인 후 적절한 로직 실행&lt;/li>
+&lt;li>&lt;code>@Valid&lt;/code> 어노테이션 확인 후 검증 로직 실행&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="custom-validator-구현">Custom Validator 구현&lt;/h2>
+&lt;h3 id="1-annotaion-만들기">1. Annotaion 만들기&lt;/h3>
+&lt;p>이제 &lt;code>@NotBlank&lt;/code> 같은 어노테이션을 만들어야한다. 아래와 같이 만들 수 있다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Constraint
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidatorContext
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Payload
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> kotlin.reflect.KClass
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Target&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FUNCTION,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_GETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_SETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FIELD,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.ANNOTATION_CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CONSTRUCTOR,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.VALUE_PARAMETER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE_PARAMETER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Retention&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationRetention&lt;/span>.RUNTIME
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">annotation&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">ValidEnum&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> enum: KClass&amp;lt;&lt;span style="color:#66d9ef">out&lt;/span> Enum&amp;lt;*&amp;gt;&amp;gt;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> isNull: Boolean = &lt;span style="color:#66d9ef">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 아래 값은 필수 값
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> message: String = &lt;span style="color:#e6db74">&amp;#34;허용되지 않은 값입니다.&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> groups: Array&amp;lt;KClass&amp;lt;Any&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> payload: Array&amp;lt;KClass&amp;lt;Payload&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>키워드&lt;/th>
+&lt;th>설명&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>@Target&lt;/td>
+&lt;td>어노테이션의 적용 범위&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>@Retention&lt;/td>
+&lt;td>언제 적용 되는지&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>message&lt;/td>
+&lt;td>검증 실패시 출력할 에러 메시지&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>groups&lt;/td>
+&lt;td>어떤 그룹에 속하는지(그룹 별로 검증할 지 안할 지 정할 수 있음)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>payload&lt;/td>
+&lt;td>추가적인 검증 메타데이터&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enum&lt;/td>
+&lt;td>검증할 Enum 클래스&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>isNull&lt;/td>
+&lt;td>null 값을 허용하는지&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>&lt;code>message&lt;/code>, &lt;code>groups&lt;/code>, &lt;code>payload&lt;/code>는 필수 파라미터이다. 자세한 건 &lt;a class="link" href="https://jakarta.ee/specifications/bean-validation/3.0/jakarta-bean-validation-spec-3.0.html#constraintsdefinitionimplementation-constraintdefinition-properties" target="_blank" rel="noopener"
+>공식 문서&lt;/a>를 참고해보자.&lt;/p>
+&lt;h3 id="2-validator-만들기">2. Validator 만들기&lt;/h3>
+&lt;p>어노테이션을 만들었으니, 스프링이 검증 로직을 실행할 때 사용할 Validator가 필요하다.&lt;/p>
+&lt;p>따로 파일을 분리해서 만들어도 되고, 방금 만든 어노테이션 클래스의 inner class로 만들어도 된다. 필자는 inner class로 만들도록 한다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fhdufhdu.windows7board.common.dto.ValidEnum.EnumValidator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Constraint
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidatorContext
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Payload
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> kotlin.reflect.KClass
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Target&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FUNCTION,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_GETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_SETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FIELD,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.ANNOTATION_CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CONSTRUCTOR,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.VALUE_PARAMETER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE_PARAMETER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Retention&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationRetention&lt;/span>.RUNTIME
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 추가된 부분
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">@Constraint&lt;/span>(validatedBy = [EnumValidator&lt;span style="color:#f92672">::&lt;/span>&lt;span style="color:#66d9ef">class&lt;/span>])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">annotation&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">ValidEnum&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> enum: KClass&amp;lt;&lt;span style="color:#66d9ef">out&lt;/span> Enum&amp;lt;*&amp;gt;&amp;gt;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> isNull: Boolean = &lt;span style="color:#66d9ef">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> message: String = &lt;span style="color:#e6db74">&amp;#34;허용되지 않은 값입니다.&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> groups: Array&amp;lt;KClass&amp;lt;Any&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> payload: Array&amp;lt;KClass&amp;lt;Payload&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> ignoreCase: Boolean = &lt;span style="color:#66d9ef">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 추가된 부분
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">EnumValidator&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ) : ConstraintValidator&amp;lt;ValidEnum, String&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">lateinit&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> annotation: ValidEnum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">override&lt;/span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">initialize&lt;/span>(constraintAnnotation: ValidEnum) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#66d9ef">annotation&lt;/span> = constraintAnnotation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">override&lt;/span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">isValid&lt;/span>(&lt;span style="color:#66d9ef">value&lt;/span>: String?, context: ConstraintValidatorContext): Boolean {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> enums = &lt;span style="color:#66d9ef">annotation&lt;/span>.&lt;span style="color:#66d9ef">enum&lt;/span>.java.enumConstants
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#66d9ef">value&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#66d9ef">annotation&lt;/span>.isNull) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> enums.any { &lt;span style="color:#66d9ef">it&lt;/span>.name &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#66d9ef">value&lt;/span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Validator는 &lt;code>jakarta.validation.ConstraintValidator&lt;/code> 인터페이스를 구현해서 만들어야 한다.&lt;/p>
+&lt;p>&lt;code>initialize&lt;/code>를 통해 어노테이션 정보를 가져오고, &lt;code>isValid&lt;/code>를 통해 검증 여부를 판단할 수 있다.(&lt;code>true&lt;/code> 성공, &lt;code>false&lt;/code> 실패)&lt;/p>
+&lt;p>우리는 &lt;code>isValid&lt;/code> 함수를 집중적으로 구현할 것이다.&lt;/p>
+&lt;ol>
+&lt;li>우선 어노테이션의 &lt;code>enum&lt;/code> 멤버 변수에서 모든 enum 값 리스트 추출&lt;/li>
+&lt;li>어노테이션에 isNull이 붙어있고 value가 null이라면 true&lt;/li>
+&lt;li>enum 값 리스트에서 value가 하나라도 매칭되면 true, 그렇지 않으면 false&lt;/li>
+&lt;/ol>
+&lt;h3 id="3-적용">3. 적용&lt;/h3>
+&lt;h4 id="request-dto">Request DTO&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">GetFooRequest&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:ValidEnum(&lt;span style="color:#66d9ef">enum&lt;/span> = SortCriteria&lt;span style="color:#f92672">::&lt;/span>&lt;span style="color:#66d9ef">class&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> sortCriteria: String = &lt;span style="color:#a6e22e">SortCriteria&lt;/span>.&lt;span style="color:#a6e22e">CREATED_AT&lt;/span>.name,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">enum&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">SortCriteria&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TITLE, CONTENT, CREATED_AT, USER_ID
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="controller">Controller&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@RestController&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@PreAuthorize&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;isAuthenticated()&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@ResponseBody&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> fooService: FooService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@GetMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">getFoo&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@ModelAttribute&lt;/span> query: GetFooRequest) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이렇게 사용할 수 있다.&lt;/p>
+&lt;h2 id="디버그-모드로-적용-확인">디버그 모드로 적용 확인&lt;/h2>
+&lt;p>이제 이 Custom Validation이 잘 적용되는지 확인해보자.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/22/image.png"
+width="1594"
+height="1336"
+loading="lazy"
+alt="Break Point"
+class="gallery-image"
+data-flex-grow="119"
+data-flex-basis="286px"
+>&lt;/p>
+&lt;p>해당 라인에 break point를 걸어서 디버그 모드로 확인해보자.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/22/image-1.png"
+width="1624"
+height="1306"
+loading="lazy"
+alt="JVM Stack"
+class="gallery-image"
+data-flex-grow="124"
+data-flex-basis="298px"
+>&lt;/p>
+&lt;p>&lt;a class="link" href="#%ea%b0%84%eb%8b%a8%ed%95%9c-spring-boot%ec%97%90%ec%84%9c%ec%9d%98-%ea%b2%80%ec%a6%9d-%ed%94%8c%eb%a1%9c%ec%9a%b0" >간단한 Spring boot에서의 검증 플로우&lt;/a>에서 말했던 것 처럼 검증 로직이 진행된다는 것을 알 수 있다.&lt;/p>
+&lt;h2 id="마치며">마치며&lt;/h2>
+&lt;p>이 기능에 대해 구현을 하고 블로그를 작성하며 Spring boot의 내부 구조와 작동 방식에 대해서 다시 한번 공부를 하게 되었고, Bean Validation에 대한 공식 문서를 보면서 작동 방식에 대해 익숙해질 수 있었다.&lt;/p>
+&lt;p>또한 디버그 모드를 통해 validation이 작동하는 위치에 대한 추측을 증명할 수 있었다.&lt;/p>
+&lt;p>블로그 글을 오랜만에 작성하면서 &amp;ldquo;알고 있는 지식은 공유해야 본인에게도 정리가 잘되는 것 같다&amp;quot;는 생각이 다시 한번 들었다. 앞으로도 게으름 피우지 말고 열심히 블로그 글을 작성해야겠다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 4
+else if(width &lt; 0) return 0
+return (4/767) * width - (3072/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Spring Boot] Controller, Service, Repository에서의 DTO 분리 그리고 네이밍에 대해서</title><link>https://fhdufhdu.github.io/post/21/</link><pubDate>Tue, 30 Apr 2024 09:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/21/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>오랜만에 포스팅하게 되었다. 그동안 회사도 바빴고, 개인적으로 Spring boot를 이용한 게시판을 만들고 있었다. 예전과는 다르게, 실무에서 겪었던 문제들을 바탕으로 해결책들을 녹여내기 위해서 노력했다. (&lt;a class="link" href="http://fhdufhdu.hopto.org" target="_blank" rel="noopener"
 >해당 게시판&lt;/a> &amp;hellip;홍보도 겸사겸사)&lt;/p>
 &lt;p>사실 백엔드 개발을 하며 제일 크게 문제라고 느꼈던 건, 네이밍과 관심사 분리였다.&lt;/p>
 &lt;p>필자는 서버를 Controller, Service, Repository, Infrasturcture 계층으로 나누어서 주로 개발한다. 여기까지는 관습적으로 잘 지켜오고 있었는데, 그 외의 DTO가 문제였다.&lt;/p>
 &lt;p>이에 대한 이야기와, 나름대로 해결책을 정리해 보겠다.&lt;/p>
-&lt;h1 id="request-dto를-모든-곳에서-사용하지-말자">Request DTO를 모든 곳에서 사용하지 말자&lt;/h1>
+&lt;h2 id="request-dto를-모든-곳에서-사용하지-말자">Request DTO를 모든 곳에서 사용하지 말자&lt;/h2>
 &lt;p>제일 크게 문제였던 것은, Request DTO였다. 필자는 이전까지 Request DTO를 모든 계층에서 돌려쓸 때가 있었다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> fooService: FooService
@@ -36,7 +294,7 @@
 &lt;/li>
 &lt;/ol>
 &lt;p>그렇다면 어떻게 해야 할까&amp;hellip;?&lt;/p>
-&lt;h1 id="dto를-모든-계층에서-분리하자">DTO를 모든 계층에서 분리하자!&lt;/h1>
+&lt;h2 id="dto를-모든-계층에서-분리하자">DTO를 모든 계층에서 분리하자!&lt;/h2>
 &lt;p>문제를 해결하기 위해 모든 계층에서 DTO를 만들어보려고 했다. 다만 이럴 때 문제점은 DTO 이름이 너무나도 중복이 많이 되는 것이 문제였다.&lt;/p>
 &lt;p>그래서 주위에 물어보거나, 많은 자료조사 끝에, 나름대로 철칙을 만들었다.&lt;/p>
 &lt;ol>
@@ -66,7 +324,7 @@
 &lt;/ol>
 &lt;p>이렇게 분리하게 되면, 앞서 이야기한 문제가 해결된다. 단점은 DTO를 많이 만들고 수정해야 한다는 것이다. 하지만 런타임 에러를 방지한다는 목적으로 보자면 매우 효율적인 비용이라고 생각한다.&lt;/p>
 &lt;p>이제 적용 예시를 보자.&lt;/p>
-&lt;h2 id="게시글-목록-조회">게시글 목록 조회&lt;/h2>
+&lt;h3 id="게시글-목록-조회">게시글 목록 조회&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 컨트롤러
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">@Controller&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BoardController&lt;/span>(
@@ -150,8 +408,8 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>모든 계층에서, 자신의 DTO를 다른 계층의 DTO로 변환해서 호출하는 것을 볼 수 있다. 이런 방식을 통해 하나의 DTO가 변경되더라도 런타임 에러를 방지할 수 있다.&lt;/p>
-&lt;h1 id="마무리하며">마무리하며&lt;/h1>
-&lt;p>DTO 이슈는 현업을 진행하며 많이 고민이 되었던 문제였다. 이번에 Spring 개발을 진행하며 나름대로 생각 정리가 되어서 후련하다. 사실 이번 DTO 관련 이슈를 제외하고서도 나름대로 정리된 내용이 많다. 다음 포스팅에서는 DTO의 역할에 대해서도 생각을 정리해 보는 시간을 가져보도록 하겠다.&lt;/p></description></item><item><title>[Spring][Spring Security] REST api + Session 로그인을 구현해보자</title><link>https://fhdufhdu.github.io/post/18/</link><pubDate>Tue, 05 Mar 2024 17:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/18/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+&lt;h2 id="마무리하며">마무리하며&lt;/h2>
+&lt;p>DTO 이슈는 현업을 진행하며 많이 고민이 되었던 문제였다. 이번에 Spring 개발을 진행하며 나름대로 생각 정리가 되어서 후련하다. 사실 이번 DTO 관련 이슈를 제외하고서도 나름대로 정리된 내용이 많다. 다음 포스팅에서는 DTO의 역할에 대해서도 생각을 정리해 보는 시간을 가져보도록 하겠다.&lt;/p></description></item><item><title>[Spring][Spring Security] REST api + Session 로그인을 구현해보자</title><link>https://fhdufhdu.github.io/post/18/</link><pubDate>Tue, 05 Mar 2024 17:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/18/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>일반적으로 Spring Security는 from 로그인과 http basic 로그인을 지원한다. 이는 RESTful한 방식과는 맞지 않기 때문에, 따로 필터를 만들어야 한다.&lt;/p>
 &lt;p>간단한 플로우차트는 아래와 같다.
 &lt;img src="https://fhdufhdu.github.io/post/18/image.png"
@@ -163,7 +421,7 @@ class="gallery-image"
 data-flex-grow="66"
 data-flex-basis="160px"
 >&lt;/p>
-&lt;h1 id="authentication">Authentication&lt;/h1>
+&lt;h2 id="authentication">Authentication&lt;/h2>
 &lt;p>세션에 등록할 객체이다. 이 친구를 세션에 등록해서 Sprint Security의 인증, 인가를 사용할 수 있다. Authentication 자체는 인터페이스이며, 구현체를 직접 만들어야 한다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk.auth
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -210,7 +468,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 부분에서 제일 중요한 부분은, &lt;code>getAuthorities()&lt;/code>와 &lt;code>isAuthenticated()&lt;/code>이다. 이 두 가지가 인가, 인증을 검증할 때 사용된다.&lt;/p>
-&lt;h1 id="loginfilter-코드">LoginFilter 코드&lt;/h1>
+&lt;h2 id="loginfilter-코드">LoginFilter 코드&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk.auth
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -278,7 +536,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.sendError(&lt;span style="color:#ae81ff">401&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="스프링-설정-변경">스프링 설정 변경&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="스프링-설정-변경">스프링 설정 변경&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fhdufhdu.kiosk.auth.LoginFilter
@@ -348,7 +606,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>실제로 테스트 해본 결과 로그인 한 이후 인증 전용 URL에도 접근이 잘 되는 것을 확인했다. 사실 JWT를 사용해볼까도 싶었지만, 이번 개발의 목적이 MSA가 아닌 대규모 트래픽 대응 서버를 만들어보는 것이기 때문에 세션을 사용하기로 결정했다.&lt;/p>
 &lt;p>JWT는 MSA 시스템이 아닌 이상 큰 장점을 가지지는 않는다고 생각한다. 생각보다 검증해야할 것이 많고, 탈취 당했을 때 대응도 어렵다.
 모놀리식 서버 구조라면 세션 방식이 더 효율적이라고 생각한다.&lt;/p>
@@ -362,9 +620,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -375,15 +633,15 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+&lt;/script></description></item><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h2 id="시작하며">시작하며&lt;/h2>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/16" >이전 글&lt;/a>에서 코틀린 해시 결과인 byte를 string으로 변환하는 과정을 탐구하던 중에, 2의 보수까지 알아야 해서 2의 보수에 관해 공부했다. 이번 포스팅에는 왜 2의 보수를 공부해야 했는지 설명하면서, 어떻게 byte를 hex string으로 변환하는지 알아보자.&lt;/p>
-&lt;h1 id="문제">문제&lt;/h1>
+&lt;h2 id="문제">문제&lt;/h2>
 &lt;p>&lt;code>val b = 244.toByte()&lt;/code>를 실행하면, 어떤 값이 나올까? 답은 &lt;code>-12&lt;/code>이다. 왜 그럴까??&lt;/p>
 &lt;p>답은 2의 보수다. byte는 8bit이고 244는 $1111\ 0100_2$이다. 최상위 비트가 1이므로 2의 보수를 취하면 $0000\ 1100_2$이고 이 값은 12이다. 그러므로 결괏값은 -12가 된다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(b.toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// -C
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>여기서 문제는 &lt;code>244&lt;/code>는 hex로 &lt;code>F4&lt;/code>이다. 그런데 Kotlin에서는 &lt;code>244.toByte().toStrint(16)&lt;/code>를 &lt;code>-C&lt;/code>로 표현한다. 같은 입력값인데 서로 다른 결괏값을 표현하게 된다.&lt;/p>
-&lt;h1 id="이유가-뭘까">이유가 뭘까?&lt;/h1>
+&lt;h2 id="이유가-뭘까">이유가 뭘까?&lt;/h2>
 &lt;p>이는 &lt;code>toString()&lt;/code> 함수의 구현 방식에 문제가 있다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Integer&lt;/span> &lt;span style="color:#66d9ef">extends&lt;/span> Number
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">implements&lt;/span> Comparable&lt;span style="color:#f92672">&amp;lt;&lt;/span>Integer&lt;span style="color:#f92672">&amp;gt;&lt;/span>, Constable, ConstantDesc {
@@ -449,7 +707,7 @@ resize()
 &lt;li>예시) $1111\ 0100_2$(-12)를 32비트 integer로 변환&lt;/li>
 &lt;li>결과) $0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 1111\ 0100_2$(244) 로 변환하고 싶다면?&lt;/li>
 &lt;/ul>
-&lt;h1 id="비트-연산을-사용하자">비트 연산을 사용하자&lt;/h1>
+&lt;h2 id="비트-연산을-사용하자">비트 연산을 사용하자&lt;/h2>
 &lt;p>비트 연산을 이용하면 된다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) &lt;span style="color:#75715e">// 244 출력
@@ -463,7 +721,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println((b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// f4 출력
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>정상적으로 &lt;code>f4&lt;/code>가 나오는 것을 알 수 있다.&lt;/p>
 &lt;p>하지만 여기서 끝이 아니다.&lt;/p>
-&lt;h1 id="뭔가-이상하게-출력되는데">뭔가 이상하게 출력되는데&amp;hellip;?&lt;/h1>
+&lt;h2 id="뭔가-이상하게-출력되는데">뭔가 이상하게 출력되는데&amp;hellip;?&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> blist = arrayOf(&lt;span style="color:#ae81ff">244.&lt;/span>toByte(), &lt;span style="color:#ae81ff">0.&lt;/span>toByte(), &lt;span style="color:#ae81ff">12.&lt;/span>toByte(), &lt;span style="color:#ae81ff">255.&lt;/span>toByte())
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>blist.forEach{ println((&lt;span style="color:#66d9ef">it&lt;/span>.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -474,7 +732,7 @@ resize()
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">ff
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">*/&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>뭔가 좀 이상하다. byte를 hex로 바꾸면 &lt;code>f4 00 0c ff&lt;/code>가 출력되어야 하는데, 그렇지 않은 것을 알 수 있다. &lt;code>toString()&lt;/code>가 integer의 나눗셈을 기반으로 변환하다 보니 $0000_2$으로 표현되는 부분은 모두 생략하게 된다. 이를 어떻게 해결해야 할까?&lt;/p>
-&lt;h1 id="다시-비트연산을-이용하자">다시 비트연산을 이용하자&lt;/h1>
+&lt;h2 id="다시-비트연산을-이용하자">다시 비트연산을 이용하자&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">12.&lt;/span>toByte()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(((b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) + &lt;span style="color:#ae81ff">0x100&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// 10c 출력
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>+ 0x100&lt;/code>이 추가되었다. 이렇게 되면
@@ -490,22 +748,22 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">ff
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">*/&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>끝이다.&lt;/p>
-&lt;h1 id="마무리하며">마무리하며&lt;/h1>
-&lt;p>자료형 간의 차이를 명확하게 알지 않는 이상, 해결하기 쉽지 않은 문제였다고 생각한다. 비트 연산 또한 잘 이용하지 않았던 것이었는데, 비트 연산을 활용해서 문제를 해결하는 방법이 꽤 인상적이었다. 홀수/짝수 구분도 최하위비트로 판단할 수 있는 것처럼 비트 연산이 최적화에 도움이 많이 될 것 같다.&lt;/p></description></item><item><title>[CS] 왜 음수를 표현할 때 2의 보수를 사용할까?</title><link>https://fhdufhdu.github.io/post/16/</link><pubDate>Sat, 17 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/16/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+&lt;h2 id="마무리하며">마무리하며&lt;/h2>
+&lt;p>자료형 간의 차이를 명확하게 알지 않는 이상, 해결하기 쉽지 않은 문제였다고 생각한다. 비트 연산 또한 잘 이용하지 않았던 것이었는데, 비트 연산을 활용해서 문제를 해결하는 방법이 꽤 인상적이었다. 홀수/짝수 구분도 최하위비트로 판단할 수 있는 것처럼 비트 연산이 최적화에 도움이 많이 될 것 같다.&lt;/p></description></item><item><title>[CS] 왜 음수를 표현할 때 2의 보수를 사용할까?</title><link>https://fhdufhdu.github.io/post/16/</link><pubDate>Sat, 17 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/16/</guid><description>&lt;h2 id="시작하며">시작하며&lt;/h2>
 &lt;p>최근에 kotlin으로 Spring boot 프로젝트를 제작하고 있던 중에, SHA-512를 사용해야 했었다.
 방법을 찾아보니, 굉장히 특이한 코드가 보였다&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Integer&lt;/span>.toString((digest[i] and &lt;span style="color:#ae81ff">0xff&lt;/span>.toByte()) + &lt;span style="color:#ae81ff">0x100&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>).substring(&lt;span style="color:#ae81ff">1&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 코드는 SHA-512를 거쳐서 나온 byte를 string으로 변경하는 코드인데, 왜 이렇게 쓰는 지 궁금해졌다.&lt;/p>
 &lt;p>그래서 파고파고 공부하다보니, 어느새 2의 보수까지 오게 되었다. 2의 보수를 다시 한번 공부하다보니, 음수를 표현할 때 2의 보수를 왜 사용했는 지에 대해 알 것 같았다. 그래서 해당 내용을 정리하고자 한다.&lt;/p>
 &lt;p>&lt;em>해당 내용은 필자의 주관적인 견해가 많이 포함되어 있습니다.&lt;/em>&lt;/p>
-&lt;h1 id="보수란">보수란?&lt;/h1>
+&lt;h2 id="보수란">보수란?&lt;/h2>
 &lt;blockquote>
 &lt;p>보수(補數)는 보충을 해주는 수를 의미한다. 이를테면 1에 대한 10의 보수는 9, 4에 대한 15의 보수는 11의 개념이다. 1에 대한 2의 보수는 1이다.&lt;br>
 &lt;strong>출처&lt;/strong> - &lt;a class="link" href="https://ko.wikipedia.org/wiki/%EB%B3%B4%EC%88%98_%28%EC%88%98%ED%95%99%29" target="_blank" rel="noopener"
 >위키피디아&lt;/a>&lt;/p>
 &lt;/blockquote>
 &lt;p>조금 더 보충 설명하자면, 보수는 각 자리의 수가 특정 수가 되게끔 보충해주는 수이다. 1에 대한 10의 보수는 9이고, 11에 대한 10의 보수는 89이다.&lt;/p>
-&lt;h1 id="2의-보수란">2의 보수란?&lt;/h1>
+&lt;h2 id="2의-보수란">2의 보수란?&lt;/h2>
 &lt;p>이진법에서 2의 보수를 계산해보자. $1_2$에 2의보수를 하면 $1_2$이고, $10_2$에 2의 보수를 하면 $10_2$이다. $11_2$에 2의 보수를 하면 $1_2$일 것이다.&lt;/p>
 &lt;p>이진법에서 1의 보수는 바로 이진수를 토글한 것이다. 여기에 +1을하면 2의 보수를 바로 구할 수 있다.&lt;/p>
 &lt;p>예시) $0011\ 0110_2 =&amp;gt; 1100\ 1001_2 =&amp;gt; 1100\ 1010_2$&lt;/p>
@@ -515,7 +773,7 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;blockquote>
 &lt;p>n진법일 때 n의 보수 쉽게 구하기&lt;br>n-1의 보수를 구해서 +1을 하면 n의 보수를 바로 구할 수 있다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="이진수-토글의-특징">이진수 토글의 특징&lt;/h1>
+&lt;h2 id="이진수-토글의-특징">이진수 토글의 특징&lt;/h2>
 &lt;p>이진수를 토글한 후의 값은 특정 수식을 따른다. 어려운 수식은 아니고 정말 간단한 수식이다. 사실 보수의 특징을 생각한다면 쉽게 생각할 수 있다.&lt;/p>
 &lt;blockquote>
 &lt;p>$\{비트\ 수에\ 맞는\ 최대값\}-\{기존값\} = \{토글된\ 값\}$&lt;/p>
@@ -529,7 +787,7 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;li>토글된 값은 $1100\ 1001_2$이고 이 값은 십진수로 201임&lt;/li>
 &lt;li>3번과 4번의 값이 같으므로 수식이 성립함&lt;/li>
 &lt;/ol>
-&lt;h1 id="1byte로-표현되는-음수의-범위">1byte로 표현되는 음수의 범위&lt;/h1>
+&lt;h2 id="1byte로-표현되는-음수의-범위">1byte로 표현되는 음수의 범위&lt;/h2>
 &lt;p>1byte로 표현되는 양수의 범위는 0~255($2^8$ = 256개 만큼)인 것은 다들 잘 알고 있을 것이다. 그렇다면 음수는 어떻게 표현할까?&lt;/p>
 &lt;ul>
 &lt;li>양수 범위 : $0000\ 0000_2$ ~ $0111\ 1111_2$ ($2^7$ = 128개)&lt;/li>
@@ -538,7 +796,7 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;p>양수와 음수를 가르는 결정적인 차이는 최상위 비트이다. 최상위 비트가 0이면 양수, 1이면 음수로 표현하는 것이다.&lt;/p>
 &lt;p>그렇다면, 왜 최상위 비트로 결정하는 것일까? &lt;strong>그 이유는 표현 가능한 수의 개수를 정확히 2등분 하기 때문이다.&lt;/strong>&lt;/p>
 &lt;p>양수와 음수를 범위를 맞춤으로써 계산하기 쉽게 하기 위함이다.&lt;/p>
-&lt;h1 id="최상위-비트가-1인-이진수는-어떻게-음수로-사용하는가">최상위 비트가 1인 이진수는 어떻게 음수로 사용하는가?&lt;/h1>
+&lt;h2 id="최상위-비트가-1인-이진수는-어떻게-음수로-사용하는가">최상위 비트가 1인 이진수는 어떻게 음수로 사용하는가?&lt;/h2>
 &lt;p>$1000\ 0000_2$은 128인데, 이 숫자를 대체 어떻게 음수로 사용할 수 있을까? 여기서 이진수 토글이 등장한다.&lt;/p>
 &lt;p>앞서 이진수 토글은 $\{비트\ 수에\ 맞는\ 최대값\}-\{기존값\} = \{토글된\ 값\}$ 가 성립하는 특징을 가진다고 했다.&lt;/p>
 &lt;p>그렇다면 최상위 비트가 1인 친구들을 토글해보자.&lt;/p>
@@ -553,11 +811,11 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;/ul>
 &lt;p>어떤가? 기존 값이 증가할 수록 토글된 값은 감소하는 것을 볼 수 있다.
 여기에 -를 붙인다면? 음수로 사용해도 되지 않겠는가?&lt;/p>
-&lt;h2 id="이진수-토글을-음수로-사용할-경우-문제">이진수 토글을 음수로 사용할 경우 문제&lt;/h2>
+&lt;h3 id="이진수-토글을-음수로-사용할-경우-문제">이진수 토글을 음수로 사용할 경우 문제&lt;/h3>
 &lt;p>앞서 진행한 과정을 보면 완벽해보인다. 하지만, 문제가 딱 한가지 있다. 그것은 쓸모없는 값이 하나 존재한다는 것이다.&lt;/p>
 &lt;p>최상위 비트가 1인 수를 이진수 토글을 통해 음수로 표현하게 되면 $-127&amp;hellip;-0,0&amp;hellip;127$와 같은 범위를 가지게 된다.&lt;/p>
 &lt;p>어라, -0이라는 값이 등장했다. 255를 이진수 토글하면 0이고 여기에 -를 붙이기로 했으니 -0이 나오기는 한다. 그런데 이는 0과 중복되는 의미를 가진다. 즉, 쓸모없는 데이터가 존재한다는 것이다.&lt;/p>
-&lt;h2 id="1을-해서-해결해보자">+1을 해서 해결해보자&lt;/h2>
+&lt;h3 id="1을-해서-해결해보자">+1을 해서 해결해보자&lt;/h3>
 &lt;p>응당 개발자라면 이런 값은 눈 뜨고도 쳐다볼 수 없어야한다.(필자는 좀 그렇다&amp;hellip;) 그렇다면 이진수 토글 이후 +1을 하면 해결되지 않겠는가?&lt;/p>
 &lt;ul>
 &lt;li>128 -&amp;gt; 128&lt;/li>

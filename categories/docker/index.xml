@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>docker on fhdufhdu</title><link>https://fhdufhdu.github.io/categories/docker/</link><description>Recent content in docker on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 20 Dec 2023 12:39:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/categories/docker/index.xml" rel="self" type="application/rss+xml"/><item><title>[Docker] 컨테이너를 Docker Hub에 올리기</title><link>https://fhdufhdu.github.io/post/3/</link><pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/3/</guid><description>&lt;p>Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p>
-&lt;h1 id="docker-hub-로그인하기">Docker Hub 로그인하기&lt;/h1>
+&lt;h2 id="docker-hub-로그인하기">Docker Hub 로그인하기&lt;/h2>
 &lt;p>&lt;a class="link" href="https://hub.docker.com/" target="_blank" rel="noopener"
 >Docker Hub&lt;/a>에 들어가서 로그인을 먼저 한다. 회원가입을 진행하지 않았다면 회원가입을 먼저 하자.&lt;/p>
 &lt;p>개인 Docker Hub Repository에 이미지를 올리기 때문에 로그인은 필수다.&lt;/p>
 &lt;p>회원가입을 하고 나면 플랜을 선택하라는 화면이 나올 수 있는데, 이때 Personal 플랜으로 진행하면 된다.(무료)&lt;/p>
-&lt;h1 id="repository-만들기">Repository 만들기&lt;/h1>
+&lt;h2 id="repository-만들기">Repository 만들기&lt;/h2>
 &lt;p>로그인을 하고나서 메인화면에서&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/3/image.png"
 width="2552"
@@ -17,15 +17,15 @@ data-flex-basis="2097px"
 >&lt;/p>
 &lt;p>위 이미지와 같이 Repository -&amp;gt; Create Repository를 눌러준다.&lt;/p>
 &lt;p>정보 입력 후 Repostiory를 생성하게 되면 자신의 Repository 화면으로 들어갈 수 있게 된다.&lt;/p>
-&lt;h1 id="컨테이너-commit-하기">컨테이너 commit 하기&lt;/h1>
+&lt;h2 id="컨테이너-commit-하기">컨테이너 commit 하기&lt;/h2>
 &lt;p>현재 자신의 컴퓨터에 존재하는 컨테이너를 image화 하는 과정이다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ docker commit 자신의컨테이너이름 repository경로:tag
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 실제 입력 예&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># tag(=version)는 본인 전략대로 사용하기&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 실제 입력 예&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## tag(=version)는 본인 전략대로 사용하기&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker commit es fhdufhdu/test_elasticsearch:1.0
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="생성된-이미지를-업로드하기">생성된 이미지를 업로드하기&lt;/h1>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 로그인, username에 email은 입력하지 말기&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="생성된-이미지를-업로드하기">생성된 이미지를 업로드하기&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 로그인, username에 email은 입력하지 말기&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker login
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">#이미지 이름에 있는 repository로 이미지가 업로드되게 된다.&lt;/span>
@@ -54,9 +54,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`

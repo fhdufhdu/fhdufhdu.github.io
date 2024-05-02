@@ -1,10 +1,268 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Tue, 30 Apr 2024 09:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring Boot] Controller, Service, Repository에서의 DTO 분리 그리고 네이밍에 대해서</title><link>https://fhdufhdu.github.io/post/21/</link><pubDate>Tue, 30 Apr 2024 09:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/21/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fhdufhdu</title><link>https://fhdufhdu.github.io/</link><description>Recent content on fhdufhdu</description><generator>Hugo -- gohugo.io</generator><language>ko-KR</language><lastBuildDate>Wed, 01 May 2024 16:00:00 +0900</lastBuildDate><atom:link href="https://fhdufhdu.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>[Spring Boot][Kotlin] @Valid 사용시에 Enum 값을 검증해보자(Custom Validation, Enum Validation)</title><link>https://fhdufhdu.github.io/post/22/</link><pubDate>Wed, 01 May 2024 16:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/22/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
+&lt;p>필자는 Enum 값을 즐겨 사용한다. Enum은 코드로 값을 고정할 수 있다는 점에서 &lt;strong>컴파일 단계에서 안전&lt;/strong>하다. Spring Boot에서 &lt;code>@Valid&lt;/code> 어노테이션을 사용하는 Body, Query를 Enum으로 검증해보자.&lt;/p>
+&lt;h2 id="주의사항">주의사항&lt;/h2>
+&lt;p>잘 알아야 하는 것은, &lt;em>&lt;strong>검증&lt;/strong>&lt;/em> 만 하는 것이다. 절대로 &lt;em>&lt;strong>변환&lt;/strong>&lt;/em> 을 하는 것이 아니다!&lt;/p>
+&lt;p>Body 혹은 Query의 String을 Enum으로 변환하고자 하는 것이 아니라, String이 Enum 값에 있는 지 확인하고자 하는 것이라는 것을 이해하자.&lt;/p>
+&lt;p>필자가 처음에 이것을 헷갈려 했다가 시간을 너무 낭비했던 경험이 있다.&lt;/p>
+&lt;h2 id="valid">&lt;code>@Valid&lt;/code>&lt;/h2>
+&lt;p>스프링은 &lt;code>@Valid&lt;/code>가 달린 객체에 대해서 검증을 실시한다. 검증을 실시할 때는 어노테이션이 달린 멤버변수에 대해서 검증한다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Controller&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(){
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@GetMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// GetFooRequest 와 PostFooRequest가 값이 올바른지 검증한다.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">getFoo&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@ModelAttribute&lt;/span> query: GetFooRequest) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">..&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@PostMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">postFoo&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@RequestBody&lt;/span> body: PostFooRequest) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">..&lt;/span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">/* GetFooRequest를 검증할 때
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * bar는 null이거나 빈 스트링이면 안되고,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageNumer는 음수이면 안되고,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> * pageSize는 3이상인지 검증함.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"> */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">GetFooRequest&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:NotBlank
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> bar: String,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:Min(&lt;span style="color:#ae81ff">0&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> pageNumber: Int,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:Min(&lt;span style="color:#ae81ff">3&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> pageSize: Int,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// field는 kotlin에서 사용하는 방식. kotlin에서는 생성자 부분에 멤버변수를 선언할 수 있으므로 생성자 부분에 있는 필드가 어느 부분에 적용되는지를 알려줘야한다.
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위의 &lt;code>@NotBlank&lt;/code>, &lt;code>@Min&lt;/code> 과 같은 어노테이션들을 &lt;strong>Bean Validation&lt;/strong>이라고 한다.(&lt;a class="link" href="https://beanvalidation.org/" target="_blank" rel="noopener"
+>문서&lt;/a>)&lt;/p>
+&lt;p>기본으로 제공되는 어노테이션 말고, 우리가 원하는 방식으로 검증하도록 수정할 수도 있다.&lt;/p>
+&lt;h2 id="간단한-spring-boot에서의-검증-플로우">간단한 Spring boot에서의 검증 플로우&lt;/h2>
+&lt;p>검증은 일반적으로 Dispatcher Servlet에서 Handler Adapter를 통해 Controller의 Method를 호출하기 전에 &lt;code>@Valid&lt;/code> 파라미터 메소드에 있는 지 확인하고 있다면 검증을 시도한다.&lt;/p>
+&lt;ol>
+&lt;li>사용자 요청&lt;/li>
+&lt;li>Dispatcher Sevlet 실행&lt;/li>
+&lt;li>Handler Mapping을 통해 실행할 컨트롤러와 메소드를 확인&lt;/li>
+&lt;li>Handler Adapter를 통해 컨트롤러의 메소드 실행
+&lt;ol>
+&lt;li>실행하기 이전 &lt;code>@ModelAttriBute&lt;/code>, &lt;code>@RequestBody&lt;/code>, &lt;code>@AuthenticationPrincipal&lt;/code> 같은 어노테이션 확인 후 적절한 로직 실행&lt;/li>
+&lt;li>&lt;code>@Valid&lt;/code> 어노테이션 확인 후 검증 로직 실행&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="custom-validator-구현">Custom Validator 구현&lt;/h2>
+&lt;h3 id="1-annotaion-만들기">1. Annotaion 만들기&lt;/h3>
+&lt;p>이제 &lt;code>@NotBlank&lt;/code> 같은 어노테이션을 만들어야한다. 아래와 같이 만들 수 있다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Constraint
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidatorContext
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Payload
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> kotlin.reflect.KClass
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Target&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FUNCTION,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_GETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_SETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FIELD,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.ANNOTATION_CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CONSTRUCTOR,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.VALUE_PARAMETER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE_PARAMETER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Retention&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationRetention&lt;/span>.RUNTIME
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">annotation&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">ValidEnum&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> enum: KClass&amp;lt;&lt;span style="color:#66d9ef">out&lt;/span> Enum&amp;lt;*&amp;gt;&amp;gt;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> isNull: Boolean = &lt;span style="color:#66d9ef">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 아래 값은 필수 값
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> message: String = &lt;span style="color:#e6db74">&amp;#34;허용되지 않은 값입니다.&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> groups: Array&amp;lt;KClass&amp;lt;Any&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> payload: Array&amp;lt;KClass&amp;lt;Payload&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>키워드&lt;/th>
+&lt;th>설명&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>@Target&lt;/td>
+&lt;td>어노테이션의 적용 범위&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>@Retention&lt;/td>
+&lt;td>언제 적용 되는지&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>message&lt;/td>
+&lt;td>검증 실패시 출력할 에러 메시지&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>groups&lt;/td>
+&lt;td>어떤 그룹에 속하는지(그룹 별로 검증할 지 안할 지 정할 수 있음)&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>payload&lt;/td>
+&lt;td>추가적인 검증 메타데이터&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>enum&lt;/td>
+&lt;td>검증할 Enum 클래스&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>isNull&lt;/td>
+&lt;td>null 값을 허용하는지&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>&lt;code>message&lt;/code>, &lt;code>groups&lt;/code>, &lt;code>payload&lt;/code>는 필수 파라미터이다. 자세한 건 &lt;a class="link" href="https://jakarta.ee/specifications/bean-validation/3.0/jakarta-bean-validation-spec-3.0.html#constraintsdefinitionimplementation-constraintdefinition-properties" target="_blank" rel="noopener"
+>공식 문서&lt;/a>를 참고해보자.&lt;/p>
+&lt;h3 id="2-validator-만들기">2. Validator 만들기&lt;/h3>
+&lt;p>어노테이션을 만들었으니, 스프링이 검증 로직을 실행할 때 사용할 Validator가 필요하다.&lt;/p>
+&lt;p>따로 파일을 분리해서 만들어도 되고, 방금 만든 어노테이션 클래스의 inner class로 만들어도 된다. 필자는 inner class로 만들도록 한다.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fhdufhdu.windows7board.common.dto.ValidEnum.EnumValidator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Constraint
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidator
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.ConstraintValidatorContext
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> jakarta.validation.Payload
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> kotlin.reflect.KClass
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Target&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FUNCTION,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_GETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.PROPERTY_SETTER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.FIELD,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.ANNOTATION_CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CONSTRUCTOR,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.VALUE_PARAMETER,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.CLASS,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationTarget&lt;/span>.TYPE_PARAMETER
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@Retention&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">AnnotationRetention&lt;/span>.RUNTIME
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 추가된 부분
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">@Constraint&lt;/span>(validatedBy = [EnumValidator&lt;span style="color:#f92672">::&lt;/span>&lt;span style="color:#66d9ef">class&lt;/span>])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">annotation&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">ValidEnum&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> enum: KClass&amp;lt;&lt;span style="color:#66d9ef">out&lt;/span> Enum&amp;lt;*&amp;gt;&amp;gt;,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> isNull: Boolean = &lt;span style="color:#66d9ef">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> message: String = &lt;span style="color:#e6db74">&amp;#34;허용되지 않은 값입니다.&amp;#34;&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> groups: Array&amp;lt;KClass&amp;lt;Any&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> payload: Array&amp;lt;KClass&amp;lt;Payload&amp;gt;&amp;gt; = [],
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> ignoreCase: Boolean = &lt;span style="color:#66d9ef">false&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 추가된 부분
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">EnumValidator&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ) : ConstraintValidator&amp;lt;ValidEnum, String&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">lateinit&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> annotation: ValidEnum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">override&lt;/span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">initialize&lt;/span>(constraintAnnotation: ValidEnum) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">this&lt;/span>.&lt;span style="color:#66d9ef">annotation&lt;/span> = constraintAnnotation
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">override&lt;/span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">isValid&lt;/span>(&lt;span style="color:#66d9ef">value&lt;/span>: String?, context: ConstraintValidatorContext): Boolean {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> enums = &lt;span style="color:#66d9ef">annotation&lt;/span>.&lt;span style="color:#66d9ef">enum&lt;/span>.java.enumConstants
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#66d9ef">value&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> &lt;span style="color:#66d9ef">annotation&lt;/span>.isNull) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> enums.any { &lt;span style="color:#66d9ef">it&lt;/span>.name &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#66d9ef">value&lt;/span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Validator는 &lt;code>jakarta.validation.ConstraintValidator&lt;/code> 인터페이스를 구현해서 만들어야 한다.&lt;/p>
+&lt;p>&lt;code>initialize&lt;/code>를 통해 어노테이션 정보를 가져오고, &lt;code>isValid&lt;/code>를 통해 검증 여부를 판단할 수 있다.(&lt;code>true&lt;/code> 성공, &lt;code>false&lt;/code> 실패)&lt;/p>
+&lt;p>우리는 &lt;code>isValid&lt;/code> 함수를 집중적으로 구현할 것이다.&lt;/p>
+&lt;ol>
+&lt;li>우선 어노테이션의 &lt;code>enum&lt;/code> 멤버 변수에서 모든 enum 값 리스트 추출&lt;/li>
+&lt;li>어노테이션에 isNull이 붙어있고 value가 null이라면 true&lt;/li>
+&lt;li>enum 값 리스트에서 value가 하나라도 매칭되면 true, 그렇지 않으면 false&lt;/li>
+&lt;/ol>
+&lt;h3 id="3-적용">3. 적용&lt;/h3>
+&lt;h4 id="request-dto">Request DTO&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">GetFooRequest&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@field&lt;/span>:ValidEnum(&lt;span style="color:#66d9ef">enum&lt;/span> = SortCriteria&lt;span style="color:#f92672">::&lt;/span>&lt;span style="color:#66d9ef">class&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">val&lt;/span> sortCriteria: String = &lt;span style="color:#a6e22e">SortCriteria&lt;/span>.&lt;span style="color:#a6e22e">CREATED_AT&lt;/span>.name,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">enum&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">SortCriteria&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> TITLE, CONTENT, CREATED_AT, USER_ID
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="controller">Controller&lt;/h4>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@RestController&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@PreAuthorize&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;isAuthenticated()&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@ResponseBody&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> fooService: FooService
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@GetMapping&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;foo&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">fun&lt;/span> &lt;span style="color:#a6e22e">getFoo&lt;/span>(&lt;span style="color:#a6e22e">@Valid&lt;/span> &lt;span style="color:#a6e22e">@ModelAttribute&lt;/span> query: GetFooRequest) {}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이렇게 사용할 수 있다.&lt;/p>
+&lt;h2 id="디버그-모드로-적용-확인">디버그 모드로 적용 확인&lt;/h2>
+&lt;p>이제 이 Custom Validation이 잘 적용되는지 확인해보자.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/22/image.png"
+width="1594"
+height="1336"
+loading="lazy"
+alt="Break Point"
+class="gallery-image"
+data-flex-grow="119"
+data-flex-basis="286px"
+>&lt;/p>
+&lt;p>해당 라인에 break point를 걸어서 디버그 모드로 확인해보자.&lt;/p>
+&lt;p>&lt;img src="https://fhdufhdu.github.io/post/22/image-1.png"
+width="1624"
+height="1306"
+loading="lazy"
+alt="JVM Stack"
+class="gallery-image"
+data-flex-grow="124"
+data-flex-basis="298px"
+>&lt;/p>
+&lt;p>&lt;a class="link" href="#%ea%b0%84%eb%8b%a8%ed%95%9c-spring-boot%ec%97%90%ec%84%9c%ec%9d%98-%ea%b2%80%ec%a6%9d-%ed%94%8c%eb%a1%9c%ec%9a%b0" >간단한 Spring boot에서의 검증 플로우&lt;/a>에서 말했던 것 처럼 검증 로직이 진행된다는 것을 알 수 있다.&lt;/p>
+&lt;h2 id="마치며">마치며&lt;/h2>
+&lt;p>이 기능에 대해 구현을 하고 블로그를 작성하며 Spring boot의 내부 구조와 작동 방식에 대해서 다시 한번 공부를 하게 되었고, Bean Validation에 대한 공식 문서를 보면서 작동 방식에 대해 익숙해질 수 있었다.&lt;/p>
+&lt;p>또한 디버그 모드를 통해 validation이 작동하는 위치에 대한 추측을 증명할 수 있었다.&lt;/p>
+&lt;p>블로그 글을 오랜만에 작성하면서 &amp;ldquo;알고 있는 지식은 공유해야 본인에게도 정리가 잘되는 것 같다&amp;quot;는 생각이 다시 한번 들었다. 앞으로도 게으름 피우지 말고 열심히 블로그 글을 작성해야겠다.&lt;/p>
+&lt;div id="fhdufhdu-card">
+&lt;/div>
+&lt;script>
+const resize = () => {
+var iamges = []
+var interval = setInterval(()=>{
+images = document.querySelectorAll('.gallery')
+if (images.length > 0){
+images.forEach((image)=>{
+const getEm = (width) => {
+if (width > 1535) return 4
+else if(width &lt; 0) return 0
+return (4/767) * width - (3072/767)
+}
+const em = getEm(window.innerWidth)
+image.style.padding = `0 ${em}em 0 ${em}em`
+})
+clearInterval(interval)
+}
+}, 100)
+}
+window.addEventListener("resize", resize)
+resize()
+&lt;/script></description></item><item><title>[Spring Boot] Controller, Service, Repository에서의 DTO 분리 그리고 네이밍에 대해서</title><link>https://fhdufhdu.github.io/post/21/</link><pubDate>Tue, 30 Apr 2024 09:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/21/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>오랜만에 포스팅하게 되었다. 그동안 회사도 바빴고, 개인적으로 Spring boot를 이용한 게시판을 만들고 있었다. 예전과는 다르게, 실무에서 겪었던 문제들을 바탕으로 해결책들을 녹여내기 위해서 노력했다. (&lt;a class="link" href="http://fhdufhdu.hopto.org" target="_blank" rel="noopener"
 >해당 게시판&lt;/a> &amp;hellip;홍보도 겸사겸사)&lt;/p>
 &lt;p>사실 백엔드 개발을 하며 제일 크게 문제라고 느꼈던 건, 네이밍과 관심사 분리였다.&lt;/p>
 &lt;p>필자는 서버를 Controller, Service, Repository, Infrasturcture 계층으로 나누어서 주로 개발한다. 여기까지는 관습적으로 잘 지켜오고 있었는데, 그 외의 DTO가 문제였다.&lt;/p>
 &lt;p>이에 대한 이야기와, 나름대로 해결책을 정리해 보겠다.&lt;/p>
-&lt;h1 id="request-dto를-모든-곳에서-사용하지-말자">Request DTO를 모든 곳에서 사용하지 말자&lt;/h1>
+&lt;h2 id="request-dto를-모든-곳에서-사용하지-말자">Request DTO를 모든 곳에서 사용하지 말자&lt;/h2>
 &lt;p>제일 크게 문제였던 것은, Request DTO였다. 필자는 이전까지 Request DTO를 모든 계층에서 돌려쓸 때가 있었다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">FooController&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">val&lt;/span> fooService: FooService
@@ -36,7 +294,7 @@
 &lt;/li>
 &lt;/ol>
 &lt;p>그렇다면 어떻게 해야 할까&amp;hellip;?&lt;/p>
-&lt;h1 id="dto를-모든-계층에서-분리하자">DTO를 모든 계층에서 분리하자!&lt;/h1>
+&lt;h2 id="dto를-모든-계층에서-분리하자">DTO를 모든 계층에서 분리하자!&lt;/h2>
 &lt;p>문제를 해결하기 위해 모든 계층에서 DTO를 만들어보려고 했다. 다만 이럴 때 문제점은 DTO 이름이 너무나도 중복이 많이 되는 것이 문제였다.&lt;/p>
 &lt;p>그래서 주위에 물어보거나, 많은 자료조사 끝에, 나름대로 철칙을 만들었다.&lt;/p>
 &lt;ol>
@@ -66,7 +324,7 @@
 &lt;/ol>
 &lt;p>이렇게 분리하게 되면, 앞서 이야기한 문제가 해결된다. 단점은 DTO를 많이 만들고 수정해야 한다는 것이다. 하지만 런타임 에러를 방지한다는 목적으로 보자면 매우 효율적인 비용이라고 생각한다.&lt;/p>
 &lt;p>이제 적용 예시를 보자.&lt;/p>
-&lt;h2 id="게시글-목록-조회">게시글 목록 조회&lt;/h2>
+&lt;h3 id="게시글-목록-조회">게시글 목록 조회&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 컨트롤러
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">@Controller&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BoardController&lt;/span>(
@@ -150,11 +408,11 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>모든 계층에서, 자신의 DTO를 다른 계층의 DTO로 변환해서 호출하는 것을 볼 수 있다. 이런 방식을 통해 하나의 DTO가 변경되더라도 런타임 에러를 방지할 수 있다.&lt;/p>
-&lt;h1 id="마무리하며">마무리하며&lt;/h1>
-&lt;p>DTO 이슈는 현업을 진행하며 많이 고민이 되었던 문제였다. 이번에 Spring 개발을 진행하며 나름대로 생각 정리가 되어서 후련하다. 사실 이번 DTO 관련 이슈를 제외하고서도 나름대로 정리된 내용이 많다. 다음 포스팅에서는 DTO의 역할에 대해서도 생각을 정리해 보는 시간을 가져보도록 하겠다.&lt;/p></description></item><item><title>[React] 가상 돔(Virtual DOM)이 왜 필요할까?</title><link>https://fhdufhdu.github.io/post/20/</link><pubDate>Mon, 18 Mar 2024 18:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/20/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+&lt;h2 id="마무리하며">마무리하며&lt;/h2>
+&lt;p>DTO 이슈는 현업을 진행하며 많이 고민이 되었던 문제였다. 이번에 Spring 개발을 진행하며 나름대로 생각 정리가 되어서 후련하다. 사실 이번 DTO 관련 이슈를 제외하고서도 나름대로 정리된 내용이 많다. 다음 포스팅에서는 DTO의 역할에 대해서도 생각을 정리해 보는 시간을 가져보도록 하겠다.&lt;/p></description></item><item><title>[React] 가상 돔(Virtual DOM)이 왜 필요할까?</title><link>https://fhdufhdu.github.io/post/20/</link><pubDate>Mon, 18 Mar 2024 18:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/20/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>나는 백엔드 개발자이지만 프론트, nlp, 보안 등등 여러 방면으로 공부하는 것을 좋아한다. 새로운 지식은 항상 재밌게 느껴지더라고&amp;hellip;&lt;/p>
 &lt;p>그래서 오늘은 그냥 지극히 개인적인 궁금증으로 찾아본 가상 돔에 대해서 이야기해보고자 한다. 사실, 혼자 공부한 건 아니고 회사의 프론트엔드 개발자 분하고 같이 공부했다.&lt;/p>
-&lt;h1 id="dom">DOM&lt;/h1>
+&lt;h2 id="dom">DOM&lt;/h2>
 &lt;p>DOM은 Document Object Model의 약자이다. 이는 HTML 요소들을 객체화해서 구조화해놓은 것을 의미한다. 이 DOM을 조작하기 위해서 JS가 탄생했다.&lt;/p>
 &lt;p>하여튼, 이 DOM을 조작하게 되면, 다시 DOM이 구조화되고 새롭게 화면으로 그려진다. 이것을 리렌더링이라고 한다. 리렌더링이 반복되고 무수히 많이 일어난다면? 매우 느릴 것이다.&lt;/p>
 &lt;p>한번 예를 들어보자.&lt;/p>
@@ -182,7 +440,7 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">rootNode&lt;/span>.&lt;span style="color:#a6e22e">innerHTML&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">html&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 코드는 어떨까? 단 한 번 업데이트하는 것이기 때문에 리렌더링도 단 한 번 일어날 것이다.&lt;/p>
 &lt;p>이렇듯 한 번에 모아서 업데이트를 하면 렌더링 횟수를 줄일 수 있다.&lt;/p>
-&lt;h1 id="가상-돔virtual-dom">가상 돔(Virtual DOM)&lt;/h1>
+&lt;h2 id="가상-돔virtual-dom">가상 돔(Virtual DOM)&lt;/h2>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/20/image.png"
 width="755"
 height="304"
@@ -195,7 +453,7 @@ data-flex-basis="596px"
 &lt;p>리액트는 이렇게 변경점을 한 번에 업데이트 하기 위해서, 가상 돔이라는 것을 만들어 냈다. 이 가상 돔은 실제 돔을 복사한 것이다. 그래서 아무리 이 가상 돔을 업데이트해도 실제로 업데이트가 일어나지는 않는다.&lt;/p>
 &lt;p>가상 돔은 총 두 가지가 존재한다. 원본 가상 돔과, 변경 가상 돔이다. 실제로 상태 값이 업데이트된다면, 리액트는 변경 가상 돔을 건드려 값을 업데이트 한다. 이후 diffing을 통해서 원본 가상 돔과 변경 가상 돔을 비교해서 어느 부분이 업데이트 되었는지를 확인한다.&lt;/p>
 &lt;p>이후 리액트는 위의 코드처럼 실제 돔에 한 번에 업데이트 할 수 있도록 코드를 작성하고, 실제 돔에 업데이트를 진행한다. 그렇다면 리렌더링을 최소화할 수 있다.&lt;/p>
-&lt;h1 id="마치며">마치며&lt;/h1>
+&lt;h2 id="마치며">마치며&lt;/h2>
 &lt;p>오늘은 궁금했던 가상 돔에 대해서 얘기해 보았다. 사실 프론트엔드 개발자가 아니라서 자세하게 작성하지는 않았지만, 왜 필요한지는 정리해야 할 것 같아서 포스팅하게 되었다. 언젠가 이런 구조를 내가 백엔드에서 써먹을 수도 있을 수도 있으니까! 개발한 코드와 구조는 돌고 돈다고 생각한다.&lt;/p>
 &lt;div id="fhdufhdu-card">
 &lt;/div>
@@ -207,9 +465,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -220,16 +478,16 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Python] ASGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/19/</link><pubDate>Tue, 12 Mar 2024 15:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/19/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+&lt;/script></description></item><item><title>[Python] ASGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/19/</link><pubDate>Tue, 12 Mar 2024 15:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/19/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>이전에 &lt;a class="link" href="https://fhdufhdu.github.io/post/14" >WSGI 서버를 직접!! 만들어보자&lt;/a>라는 게시글을 통해 WSGI 서버를 만들어보았다. WSGI만 하면 아쉬우니 이번에는 ASGI 서버를 만들어보도록 하겠다.&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyUvicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
-&lt;h1 id="asgi">ASGI&lt;/h1>
+&lt;h2 id="asgi">ASGI&lt;/h2>
 &lt;p>WSGI는 Web Server Gateway Interface의 약자다. 그럼 ASGI는 어떤 단어들의 약자일까?&lt;/p>
 &lt;p>정답은 Asynchronous Server Gateway Interface의 약자이다. 이름을 보면 알 수 있듯이, ASGI는 비동기 처리가 가능한 서버 인터페이스이다.&lt;/p>
 &lt;p>&lt;em>동기/비동기에 대해서 궁금하다면 해당 &lt;a class="link" href="https://fhdufhdu.github.io/post/4" >게시글&lt;/a>로!&lt;/em>&lt;/p>
 &lt;p>ASGI 공식문서를 보면 &lt;em>&lt;strong>ASGI (Asynchronous Server Gateway Interface) is a spiritual successor to WSGI&lt;/strong>&lt;/em> 라고 쓰여있다. ASGI는 WSGI의 정신적으로 계승했다는 것인데 그 말대로 WSGI와 전체적인 구조가 비슷하다.&lt;/p>
-&lt;h1 id="cpython의-gil">CPython의 GIL&lt;/h1>
+&lt;h2 id="cpython의-gil">CPython의 GIL&lt;/h2>
 &lt;p>자바의 경우 한 요청당 하나의 스레드가 배정된다. 이렇게 되면, 여러 개의 요청이 들어와도 동시에 처리할 수 있다.&lt;/p>
 &lt;p>그런데 이전의 WSGI는 왜 스레드를 사용하지 않고, 여러 개의 프로세스를 사용했을까? 안타깝게도, 이는 CPython의 GIL때문이다.&lt;/p>
 &lt;p>GIL이란 Global Interpreter Lock의 약자로, Python에서 하나의 스레드가 활성화되면 다른 스레드는 활성화되지 않도록 락을 거는 정책이다. 그래서 스레드를 여러 개 만들어도 제대로 실행되는 스레드는 단 하나밖에 없다. 그래서 멀티 프로세스로 처리하게 된 것이다.&lt;/p>
@@ -240,11 +498,11 @@ resize()
 &lt;p>&lt;strong>CPython?&lt;/strong> &lt;br>
 python은 인터프리터 언어로, python으로 작성된 스크립트를 실행시켜 주는 실행기가 존재한다. 이 실행기는 C, Java 등등의 언어로 작성되어 있다. 이때 C로 작성된 실행기를 CPython이라고 부른다. 맨 처음 Python이 릴리즈될 때 사용된 것이 CPython이고 대부분 CPython을 사용한다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="여기에-비동기를-한-스푼">여기에 비동기를 한 스푼&lt;/h1>
+&lt;h2 id="여기에-비동기를-한-스푼">여기에 비동기를 한 스푼&lt;/h2>
 &lt;p>잘 생각해 보면, 실행 로직이 CPU bound인 작업은 정말 웬만하면 처리 시간이 엄청 짧다. 문제인 것은 바로 네트워크 I/O이다. 예를 들어, DB 연결, 외부 API 호출 등등 네트워크를 사용하면 생각보다 딜레이 되는 시간이 많다. 그런 남는 시간에 CPU bound 작업을 처리한다면 매우 효율적이지 않을까?&lt;/p>
 &lt;p>그래서 탄생한 것이 ASGI다.&lt;/p>
-&lt;h1 id="python에서-비동기를-사용하는-방법">Python에서 비동기를 사용하는 방법&lt;/h1>
-&lt;h2 id="동기-코드">동기 코드&lt;/h2>
+&lt;h2 id="python에서-비동기를-사용하는-방법">Python에서 비동기를 사용하는 방법&lt;/h2>
+&lt;h3 id="동기-코드">동기 코드&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> requests
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get_response&lt;/span>():
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response &lt;span style="color:#f92672">=&lt;/span> requests&lt;span style="color:#f92672">.&lt;/span>get(&lt;span style="color:#e6db74">&amp;#34;https://www.naver.com&amp;#34;&lt;/span>) &lt;span style="color:#75715e"># 이 부분에서 3초가 걸림&lt;/span>
@@ -260,7 +518,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>sum(&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>자, 이런 코드가 있다고 해보자. 이 코드는 1번이 출력되고, 2번이 출력될 것이다. get_response에 3초가 걸린다고 하더라도 순서대로 진행될 것이다.&lt;/p>
 &lt;p>근데 우리는 이 requests.post에 낭비되는 3초가 너무 아깝다고 생각한다. 이 3초 동안 sum을 실행시켜 보자.&lt;/p>
-&lt;h2 id="비동기-코드">비동기 코드&lt;/h2>
+&lt;h3 id="비동기-코드">비동기 코드&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> asyncio
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> aiohttp &lt;span style="color:#75715e"># pip install aiohttp&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">async&lt;/span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get_response&lt;/span>():
@@ -284,10 +542,10 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>asyncio&lt;span style="color:#f92672">.&lt;/span>run(main())
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 코드를 실행시키면, 2번이 먼저 출력되고, 1번이 출력되는 것을 볼 수 있다. http 요청에 3초가 걸릴 때, 이 시간에 다른 작업(&lt;code>sum&lt;/code>)을 진행한 것이다.&lt;/p>
-&lt;h1 id="asgi-구현">ASGI 구현&lt;/h1>
+&lt;h2 id="asgi-구현">ASGI 구현&lt;/h2>
 &lt;p>이제 python에서 비동기를 사용하는 방법도 알아보았으니, 본격적으로 ASGI를 구현해 보자.&lt;/p>
 &lt;p>WSGI랑 마찬가지로 Application과 Server로 구성되어 있다. Application은 앞으로 app이라고 부르겠다.&lt;/p>
-&lt;h2 id="asgi-application">ASGI Application&lt;/h2>
+&lt;h3 id="asgi-application">ASGI Application&lt;/h3>
 &lt;p>간단한 app의 구현체는 아래와 같이 생겼다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">SimpleASGIApp&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self):
@@ -312,7 +570,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;li>receive: app은 &lt;code>await receive()&lt;/code>처럼 receive를 호출해 request body를 가져올 수 있음&lt;/li>
 &lt;li>send: response를 하려면 해당 함수를 호출해야 함&lt;/li>
 &lt;/ul>
-&lt;h2 id="asgi-server">ASGI Server&lt;/h2>
+&lt;h3 id="asgi-server">ASGI Server&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> asyncio
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">from&lt;/span> fast_api_app &lt;span style="color:#f92672">import&lt;/span> app
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -441,7 +699,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;li>body 부분은 bytes 형태 그래도 receive 함수를 통해 반환하도록&lt;/li>
 &lt;li>send를 통해 받아온 response header와 response body를 하나로 합쳐서 소켓으로 전달&lt;/li>
 &lt;/ol>
-&lt;h1 id="결과">결과&lt;/h1>
+&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>테스트도 빼놓을 수는 없다.
 이번에는 두 가지의 테스트를 진행했다.&lt;/p>
 &lt;p>[조건]&lt;/p>
@@ -451,14 +709,14 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;li>MyGunicorn의 경우 worker = 16 으로 진행&lt;/li>
 &lt;li>아래 코드와 같이 2초 sleep하고 진행&lt;/li>
 &lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># asgi - FastAPI&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## asgi - FastAPI&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">@app.get&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;/hello_world/&lt;/span>&lt;span style="color:#e6db74">{id}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">async&lt;/span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">hello_world&lt;/span>(request: Request, id: int, abcd:int &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">await&lt;/span> asyncio&lt;span style="color:#f92672">.&lt;/span>sleep(&lt;span style="color:#ae81ff">2&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id:abcd
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># wsgi - django&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## wsgi - django&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">HelloWorld&lt;/span>(GenericAPIView):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get&lt;/span>(self, request: Request, id:int):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(id)
@@ -466,7 +724,7 @@ python은 인터프리터 언어로, python으로 작성된 스크립트를 실�
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> Response({
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id: request&lt;span style="color:#f92672">.&lt;/span>GET[&lt;span style="color:#e6db74">&amp;#39;abcd&amp;#39;&lt;/span>]
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> })
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="uvicorn-vs-myuvicorn">Uvicorn vs MyUvicorn&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="uvicorn-vs-myuvicorn">Uvicorn vs MyUvicorn&lt;/h3>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/19/image.png"
 width="3682"
 height="2576"
@@ -476,7 +734,7 @@ class="gallery-image"
 data-flex-grow="142"
 data-flex-basis="343px"
 >&lt;/p>
-&lt;h2 id="asgi-vs-wsgi">ASGI vs WSGI&lt;/h2>
+&lt;h3 id="asgi-vs-wsgi">ASGI vs WSGI&lt;/h3>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/19/image-1.png"
 width="3670"
 height="2600"
@@ -486,7 +744,7 @@ class="gallery-image"
 data-flex-grow="141"
 data-flex-basis="338px"
 >&lt;/p>
-&lt;h2 id="총평">총평&lt;/h2>
+&lt;h3 id="총평">총평&lt;/h3>
 &lt;p>각 요청당 2초 딜레이됐을 뿐인데도, 16개의 프로세서가 작동하는 동기 방식이 매우 성능이 떨어지는 것을 볼 수 있다. 확실히 네트워크 I/O가 자주 발생할 경우에는 비동기 방식이 필수라고 생각이 된다.&lt;/p>
 &lt;p>또한 Uvicorn과 MyUvicorn이 성능에서 큰 차이를 보이지 않는 것을 확인했다. 하지만 간단한 상황에서만 비슷한 것이고, 실제 복잡한 상용 서버에 적용하기에는 문제가 있을 것이다.&lt;/p>
 &lt;p>오늘도 ASGI를 성공적으로 구현했다. WSGI에 이어, 매우 재미있었다. 아마도 다음에는 golang의 goroutine을 이용한 동시성 프로그래밍을 진행해 볼 것 같다.&lt;/p>
@@ -500,9 +758,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -513,7 +771,7 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Spring][Spring Security] REST api + Session 로그인을 구현해보자</title><link>https://fhdufhdu.github.io/post/18/</link><pubDate>Tue, 05 Mar 2024 17:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/18/</guid><description>&lt;h1 id="들어가며">들어가며&lt;/h1>
+&lt;/script></description></item><item><title>[Spring][Spring Security] REST api + Session 로그인을 구현해보자</title><link>https://fhdufhdu.github.io/post/18/</link><pubDate>Tue, 05 Mar 2024 17:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/18/</guid><description>&lt;h2 id="들어가며">들어가며&lt;/h2>
 &lt;p>일반적으로 Spring Security는 from 로그인과 http basic 로그인을 지원한다. 이는 RESTful한 방식과는 맞지 않기 때문에, 따로 필터를 만들어야 한다.&lt;/p>
 &lt;p>간단한 플로우차트는 아래와 같다.
 &lt;img src="https://fhdufhdu.github.io/post/18/image.png"
@@ -525,7 +783,7 @@ class="gallery-image"
 data-flex-grow="66"
 data-flex-basis="160px"
 >&lt;/p>
-&lt;h1 id="authentication">Authentication&lt;/h1>
+&lt;h2 id="authentication">Authentication&lt;/h2>
 &lt;p>세션에 등록할 객체이다. 이 친구를 세션에 등록해서 Sprint Security의 인증, 인가를 사용할 수 있다. Authentication 자체는 인터페이스이며, 구현체를 직접 만들어야 한다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk.auth
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -572,7 +830,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>이 부분에서 제일 중요한 부분은, &lt;code>getAuthorities()&lt;/code>와 &lt;code>isAuthenticated()&lt;/code>이다. 이 두 가지가 인가, 인증을 검증할 때 사용된다.&lt;/p>
-&lt;h1 id="loginfilter-코드">LoginFilter 코드&lt;/h1>
+&lt;h2 id="loginfilter-코드">LoginFilter 코드&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk.auth
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -640,7 +898,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> response.sendError(&lt;span style="color:#ae81ff">401&lt;/span>)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="스프링-설정-변경">스프링 설정 변경&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="스프링-설정-변경">스프링 설정 변경&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">package&lt;/span> com.fhdufhdu.kiosk
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> com.fhdufhdu.kiosk.auth.LoginFilter
@@ -710,7 +968,7 @@ data-flex-basis="160px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>실제로 테스트 해본 결과 로그인 한 이후 인증 전용 URL에도 접근이 잘 되는 것을 확인했다. 사실 JWT를 사용해볼까도 싶었지만, 이번 개발의 목적이 MSA가 아닌 대규모 트래픽 대응 서버를 만들어보는 것이기 때문에 세션을 사용하기로 결정했다.&lt;/p>
 &lt;p>JWT는 MSA 시스템이 아닌 이상 큰 장점을 가지지는 않는다고 생각한다. 생각보다 검증해야할 것이 많고, 탈취 당했을 때 대응도 어렵다.
 모놀리식 서버 구조라면 세션 방식이 더 효율적이라고 생각한다.&lt;/p>
@@ -724,9 +982,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -737,15 +995,15 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+&lt;/script></description></item><item><title>[Kotlin] Byte to Hex String을 구현해 보자</title><link>https://fhdufhdu.github.io/post/17/</link><pubDate>Fri, 23 Feb 2024 13:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/17/</guid><description>&lt;h2 id="시작하며">시작하며&lt;/h2>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/16" >이전 글&lt;/a>에서 코틀린 해시 결과인 byte를 string으로 변환하는 과정을 탐구하던 중에, 2의 보수까지 알아야 해서 2의 보수에 관해 공부했다. 이번 포스팅에는 왜 2의 보수를 공부해야 했는지 설명하면서, 어떻게 byte를 hex string으로 변환하는지 알아보자.&lt;/p>
-&lt;h1 id="문제">문제&lt;/h1>
+&lt;h2 id="문제">문제&lt;/h2>
 &lt;p>&lt;code>val b = 244.toByte()&lt;/code>를 실행하면, 어떤 값이 나올까? 답은 &lt;code>-12&lt;/code>이다. 왜 그럴까??&lt;/p>
 &lt;p>답은 2의 보수다. byte는 8bit이고 244는 $1111\ 0100_2$이다. 최상위 비트가 1이므로 2의 보수를 취하면 $0000\ 1100_2$이고 이 값은 12이다. 그러므로 결괏값은 -12가 된다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(b.toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// -C
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>여기서 문제는 &lt;code>244&lt;/code>는 hex로 &lt;code>F4&lt;/code>이다. 그런데 Kotlin에서는 &lt;code>244.toByte().toStrint(16)&lt;/code>를 &lt;code>-C&lt;/code>로 표현한다. 같은 입력값인데 서로 다른 결괏값을 표현하게 된다.&lt;/p>
-&lt;h1 id="이유가-뭘까">이유가 뭘까?&lt;/h1>
+&lt;h2 id="이유가-뭘까">이유가 뭘까?&lt;/h2>
 &lt;p>이는 &lt;code>toString()&lt;/code> 함수의 구현 방식에 문제가 있다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Integer&lt;/span> &lt;span style="color:#66d9ef">extends&lt;/span> Number
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">implements&lt;/span> Comparable&lt;span style="color:#f92672">&amp;lt;&lt;/span>Integer&lt;span style="color:#f92672">&amp;gt;&lt;/span>, Constable, ConstantDesc {
@@ -811,7 +1069,7 @@ resize()
 &lt;li>예시) $1111\ 0100_2$(-12)를 32비트 integer로 변환&lt;/li>
 &lt;li>결과) $0000\ 0000\ 0000\ 0000\ 0000\ 0000\ 1111\ 0100_2$(244) 로 변환하고 싶다면?&lt;/li>
 &lt;/ul>
-&lt;h1 id="비트-연산을-사용하자">비트 연산을 사용하자&lt;/h1>
+&lt;h2 id="비트-연산을-사용하자">비트 연산을 사용하자&lt;/h2>
 &lt;p>비트 연산을 이용하면 된다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">244.&lt;/span>toByte()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) &lt;span style="color:#75715e">// 244 출력
@@ -825,7 +1083,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println((b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// f4 출력
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>정상적으로 &lt;code>f4&lt;/code>가 나오는 것을 알 수 있다.&lt;/p>
 &lt;p>하지만 여기서 끝이 아니다.&lt;/p>
-&lt;h1 id="뭔가-이상하게-출력되는데">뭔가 이상하게 출력되는데&amp;hellip;?&lt;/h1>
+&lt;h2 id="뭔가-이상하게-출력되는데">뭔가 이상하게 출력되는데&amp;hellip;?&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> blist = arrayOf(&lt;span style="color:#ae81ff">244.&lt;/span>toByte(), &lt;span style="color:#ae81ff">0.&lt;/span>toByte(), &lt;span style="color:#ae81ff">12.&lt;/span>toByte(), &lt;span style="color:#ae81ff">255.&lt;/span>toByte())
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>blist.forEach{ println((&lt;span style="color:#66d9ef">it&lt;/span>.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -836,7 +1094,7 @@ resize()
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">ff
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">*/&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>뭔가 좀 이상하다. byte를 hex로 바꾸면 &lt;code>f4 00 0c ff&lt;/code>가 출력되어야 하는데, 그렇지 않은 것을 알 수 있다. &lt;code>toString()&lt;/code>가 integer의 나눗셈을 기반으로 변환하다 보니 $0000_2$으로 표현되는 부분은 모두 생략하게 된다. 이를 어떻게 해결해야 할까?&lt;/p>
-&lt;h1 id="다시-비트연산을-이용하자">다시 비트연산을 이용하자&lt;/h1>
+&lt;h2 id="다시-비트연산을-이용하자">다시 비트연산을 이용하자&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">val&lt;/span> b = &lt;span style="color:#ae81ff">12.&lt;/span>toByte()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>println(((b.toInt() and &lt;span style="color:#ae81ff">0xFF&lt;/span>) + &lt;span style="color:#ae81ff">0x100&lt;/span>).toString(&lt;span style="color:#ae81ff">16&lt;/span>)) &lt;span style="color:#75715e">// 10c 출력
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>+ 0x100&lt;/code>이 추가되었다. 이렇게 되면
@@ -852,22 +1110,22 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">ff
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">*/&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>끝이다.&lt;/p>
-&lt;h1 id="마무리하며">마무리하며&lt;/h1>
-&lt;p>자료형 간의 차이를 명확하게 알지 않는 이상, 해결하기 쉽지 않은 문제였다고 생각한다. 비트 연산 또한 잘 이용하지 않았던 것이었는데, 비트 연산을 활용해서 문제를 해결하는 방법이 꽤 인상적이었다. 홀수/짝수 구분도 최하위비트로 판단할 수 있는 것처럼 비트 연산이 최적화에 도움이 많이 될 것 같다.&lt;/p></description></item><item><title>[CS] 왜 음수를 표현할 때 2의 보수를 사용할까?</title><link>https://fhdufhdu.github.io/post/16/</link><pubDate>Sat, 17 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/16/</guid><description>&lt;h1 id="시작하며">시작하며&lt;/h1>
+&lt;h2 id="마무리하며">마무리하며&lt;/h2>
+&lt;p>자료형 간의 차이를 명확하게 알지 않는 이상, 해결하기 쉽지 않은 문제였다고 생각한다. 비트 연산 또한 잘 이용하지 않았던 것이었는데, 비트 연산을 활용해서 문제를 해결하는 방법이 꽤 인상적이었다. 홀수/짝수 구분도 최하위비트로 판단할 수 있는 것처럼 비트 연산이 최적화에 도움이 많이 될 것 같다.&lt;/p></description></item><item><title>[CS] 왜 음수를 표현할 때 2의 보수를 사용할까?</title><link>https://fhdufhdu.github.io/post/16/</link><pubDate>Sat, 17 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/16/</guid><description>&lt;h2 id="시작하며">시작하며&lt;/h2>
 &lt;p>최근에 kotlin으로 Spring boot 프로젝트를 제작하고 있던 중에, SHA-512를 사용해야 했었다.
 방법을 찾아보니, 굉장히 특이한 코드가 보였다&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Integer&lt;/span>.toString((digest[i] and &lt;span style="color:#ae81ff">0xff&lt;/span>.toByte()) + &lt;span style="color:#ae81ff">0x100&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>).substring(&lt;span style="color:#ae81ff">1&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>해당 코드는 SHA-512를 거쳐서 나온 byte를 string으로 변경하는 코드인데, 왜 이렇게 쓰는 지 궁금해졌다.&lt;/p>
 &lt;p>그래서 파고파고 공부하다보니, 어느새 2의 보수까지 오게 되었다. 2의 보수를 다시 한번 공부하다보니, 음수를 표현할 때 2의 보수를 왜 사용했는 지에 대해 알 것 같았다. 그래서 해당 내용을 정리하고자 한다.&lt;/p>
 &lt;p>&lt;em>해당 내용은 필자의 주관적인 견해가 많이 포함되어 있습니다.&lt;/em>&lt;/p>
-&lt;h1 id="보수란">보수란?&lt;/h1>
+&lt;h2 id="보수란">보수란?&lt;/h2>
 &lt;blockquote>
 &lt;p>보수(補數)는 보충을 해주는 수를 의미한다. 이를테면 1에 대한 10의 보수는 9, 4에 대한 15의 보수는 11의 개념이다. 1에 대한 2의 보수는 1이다.&lt;br>
 &lt;strong>출처&lt;/strong> - &lt;a class="link" href="https://ko.wikipedia.org/wiki/%EB%B3%B4%EC%88%98_%28%EC%88%98%ED%95%99%29" target="_blank" rel="noopener"
 >위키피디아&lt;/a>&lt;/p>
 &lt;/blockquote>
 &lt;p>조금 더 보충 설명하자면, 보수는 각 자리의 수가 특정 수가 되게끔 보충해주는 수이다. 1에 대한 10의 보수는 9이고, 11에 대한 10의 보수는 89이다.&lt;/p>
-&lt;h1 id="2의-보수란">2의 보수란?&lt;/h1>
+&lt;h2 id="2의-보수란">2의 보수란?&lt;/h2>
 &lt;p>이진법에서 2의 보수를 계산해보자. $1_2$에 2의보수를 하면 $1_2$이고, $10_2$에 2의 보수를 하면 $10_2$이다. $11_2$에 2의 보수를 하면 $1_2$일 것이다.&lt;/p>
 &lt;p>이진법에서 1의 보수는 바로 이진수를 토글한 것이다. 여기에 +1을하면 2의 보수를 바로 구할 수 있다.&lt;/p>
 &lt;p>예시) $0011\ 0110_2 =&amp;gt; 1100\ 1001_2 =&amp;gt; 1100\ 1010_2$&lt;/p>
@@ -877,7 +1135,7 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;blockquote>
 &lt;p>n진법일 때 n의 보수 쉽게 구하기&lt;br>n-1의 보수를 구해서 +1을 하면 n의 보수를 바로 구할 수 있다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="이진수-토글의-특징">이진수 토글의 특징&lt;/h1>
+&lt;h2 id="이진수-토글의-특징">이진수 토글의 특징&lt;/h2>
 &lt;p>이진수를 토글한 후의 값은 특정 수식을 따른다. 어려운 수식은 아니고 정말 간단한 수식이다. 사실 보수의 특징을 생각한다면 쉽게 생각할 수 있다.&lt;/p>
 &lt;blockquote>
 &lt;p>$\{비트\ 수에\ 맞는\ 최대값\}-\{기존값\} = \{토글된\ 값\}$&lt;/p>
@@ -891,7 +1149,7 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;li>토글된 값은 $1100\ 1001_2$이고 이 값은 십진수로 201임&lt;/li>
 &lt;li>3번과 4번의 값이 같으므로 수식이 성립함&lt;/li>
 &lt;/ol>
-&lt;h1 id="1byte로-표현되는-음수의-범위">1byte로 표현되는 음수의 범위&lt;/h1>
+&lt;h2 id="1byte로-표현되는-음수의-범위">1byte로 표현되는 음수의 범위&lt;/h2>
 &lt;p>1byte로 표현되는 양수의 범위는 0~255($2^8$ = 256개 만큼)인 것은 다들 잘 알고 있을 것이다. 그렇다면 음수는 어떻게 표현할까?&lt;/p>
 &lt;ul>
 &lt;li>양수 범위 : $0000\ 0000_2$ ~ $0111\ 1111_2$ ($2^7$ = 128개)&lt;/li>
@@ -900,7 +1158,7 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;p>양수와 음수를 가르는 결정적인 차이는 최상위 비트이다. 최상위 비트가 0이면 양수, 1이면 음수로 표현하는 것이다.&lt;/p>
 &lt;p>그렇다면, 왜 최상위 비트로 결정하는 것일까? &lt;strong>그 이유는 표현 가능한 수의 개수를 정확히 2등분 하기 때문이다.&lt;/strong>&lt;/p>
 &lt;p>양수와 음수를 범위를 맞춤으로써 계산하기 쉽게 하기 위함이다.&lt;/p>
-&lt;h1 id="최상위-비트가-1인-이진수는-어떻게-음수로-사용하는가">최상위 비트가 1인 이진수는 어떻게 음수로 사용하는가?&lt;/h1>
+&lt;h2 id="최상위-비트가-1인-이진수는-어떻게-음수로-사용하는가">최상위 비트가 1인 이진수는 어떻게 음수로 사용하는가?&lt;/h2>
 &lt;p>$1000\ 0000_2$은 128인데, 이 숫자를 대체 어떻게 음수로 사용할 수 있을까? 여기서 이진수 토글이 등장한다.&lt;/p>
 &lt;p>앞서 이진수 토글은 $\{비트\ 수에\ 맞는\ 최대값\}-\{기존값\} = \{토글된\ 값\}$ 가 성립하는 특징을 가진다고 했다.&lt;/p>
 &lt;p>그렇다면 최상위 비트가 1인 친구들을 토글해보자.&lt;/p>
@@ -915,11 +1173,11 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;/ul>
 &lt;p>어떤가? 기존 값이 증가할 수록 토글된 값은 감소하는 것을 볼 수 있다.
 여기에 -를 붙인다면? 음수로 사용해도 되지 않겠는가?&lt;/p>
-&lt;h2 id="이진수-토글을-음수로-사용할-경우-문제">이진수 토글을 음수로 사용할 경우 문제&lt;/h2>
+&lt;h3 id="이진수-토글을-음수로-사용할-경우-문제">이진수 토글을 음수로 사용할 경우 문제&lt;/h3>
 &lt;p>앞서 진행한 과정을 보면 완벽해보인다. 하지만, 문제가 딱 한가지 있다. 그것은 쓸모없는 값이 하나 존재한다는 것이다.&lt;/p>
 &lt;p>최상위 비트가 1인 수를 이진수 토글을 통해 음수로 표현하게 되면 $-127&amp;hellip;-0,0&amp;hellip;127$와 같은 범위를 가지게 된다.&lt;/p>
 &lt;p>어라, -0이라는 값이 등장했다. 255를 이진수 토글하면 0이고 여기에 -를 붙이기로 했으니 -0이 나오기는 한다. 그런데 이는 0과 중복되는 의미를 가진다. 즉, 쓸모없는 데이터가 존재한다는 것이다.&lt;/p>
-&lt;h2 id="1을-해서-해결해보자">+1을 해서 해결해보자&lt;/h2>
+&lt;h3 id="1을-해서-해결해보자">+1을 해서 해결해보자&lt;/h3>
 &lt;p>응당 개발자라면 이런 값은 눈 뜨고도 쳐다볼 수 없어야한다.(필자는 좀 그렇다&amp;hellip;) 그렇다면 이진수 토글 이후 +1을 하면 해결되지 않겠는가?&lt;/p>
 &lt;ul>
 &lt;li>128 -&amp;gt; 128&lt;/li>
@@ -931,11 +1189,11 @@ $0000\ 0000\ 0000\ 0000\ 0000\ 0001\ 0000\ 1100_2$이 되기 때문에 $0001\ 00
 &lt;li>255 -&amp;gt; 1&lt;/li>
 &lt;/ul>
 &lt;p>드디어 $-128&amp;hellip;-1,0&amp;hellip;127$ 와 같은 우리가 흔히 보는 범위가
-완성되었다.&lt;/p></description></item><item><title>[Python] WSGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h1 id="계기">계기&lt;/h1>
+완성되었다.&lt;/p></description></item><item><title>[Python] WSGI 서버를 직접!! 만들어보자</title><link>https://fhdufhdu.github.io/post/14/</link><pubDate>Tue, 06 Feb 2024 21:00:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/14/</guid><description>&lt;h2 id="계기">계기&lt;/h2>
 &lt;p>사실 이 포스팅은 원래 &lt;strong>서버의 동시성&lt;/strong>에 대해 포스팅하려고 했었다. 그런데 글을 작성하다 보니 생각 외로 꼬리 질문이 많이 생겨났다. 그래서 그 의문점을 해소해 보고자 그냥 직접 HTTP 서버를 만들면서 동시성을 테스트해 보기로 했다. 이번에는 파이썬을 이용해 개발했다. 파이썬에서는 GIL 때문에 동시성이 어려운데, 이를 어떻게 해결했는지도 궁금해서 파이썬으로 골랐다.&lt;/p>
 &lt;p>전체 코드는 &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
 >깃허브에서&lt;/a> 확인해 볼 수 있다.&lt;/p>
-&lt;h1 id="osi-7계층">OSI 7계층&lt;/h1>
+&lt;h2 id="osi-7계층">OSI 7계층&lt;/h2>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image.png"
 width="1462"
 height="1184"
@@ -960,7 +1218,7 @@ data-flex-basis="296px"
 &lt;blockquote>
 &lt;p>&lt;strong>여기서 말하는 추상화란?&lt;/strong> &lt;br> 추상화는 비슷하지만, 다른 두 가지의 타입을 하나로 여기고 작업을 할 수 있도록 하는 것을 말한다. 소켓은 모두 다른 L1, L2, L3, L4 하드웨어 드라이버를 신경 쓰지 않고 하나의 코드로 네트워크 작업을 할 수 있도록 도와준다. 만약 소켓이 없었다면, 개발자는 L1, L2, L3, L4 하드웨어 드라이버에 맞게 코드를 짜야 한다. 또한 그렇게 작성한 코드는 동일한 하드웨어 구조가 아니면 다른 기기에서 작동하지 않는다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="소켓">소켓&lt;/h1>
+&lt;h2 id="소켓">소켓&lt;/h2>
 &lt;p>소켓은 앞서 말한 것처럼, 추상화된 네트워크 접속 방법이다. 그렇다면 그 위치는 어디 있을까?&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-2.png"
 width="1462"
@@ -973,7 +1231,7 @@ data-flex-basis="296px"
 >&lt;/p>
 &lt;p>바로 전송 계층 위에 존재한다. 대부분의 유명한 프로토콜들은(HTTP, SMTP, FTP, DNS)등은 응용 계층 프로토콜이다. 소켓을 사용할 줄 알고, 프로토콜에 대한 명세를 알고 있다면, 대부분 비슷하게 따라 만들 수 있다.&lt;/p>
 &lt;p>그래서 필자도 직접 웹서버를 만들어 볼 생각을 할 수 있었다.&lt;/p>
-&lt;h1 id="http">HTTP&lt;/h1>
+&lt;h2 id="http">HTTP&lt;/h2>
 &lt;p>그럼 HTTP는 실제로 어떻게 요청을 받고 어떻게 응답할까?&lt;/p>
 &lt;p>생각보다 간단하다.&lt;/p>
 &lt;ul>
@@ -1029,7 +1287,7 @@ data-flex-basis="296px"
 &lt;/li>
 &lt;/ul>
 &lt;p>위의 형태를 소켓에 주고 받기를 하면 된다.&lt;/p>
-&lt;h1 id="wsgi">WSGI&lt;/h1>
+&lt;h2 id="wsgi">WSGI&lt;/h2>
 &lt;p>파이썬에는 WSGI라는 것이 있다. Web Server Gateway Interface 라는 것의 약자로, 웹 서버와 웹 어플리케이션 사이의 요청/응답 방법을 정의해놓은 것이다.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-3.png"
 width="1542"
@@ -1057,7 +1315,7 @@ data-flex-basis="428px"
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;h2 id="wsgi-application-구현">WSGI Application 구현&lt;/h2>
+&lt;h3 id="wsgi-application-구현">WSGI Application 구현&lt;/h3>
 &lt;p>WSGI Application은 WSGI Server가 전달한 데이터를 받고 처리를 거친 후 데이터를 반환할 것이다.&lt;/p>
 &lt;p>그렇게하기 위해서는 WSGI Server(이하 server)와 WSGI Application(이하 app) 간에 약속된 호출 방식과 데이터 구조가 있어야한다.&lt;/p>
 &lt;ul>
@@ -1090,7 +1348,7 @@ data-flex-basis="428px"
 &lt;/li>
 &lt;/ul>
 &lt;p>그럼 간단한 app 구현체를 보자. 파이썬의 빌트인 라이브러리에서 간단한 app을 제공해준다.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># from wsgiref.simple_server import demo_app&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## from wsgiref.simple_server import demo_app&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">demo_app&lt;/span>(environ, start_response):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> start_response(&lt;span style="color:#e6db74">&amp;#34;200 OK&amp;#34;&lt;/span>, [(&lt;span style="color:#e6db74">&amp;#39;Content-Type&amp;#39;&lt;/span>,&lt;span style="color:#e6db74">&amp;#39;text/plain; charset=utf-8&amp;#39;&lt;/span>)])
@@ -1108,12 +1366,12 @@ data-flex-basis="428px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">yield&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Hello World!!&amp;#34;&lt;/span>&lt;span style="color:#f92672">.&lt;/span>encode(&lt;span style="color:#e6db74">&amp;#34;utf-8&amp;#34;&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>조금은 복잡해졌다. 이 코드를 이해하려면 &lt;code>__iter__&lt;/code>, &lt;code>__next__&lt;/code>, &lt;code>generator&lt;/code>를 이해해야 한다. 이 게시글에서는 설명하지 않도록 하겠다.&lt;/p>
 &lt;p>&lt;code>__iter__&lt;/code>함수가 generator이므로 &lt;code>for x in DemoApp(environ, start_response)&lt;/code>가 구동 가능하다. 그러므로 WSGI를 충족한다.&lt;/p>
-&lt;h1 id="wsgi-server-구현">WSGI Server 구현&lt;/h1>
+&lt;h2 id="wsgi-server-구현">WSGI Server 구현&lt;/h2>
 &lt;p>app이 어떻게 구성되는지 알아보았다. 이제 핵심은 server를 구현해보고자 한다. 앞서 간단한 app을 만들어 보았지만, app 부분은 이번 구현 목적에서 크게 중요한 것이 아니기 때문에 Django로 대체하고자 한다.&lt;/p>
-&lt;h2 id="소켓으로-http-서버-만들기">소켓으로 HTTP 서버 만들기&lt;/h2>
+&lt;h3 id="소켓으로-http-서버-만들기">소켓으로 HTTP 서버 만들기&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> socket
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># TCP로 소켓 연결&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## TCP로 소켓 연결&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">with&lt;/span> socket&lt;span style="color:#f92672">.&lt;/span>socket(socket&lt;span style="color:#f92672">.&lt;/span>AF_INET, socket&lt;span style="color:#f92672">.&lt;/span>SOCK_STREAM) &lt;span style="color:#66d9ef">as&lt;/span> ss:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓이 사용하던 포트가 종료되면, 기본적으로 해당 포트를 일정시간 동안 사용을 막음. 그 설정을 풀어주는 코드&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -1169,7 +1427,7 @@ class="gallery-image"
 data-flex-grow="319"
 data-flex-basis="767px"
 >&lt;/p>
-&lt;h2 id="소켓-서버를-wsgi로-변경하기">소켓 서버를 WSGI로 변경하기&lt;/h2>
+&lt;h3 id="소켓-서버를-wsgi로-변경하기">소켓 서버를 WSGI로 변경하기&lt;/h3>
 &lt;p>자 이제 소켓으로 HTTP 서버를 열어보았다. 이제 WSGI에 충족하도록 WSGI Server를 제작해보자.&lt;/p>
 &lt;p>전체코드는 아래와 같다. 코드는 계속해서 업데이트 될 예정이므로, &lt;a class="link" href="https://github.com/fhdufhdu/MyGunicorn" target="_blank" rel="noopener"
 >깃허브 링크&lt;/a>도 참고하자!&lt;/p>
@@ -1329,7 +1587,7 @@ data-flex-basis="767px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;__main__&amp;#34;&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> MyGunicorn()&lt;span style="color:#f92672">.&lt;/span>run(app_path&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;wsgiserver.wsgi:application&amp;#34;&lt;/span>, worker&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, backlog&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">1000&lt;/span>)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="소켓을-사용하는-서버부분">소켓을 사용하는 서버부분&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="소켓을-사용하는-서버부분">소켓을 사용하는 서버부분&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">MyGunicorn&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> __init__(self):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 소켓 생성&lt;/span>
@@ -1367,7 +1625,7 @@ data-flex-basis="767px"
 &lt;blockquote>
 &lt;p>&lt;strong>GIL(Global Interpreter Lock)&lt;/strong> &lt;br> GIL은 하나의 스레드가 활성화 되면 다른 스레드가 활성화 되지 않도록 락을 걸고 사용하는 것을 의미한다. 이는 CPython에만 존재하며 다른 파이썬 구현체에는 존재하지 않는다. I/O 바운드에는 GIL이 잘 적용되지 않아서 스레드가 효율적이고, CPU 바운드에는 GIL이 적극적으로 적용된다고 한다. 웹 서버의 경우 CPU 바운드와 I/O 바운드가 적절하게 존재하므로 스레드를 사용하는 것보다 프로세스를 사용하는 것이 더 효율적이다.&lt;/p>
 &lt;/blockquote>
-&lt;h2 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h2>
+&lt;h3 id="요청을-처리하는-부분">요청을 처리하는 부분&lt;/h3>
 &lt;p>각 프로세스마다 Handler 클래스를 하나씩 만들어 실행시킨다.&lt;/p>
 &lt;p>이후 해당 run 함수 부분에서는 크게 &amp;ldquo;request를 파싱해서 &lt;code>environ&lt;/code>과 &lt;code>start_response&lt;/code>를 적절하게 만들어서 app에게 제공하는 부분&amp;rdquo;, &amp;ldquo;app에게 response를 받아서 소켓을 통해 발신하는 부분&amp;quot;으로 나뉜다.&lt;/p>
 &lt;ol>
@@ -1475,7 +1733,7 @@ data-flex-basis="767px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>send(response)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> conn&lt;span style="color:#f92672">.&lt;/span>close()
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="결과">결과&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/14/image-6.png"
 width="524"
 height="526"
@@ -1528,9 +1786,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -1541,28 +1799,28 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[PostgreSQL] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h1 id="문제와-원인">문제와 원인&lt;/h1>
+&lt;/script></description></item><item><title>[PostgreSQL] 인덱스 이야기</title><link>https://fhdufhdu.github.io/post/13/</link><pubDate>Tue, 23 Jan 2024 09:33:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/13/</guid><description>&lt;h2 id="문제와-원인">문제와 원인&lt;/h2>
 &lt;p>갑자기 에러가 엄청나게 발생하면서 DB CPU 점유율이 100%까지 올랐던 경험이 있다. 해당 서버는 에러 로그를 데이터베이스에 저장하는데, 에러가 많이 발생했으니 그것을 저장한다고 DB CPU 점유율이 높아진 듯 보였다.&lt;/p>
 &lt;p>현재 DB는 AWS의 RDS를 사용한다. RDS의 경우 &lt;strong>&amp;ldquo;성능 개선 도우미&amp;rdquo;&lt;/strong> 라는 도구가 있는데, 이 도구를 통해 확인해 본 결과 예상과는 전혀 달랐다.&lt;/p>
 &lt;p>특정 쿼리를 실행하는 곳에서 2.5초가 걸리고 있었다. 이 쿼리는 매우 자주 호출되는 것이기 때문에, 이 속도가 지연된다면, 지연된 시간에 동시에 다른 쿼리가 많이 실행되고 있을 것이고, 그래서 CPU 점유율이 올라간 것이었다.&lt;/p>
 &lt;p>결국 해당 쿼리를 최적화하거나, 다른 해결 방법을 모색해야했다.&lt;/p>
-&lt;h1 id="해결-방법-후보들">해결 방법 후보들&lt;/h1>
-&lt;h2 id="1-쿼리-최적화">1. 쿼리 최적화&lt;/h2>
+&lt;h2 id="해결-방법-후보들">해결 방법 후보들&lt;/h2>
+&lt;h3 id="1-쿼리-최적화">1. 쿼리 최적화&lt;/h3>
 &lt;p>해당 쿼리는 서브 쿼리를 사용하고 있다. 그것이 문제라고 생각했다. &lt;em>&amp;ldquo;그 쿼리를 &lt;a class="link" href="https://fhdufhdu.github.io/post/7" >with절&lt;/a>로 빼면, 해결되지 않을까?&amp;rdquo;&lt;/em> 라고 생각하고 테스트를 해보았으나, 기대한 만큼의 결과가 나오지 않았다. 2.5s -&amp;gt; 1.5s 로 시간이 줄기는 했으나, 해당 시간 또한 오래 걸리는 것은 마찬가지였다. 해당 테이블의 row의 개수가 200만+ 인 것을 그때 인지했다.&lt;/p>
-&lt;h2 id="2-인덱스">2. 인덱스&lt;/h2>
+&lt;h3 id="2-인덱스">2. 인덱스&lt;/h3>
 &lt;p>1번으로도 해결이 안되고, row의 개수가 많은 것도 인지해서, select 자체에 문제가 있음을 인지했다. 보통 이런 경우 인덱스가 문제였길래, 인덱스가 지정되어 있는지를 확인했다.&lt;/p>
 &lt;p>역시, 인덱스가 걸려있지 않았다. 사수에게 듣기로는 row가 100만 건 넘어가면, 그때부터 인덱스의 부재가 느껴진다고 했다. 이번 문제의 테이블은 200만+건이니까, 인덱스가 문제였다는 확신이 들었다.&lt;/p>
 &lt;p>그런데 바로 인덱스를 적용하기에는 조금 걱정이 되었다. CPU 점유율이 100%였다가 계속 50% 정도를 유지하고 있는 상황에서 인덱스를 걸면 점유율이 또 올라서 문제가 생길 수도 있으니까 말이다. (기존에는 평균 5%~10%를 유지했다.)&lt;/p>
 &lt;p>그래서 어떻게 했냐면&amp;hellip;&lt;/p>
-&lt;h3 id="복제-db-생성하기">복제 DB 생성하기&lt;/h3>
+&lt;h4 id="복제-db-생성하기">복제 DB 생성하기&lt;/h4>
 &lt;p>RDS에는 매일매일 특정 시간에 스냅샷을 저장하는 옵션이 있다. 해당 DB에는 그 옵션이 적용되어 있었다. 그래서 해당 스냅샷을 이용해서 복제 데이터베이스를 만들어 놓고 거기서 인덱스를 거는 실험을 해보았다. 만약 시간이 오래걸리고 CPU 점유율도 높아지는 것이 보인다면 사람이 잘 사용하지 않는 시간대에 인덱스 적용 작업을 해야할 것이다.&lt;/p>
 &lt;p>전날 스냅샷을 기반으로 데이터베이스를 새롭게 만들고, 테스트를 진행했다. 예상외로 4개 정도 컬럼에 인덱스를 적용하는 것에 2초 정도 걸렸다. 이 정도면 할 만하겠다 싶어서, 바로 적용을 시작했다.&lt;/p>
-&lt;h1 id="후기">후기&lt;/h1>
-&lt;p>현재 사용중인 DB라서 그런진 몰라도 4초 정도 걸렸지만, 다행히도 매우 빠르게 끝났다. 이후 쿼리를 테스트해보니 0.2초만에 끝나는 것을 확인했다.&lt;/p></description></item><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h1 id="this란">this란?&lt;/h1>
+&lt;h2 id="후기">후기&lt;/h2>
+&lt;p>현재 사용중인 DB라서 그런진 몰라도 4초 정도 걸렸지만, 다행히도 매우 빠르게 끝났다. 이후 쿼리를 테스트해보니 0.2초만에 끝나는 것을 확인했다.&lt;/p></description></item><item><title>[JS] this 바인딩에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/12/</link><pubDate>Wed, 17 Jan 2024 13:08:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/12/</guid><description>&lt;h2 id="this란">this란?&lt;/h2>
 &lt;p>일반적으로 대부분의 언어에서 &lt;code>this&lt;/code> 키워드는 자기 자신의 인스턴스를 가리키는 용어이다.(python에서는 &lt;code>self&lt;/code> 키워드)&lt;/p>
 &lt;p>하지만, javascript의 &lt;code>this&lt;/code> 키워드는 다른 언어와는 다른 방식으로 작동한다.&lt;/p>
 &lt;p>* chrome 브라우저 환경에서 테스트한 결과입니다. node의 경우 &lt;code>window&lt;/code> 전역 객체 대신 &lt;code>global&lt;/code> 전역 객체를 사용하는데, &lt;code>global&lt;/code>이 제대로 반환되지 않아서 브라우저 환경에서 진행하였습니다.&lt;/p>
-&lt;h2 id="java에서의-this">Java에서의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;h3 id="java에서의-this">Java에서의 &lt;code>this&lt;/code>&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Test&lt;/span> {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> number;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -1584,15 +1842,15 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>당연하게도 Java에서의 &lt;code>this&lt;/code>는 Test 인스턴스를 가리킨다는 것을 알 수 있다. 그렇다면 js에서는 어떻게 작동할까?&lt;/p>
-&lt;h1 id="javascript에서의-this">javascript에서의 &lt;code>this&lt;/code>&lt;/h1>
-&lt;h2 id="this-바인딩-규칙">&lt;code>this&lt;/code> 바인딩 규칙&lt;/h2>
+&lt;h2 id="javascript에서의-this">javascript에서의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;h3 id="this-바인딩-규칙">&lt;code>this&lt;/code> 바인딩 규칙&lt;/h3>
 &lt;p>우선 설명 이전에, 바인딩 규칙부터 알아보자.&lt;/p>
 &lt;ol>
 &lt;li>일반 함수(function 키워드 사용)에서 사용된 &lt;code>this&lt;/code>는 해당 함수를 호출하는 객체를 가리킨다.&lt;/li>
 &lt;li>화살표 함수에서 사용된 &lt;code>this&lt;/code>는 block을 타고 올라갔을 때, 맨 처음 만나는 일반 함수의 &lt;code>this&lt;/code>를 가리킨다.&lt;/li>
 &lt;li>&lt;code>new&lt;/code> 키워드를 사용할 경우 생성자 함수가 객체 그 자체가 된다. 생성자 함수는 일반 함수여야한다. 생성자 함수 호출 시 &lt;code>this&lt;/code>는 무조건 자기 자신이다.&lt;/li>
 &lt;/ol>
-&lt;h2 id="첫-번째-규칙---일반-함수의-this">첫 번째 규칙 - 일반 함수의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;h3 id="첫-번째-규칙---일반-함수의-this">첫 번째 규칙 - 일반 함수의 &lt;code>this&lt;/code>&lt;/h3>
 &lt;blockquote>
 &lt;p>일반 함수(function 키워드 사용)에서 사용된 &lt;code>this&lt;/code>는 해당 함수를 호출하는 객체를 가리킨다.&lt;/p>
 &lt;/blockquote>
@@ -1641,7 +1899,7 @@ resize()
 &lt;li>-&amp;gt; &lt;code>this&lt;/code> = &lt;code>other&lt;/code> 임을 알 수 있음.&lt;/li>
 &lt;/ul>
 &lt;p>즉, 규칙에 따라, &lt;code>this&lt;/code>는 일반함수를 호출하는 객체임을 알 수 있다.&lt;/p>
-&lt;h2 id="두-번째-규칙---화살표-함수의-this">두 번째 규칙 - 화살표 함수의 &lt;code>this&lt;/code>&lt;/h2>
+&lt;h3 id="두-번째-규칙---화살표-함수의-this">두 번째 규칙 - 화살표 함수의 &lt;code>this&lt;/code>&lt;/h3>
 &lt;blockquote>
 &lt;p>화살표 함수에서 사용된 &lt;code>this&lt;/code> 는 block 계층을 타고 올라갔을 때, 맨 처음 만나는 일반 함수의 &lt;code>this&lt;/code> 를 가리킨다.&lt;/p>
 &lt;/blockquote>
@@ -1689,7 +1947,7 @@ resize()
 &lt;li>&lt;code>setNumber&lt;/code> 를 호출한 객체는 &lt;code>test&lt;/code> 객체임&lt;/li>
 &lt;li>그러므로 &lt;code>this&lt;/code> = &lt;code>test&lt;/code> 임을 알 수 있음.&lt;/li>
 &lt;/ul>
-&lt;h2 id="세-번째-규칙---new-키워드">세 번째 규칙 - new 키워드&lt;/h2>
+&lt;h3 id="세-번째-규칙---new-키워드">세 번째 규칙 - new 키워드&lt;/h3>
 &lt;blockquote>
 &lt;p>&lt;code>new&lt;/code> 키워드를 사용할 경우 생성자 함수가 객체 그 자체가 된다. 생성자 함수는 일반 함수여야한다. 생성자 함수 호출 시 &lt;code>this&lt;/code>는 무조건 자기 자신이다.&lt;/p>
 &lt;/blockquote>
@@ -1735,7 +1993,7 @@ resize()
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">result&lt;/span> &lt;span style="color:#f92672">===&lt;/span> &lt;span style="color:#a6e22e">test&lt;/span>) &lt;span style="color:#75715e">// true
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>js에서는 함수에 &lt;code>new&lt;/code>를 붙여버리면, 그 함수가 생성자 함수가 되어버린다. 그리고 &lt;code>new&lt;/code>는 일반 함수에만 붙일 수 있다.&lt;/p>
 &lt;p>그렇다면 &lt;code>setNumber&lt;/code>의 맨 처음 만나는 상위 블록의 일반 함수가 생성자이고, 생성자의 호출시 &lt;code>this&lt;/code>는 자기자신이므로 &lt;code>setNumber&lt;/code>의 &lt;code>this&lt;/code>는 &lt;code>test&lt;/code>가 된다.&lt;/p>
-&lt;h1 id="정리">정리&lt;/h1>
+&lt;h2 id="정리">정리&lt;/h2>
 &lt;p>해당 내용은 &lt;a class="link" href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/this" target="_blank" rel="noopener"
 >mdn web docs - this&lt;/a>을 참고해서 작성한 글이다. 더 자세한 정보를 얻고 싶다면 문서에서 확인해보자.&lt;/p>
 &lt;ul>
@@ -1758,9 +2016,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -1771,9 +2029,9 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h1 id="이전-버전의-문제">이전 버전의 문제&lt;/h1>
+&lt;/script></description></item><item><title>[Hugo] [개선판] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/11/</link><pubDate>Sun, 14 Jan 2024 14:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/11/</guid><description>&lt;h2 id="이전-버전의-문제">이전 버전의 문제&lt;/h2>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/10" >저번 게시글&lt;/a>에서 무한 스크롤을 구현했지만, 하나의 html에 모든 데이터를 가지고 있는 구조였다. 해당 구조는 게시글이 1,000개 혹은 10,000개가 된다면, 메인 페이지를 불러오는데, 많은 네트워크 자원을 소비하게 될 것이다. 실제로 게시글 200개 정도로 테스트해 보니, 요청에 600kb를 사용하는 것을 확인했다.&lt;/p>
-&lt;h1 id="방법을-찾자">방법을 찾자&lt;/h1>
+&lt;h2 id="방법을-찾자">방법을 찾자&lt;/h2>
 &lt;p>처음 발상은 이랬다.&lt;/p>
 &lt;blockquote>
 &lt;p>특정 범위에 해당하는 게시글 리스트를 미리 저장해놓고, http GET 요청을 통해 그때그때 가져오면 되지 않을까?&lt;/p>
@@ -1838,14 +2096,14 @@ data-flex-basis="263px"
 &lt;/li>
 &lt;/ul>
 &lt;p>그래서 &lt;code>Pagination&lt;/code>을 이용해서 개발을 진행하기로 한다.&lt;/p>
-&lt;h1 id="구현">구현&lt;/h1>
-&lt;h2 id="hugotoml-수정">hugo.toml 수정&lt;/h2>
+&lt;h2 id="구현">구현&lt;/h2>
+&lt;h3 id="hugotoml-수정">hugo.toml 수정&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-toml" data-lang="toml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">baseURL&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;https://fhdufhdu.github.io/&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">languageCode&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;ko-KR&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">title&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;fhdufhdu&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">theme&lt;/span> = &lt;span style="color:#e6db74">&amp;#39;hugo-theme-stack&amp;#39;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">paginate&lt;/span> = &lt;span style="color:#ae81ff">5&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">//추가&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="indexhtml-수정">index.html 수정&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="indexhtml-수정">index.html 수정&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">section&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">class&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;article-list&amp;#34;&lt;/span>&amp;gt;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ range $index, $element := $pag.Pages }}
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {{ partial &amp;#34;article-list/default&amp;#34; . }}
@@ -1887,7 +2145,7 @@ data-flex-basis="263px"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// element 구독
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">intersectionObserver&lt;/span>.&lt;span style="color:#a6e22e">observe&lt;/span>(document.&lt;span style="color:#a6e22e">querySelector&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;#posts-footer&amp;#39;&lt;/span>));
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&amp;lt;/&lt;span style="color:#f92672">script&lt;/span>&amp;gt;
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="후기">후기&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="후기">후기&lt;/h2>
 &lt;p>이전 게시글에서 무한 스크롤을 구현하고나서 많이 뿌듯했지만, 한편으로는 가슴속에 남아있는 불편함이 있었다. 보기에는 무한 스크롤이지만, 실제로는 무한 스크롤이라고 부르기는 좀 좋지 않은 구조였기 때문이다. 실제로 게시글 수가 많아질수록 쓸데없이 네트워크 자원을 소비한다는 문제가 있는 구조이다.&lt;/p>
 &lt;p>어쨌든, 좀 더 나은 코드를 작성하는 것이 바로 개발자의 역할이 아니겠는가? 이 불편한 감정을 해결하기 위해 고민을 오래 했던 것 같다. 샤워하다가도 생각나고, 밥먹다가도 생각나고, 출근하다가도 생각이 났다.&lt;/p>
 &lt;p>그런 상황에서 해결하고 나니, 진짜 진지하게 속이 뻥 뚫리는 느낌이다. 이래서 개발을 못 끊나 보다.&lt;/p>
@@ -1901,9 +2159,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -1914,17 +2172,17 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h1 id="새로운-방법-추가">새로운 방법 추가!&lt;/h1>
+&lt;/script></description></item><item><title>[Hugo] [구버전] 무한스크롤을 구현해 보자</title><link>https://fhdufhdu.github.io/post/10/</link><pubDate>Thu, 11 Jan 2024 09:41:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/10/</guid><description>&lt;h2 id="새로운-방법-추가">새로운 방법 추가!&lt;/h2>
 &lt;p>해당 방법보다 더 좋은 아이디어로 개발했습니다.
 &lt;a class="link" href="https://fhdufhdu.github.io/post/11" >해당 게시글&lt;/a> 참고 해주세요!&lt;/p>
-&lt;h1 id="발단">발단&lt;/h1>
+&lt;h2 id="발단">발단&lt;/h2>
 &lt;p>Hudi님의 &lt;a class="link" href="https://hudi.blog/" target="_blank" rel="noopener"
 >블로그&lt;/a>를 보다 보니 게시글 목록이 무한 스크롤로 구성되어 있었다. 필자도 구현하고 싶어서 여러 가지 방법을 찾아보았다.&lt;/p>
 &lt;p>찾아보니 제일 좋은 방법은 &lt;code>IntersectionObserver&lt;/code>를 이용하는 것이라고 한다.&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;code>InsersectionObserver&lt;/code>란 상위 요소와의 교차 영역에 대한 변화를 비동기적으로 감지하는 API. element가 화면에 노출되었는지 여부를 간단하게 구독할 수 있음.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="문제">문제&lt;/h1>
+&lt;h2 id="문제">문제&lt;/h2>
 &lt;p>그런데 문제는, hugo와 js가 궁합이 그렇게 좋지 않다는 것이다.&lt;/p>
 &lt;p>블로그 게시글 hugo 템플릿과 js는 공존이 불가능하다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">num&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
@@ -1953,7 +2211,7 @@ data-flex-basis="2206px"
 &lt;li>사용자가 해당 사이트에 접속할 때 js 실행&lt;/li>
 &lt;/ol>
 &lt;p>즉, hugo 빌드 시점에 템플릿에는 값이 설정되어야 하는데 js가 실행되지 않았으므로 빌드를 완료할 수 없는 것이다.&lt;/p>
-&lt;h1 id="해결-방법">해결 방법&lt;/h1>
+&lt;h2 id="해결-방법">해결 방법&lt;/h2>
 &lt;p>방법은 전체 html을 만들어 놓고, 필요에 따라 잘라서 집어 넣는 것이다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-html" data-lang="html">&lt;span style="display:flex;">&lt;span>&amp;lt;&lt;span style="color:#f92672">section&lt;/span> &lt;span style="color:#a6e22e">id&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;posts&amp;#34;&lt;/span> &lt;span style="color:#a6e22e">class&lt;/span>&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;article-list&amp;#34;&lt;/span>&amp;gt;
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">&amp;lt;!-- 게시글 목록이 보여질 곳 --&amp;gt;&lt;/span>
@@ -2002,7 +2260,7 @@ data-flex-basis="2206px"
 &lt;lottie-player src="scroll.json" background="transparent" speed="1" style="width: auto; height: auto" controls>&lt;/lottie-player>
 &lt;/div>
 &lt;p>위 영상을 보면, 새로고침하고나서 &lt;code>Loaded new items&lt;/code>가 한번 출력되고, 이후 스크롤을 내리면서 &lt;code>&amp;lt;div id=&amp;quot;posts-footer&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;&lt;/code>가 화면에 노출될 때 마다 &lt;code>Loaded new items&lt;/code>가 계속해서 호출되는 것을 볼 수 있다.&lt;/p>
-&lt;h1 id="후기">후기&lt;/h1>
+&lt;h2 id="후기">후기&lt;/h2>
 &lt;p>쉬울듯 하면서도 생각보다 너무 어려웠다. &lt;code>hugo 템플릿은 브라우저에서 동적으로 작동하지 않는다.&lt;/code> 라는 것을 모르는 상태에서 js와 결합하려고 하니 그랬던 것 같다. 그래도 &lt;code>IntersectionObserver&lt;/code>를 알게되고, &lt;code>hugo 템플릿의 작동 방식&lt;/code>을 알게된 좋은 기회였다.&lt;/p>
 &lt;p>하지만 조금은 아쉬운 방식이다. 저 방식은 한 html에 모든 데이터를 가지고 있고 보여주는 것만 잘라서 보여주는 것이니까, 본질적으로 한번에 모든 데이터를 보여주는 것과 똑같다고 느껴진다.
 조금 더 hugo의 정보를 찾아봐서 다른 방식을 찾아봐야 겠다.&lt;/p>
@@ -2017,9 +2275,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -2030,17 +2288,17 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title><link>https://fhdufhdu.github.io/post/9/</link><pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/9/</guid><description>&lt;h1 id="with-절이란">With 절이란?&lt;/h1>
+&lt;/script></description></item><item><title>[PostgreSQL] 쿼리 결과를 임시로 저장해서 사용하는 방법(with 절)</title><link>https://fhdufhdu.github.io/post/9/</link><pubDate>Thu, 11 Jan 2024 08:54:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/9/</guid><description>&lt;h2 id="with-절이란">With 절이란?&lt;/h2>
 &lt;p>복잡한 쿼리를 작성하다 보면, 비슷한 쿼리를 여러 번 사용해야 할 때가 있다. 매번 똑같은 쿼리를 사용하면 실행 시간이 계속 늘어날 것 같고, 한 번만 실행하고 싶을 때가 있을 것이다.&lt;/p>
 &lt;p>이럴 때 필요한 것이 &lt;code>with&lt;/code> 절이다. with 절은 select 쿼리를 실행하고 해당 결과를 임시로 저장해준다. 이러한 것들은 &lt;code>CTE(common table expression)&lt;/code>라고 한다.&lt;/p>
-&lt;h1 id="사용법">사용법&lt;/h1>
-&lt;h2 id="테이블-구조">테이블 구조&lt;/h2>
+&lt;h2 id="사용법">사용법&lt;/h2>
+&lt;h3 id="테이블-구조">테이블 구조&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">create&lt;/span> &lt;span style="color:#66d9ef">table&lt;/span> &lt;span style="color:#66d9ef">user&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> id integer &lt;span style="color:#66d9ef">not&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span> &lt;span style="color:#66d9ef">primary&lt;/span> &lt;span style="color:#66d9ef">key&lt;/span>,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> name varchar(&lt;span style="color:#ae81ff">8&lt;/span>) &lt;span style="color:#66d9ef">not&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> locale varchar(&lt;span style="color:#ae81ff">8&lt;/span>) &lt;span style="color:#66d9ef">not&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="select-쿼리">select 쿼리&lt;/h2>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="select-쿼리">select 쿼리&lt;/h3>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">with&lt;/span> temp_user &lt;span style="color:#66d9ef">as&lt;/span> (
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">select&lt;/span> &lt;span style="color:#f92672">*&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">from&lt;/span> &lt;span style="color:#66d9ef">user&lt;/span>
@@ -2051,7 +2309,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">left&lt;/span> &lt;span style="color:#66d9ef">join&lt;/span> temp_user u2
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">on&lt;/span> u1.locale &lt;span style="color:#f92672">=&lt;/span> u2.locale
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>temp_user에 결과를 저장해놓고 계속 불러와서 쓸 수 있게 도와준다.&lt;/p>
-&lt;h3 id="with-절-여러-개-사용">with 절 여러 개 사용&lt;/h3>
+&lt;h4 id="with-절-여러-개-사용">with 절 여러 개 사용&lt;/h4>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sql" data-lang="sql">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">with&lt;/span> temp_user &lt;span style="color:#66d9ef">as&lt;/span> (
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">select&lt;/span> &lt;span style="color:#f92672">*&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">from&lt;/span> &lt;span style="color:#66d9ef">user&lt;/span>
@@ -2065,7 +2323,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">from&lt;/span> temp_user u1
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">left&lt;/span> &lt;span style="color:#66d9ef">join&lt;/span> temp_user2 u2
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">on&lt;/span> u1.locale &lt;span style="color:#f92672">=&lt;/span> u2.locale
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위와 같이 &lt;code>,&lt;/code>기호로 하나의 쿼리에서 여러 개의 with 절을 사용할 수 있다.&lt;/p></description></item><item><title>[PostgreSQL] 데이터를 일관되게 전달해 보자</title><link>https://fhdufhdu.github.io/post/8/</link><pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/8/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위와 같이 &lt;code>,&lt;/code>기호로 하나의 쿼리에서 여러 개의 with 절을 사용할 수 있다.&lt;/p></description></item><item><title>[PostgreSQL] 데이터를 일관되게 전달해 보자</title><link>https://fhdufhdu.github.io/post/8/</link><pubDate>Wed, 10 Jan 2024 14:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/8/</guid><description>&lt;h2 id="문제"> 문제&lt;/h2>
 &lt;p>&lt;a class="link" href="https://fhdufhdu.github.io/post/7" >1편의 문제&lt;/a>를 해결한 이후 새로운 이슈가 발생했다. 해당 이슈는 &lt;code>게시글 리스트의 댓글 개수와 실제 게시글에 들어갔을 때 댓글 개수가 달라요&lt;/code> 이다. 이전에 수정한 코드가 문제가 있던 것은 아니고, 기존의 로직 자체의 문제였다.&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/8/image.png"
 width="678"
@@ -2080,7 +2338,7 @@ data-flex-basis="598px"
 &lt;p>이는 서비스의 댓글 정책에서 기인하는 문제이다. 해당 정책은 댓글의 노출이 필요한 조건이 복잡하다.&lt;/p>
 &lt;p>그래서 그랬을까? 애초에 기존 로직이 조금 이상했었다. 게시글 리스트를 가져올 때는 단순하게 삭제된 댓글을 제외한 개수를 가져와서 반환하고, 게시글 상세 정보 조회 시에는 실제로 댓글 리스트에 정책을 js 코드로 필터를 작성해서 반환했다. 그래서 댓글의 작성과 삭제가 빈번하게 일어나는 게시글일수록 점점 차이가 심하게 나기 시작했다.&lt;/p>
 &lt;p>솔직히 처음 코드를 보고 조금 벙쪘다. 아무리 그래도 그렇지&amp;hellip; 두개의 댓글 개수 카운팅 방식이 같지 않다니&amp;hellip;&lt;/p>
-&lt;h1 id="문제를-어떻게-해결할-것인가">문제를 어떻게 해결할 것인가&lt;/h1>
+&lt;h2 id="문제를-어떻게-해결할-것인가">문제를 어떻게 해결할 것인가&lt;/h2>
 &lt;p>문제의 원인을 파악하고 나서, 어떻게 해결할 지 고민이 많이 되었다. 곰곰히 생각하면서 세가지의 생각이 떠올랐다.&lt;/p>
 &lt;ol>
 &lt;li>&lt;strong>프론트엔드에게 처리 맞기기&lt;/strong>
@@ -2103,7 +2361,7 @@ data-flex-basis="598px"
 &lt;/li>
 &lt;/ol>
 &lt;p>결론은 sql 쿼리를 사용하는 것이었다. 하지만 여기에도 문제가 존재한다.&lt;/p>
-&lt;h3 id="추가-문제">추가 문제&lt;/h3>
+&lt;h4 id="추가-문제">추가 문제&lt;/h4>
 &lt;ul>
 &lt;li>&lt;strong>기존 response dto를 유지해야함.&lt;/strong>
 &lt;ul>
@@ -2120,16 +2378,16 @@ data-flex-basis="598px"
 &lt;blockquote>
 &lt;p>postgresql에는 jsonb와 json 타입이 있다. jsonb는 바이너리, json은 텍스트이다. 바이너리로 구성된 jsonb는 내부 값 컨트롤(추가, 수정, 삭제)이 가능하다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="해결-과정">해결 과정&lt;/h1>
-&lt;h2 id="with절-적극-활용하기">with절 적극 활용하기&lt;/h2>
+&lt;h2 id="해결-과정">해결 과정&lt;/h2>
+&lt;h3 id="with절-적극-활용하기">with절 적극 활용하기&lt;/h3>
 &lt;p>postgresql에는 with절이라는 것이 있다. with절은 특정 select 구문을 한번 실행하고 임시로 저장해두는 역할을 한다. 비슷한 쿼리를 여러번 실행해야 하는 경우 속도 측면에서 엄청난 강점을 가진다. 이를 보통 &lt;code>CTE(common table expression)&lt;/code>이라고 한다. (&lt;a class="link" href="https://fhdufhdu.github.io/post/9" >참고 링크&lt;/a>)&lt;/p>
-&lt;h2 id="대상-게시글-선택">대상 게시글 선택&lt;/h2>
+&lt;h3 id="대상-게시글-선택">대상 게시글 선택&lt;/h3>
 &lt;p>with절을 활용해 게시글을 조회한다. 해당 게시글 id로 댓글 조회 row 개수를 최소화 하는 목적을 가진다.&lt;/p>
-&lt;h2 id="댓글-선택">댓글 선택&lt;/h2>
+&lt;h3 id="댓글-선택">댓글 선택&lt;/h3>
 &lt;p>댓글 테이블의 self join을 통해 정책을 sql에 녹여낸다. self join시 row 개수가 많으면 시간이 오래 걸리므로 위의 게시글 조회를 저장해둔 결과를 가져와 댓글 범위를 최소화 한다. 이후 댓글과 유저를 join 한 후 유저 정보를 jsonb로 변환한다. 해당 결과도 with절로 저장해둔다.&lt;/p>
-&lt;h2 id="게시글과-댓글-조합-후-json-제작">게시글과 댓글 조합 후 json 제작&lt;/h2>
+&lt;h3 id="게시글과-댓글-조합-후-json-제작">게시글과 댓글 조합 후 json 제작&lt;/h3>
 &lt;p>대상 게시글과 댓글 정보를 이용해 join을 맺는다. 이를 통해 &lt;code>게시글-댓글리스트&lt;/code>를 json으로 만들고 전달할 수 있게 된다.&lt;/p>
-&lt;h1 id="후기">후기&lt;/h1>
+&lt;h2 id="후기">후기&lt;/h2>
 &lt;p>해당 쿼리를 게시글 리스트 조회 API와 게시글 상세 조회 API 모두에 사용했다. 같은 쿼리를 사용함으로써 두 API의 데이터를 일관적으로 전달할 수 있었다. 또한 앞서 언급한 jsonb를 이용해서 response dto도 그대로 유지할 수 있었다.&lt;/p>
 &lt;p>의외로 추가적인 소득도 있었다. 속도가 &lt;strong>1s에서 200ms 대로 줄었던 것이다.&lt;/strong> with절을 이용한 방식이 효과가 컸던 것 같다. 이번 문제를 해결하기 위해 처음으로 사용해본 것인데, 앞으로도 애용할 것 같다.&lt;/p>
 &lt;div id="fhdufhdu-card">
@@ -2142,9 +2400,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -2155,11 +2413,11 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[PostgreSQL] Select 쿼리 속도를 개선해 보자</title><link>https://fhdufhdu.github.io/post/7/</link><pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/7/</guid><description>&lt;h1 id="문제"> 문제&lt;/h1>
+&lt;/script></description></item><item><title>[PostgreSQL] Select 쿼리 속도를 개선해 보자</title><link>https://fhdufhdu.github.io/post/7/</link><pubDate>Sun, 07 Jan 2024 20:35:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/7/</guid><description>&lt;h2 id="문제"> 문제&lt;/h2>
 &lt;p>SQL 쿼리를 조회하는데 15초가 걸려버리는 일이 발생했다. 이 문제를 보자마자 바로 SQL 쿼리 문제라는 생각이 들었다. 역시나 예상대로 쿼리가 문제였다.&lt;/p>
 &lt;p>정확히 말하면, ORM이 문제였다. ORM으로 작성하다보니, 쿼리 최적화를 마음대로 할 수 없었고, 그래서 문제가 발생했던 것이다.&lt;/p>
 &lt;p>이제 한번 문제를 자세히 살펴보자&lt;/p>
-&lt;h2 id="원인">원인&lt;/h2>
+&lt;h3 id="원인">원인&lt;/h3>
 &lt;p>특정 쿼리의 결과가 아래와 같았다. 그리고 해당 쿼리에는 select에 서브쿼리가 작성되어 있다.&lt;/p>
 &lt;table>
 &lt;thead>
@@ -2205,18 +2463,18 @@ resize()
 &lt;/table>
 &lt;p>원하는 결과는 c의 리스트이다. 노출되는 c의 개수는 2개인데, 총 row의 개수는 5개로 뻥튀기된 것을 볼 수 있다. 그렇다면 2번만 서브쿼리를 실행하면 될 것을, 5번이나 실행하고 있었다는 것이다.&lt;/p>
 &lt;p>원하는 결과에 c의 갯수가 많아지면 많아 질 수록 row의 개수는 뻥튀기 될 것이다. 만약 20개의 c를 원한다고 하면 100개의 row가 조회될 수도 있고, 100개의 row에 모두 서브쿼리가 실행된다면 20개의 서브쿼리보다 훨씬 느릴 것이다.&lt;/p>
-&lt;h1 id="원인파악-완료-개선해-보자">원인파악 완료! 개선해 보자&lt;/h1>
-&lt;h2 id="result-row의-갯수를-줄이자">Result Row의 갯수를 줄이자.&lt;/h2>
+&lt;h2 id="원인파악-완료-개선해-보자">원인파악 완료! 개선해 보자&lt;/h2>
+&lt;h3 id="result-row의-갯수를-줄이자">Result Row의 갯수를 줄이자.&lt;/h3>
 &lt;p>ORM 코드를 잘 살펴보니 특정 조건이 빠져있었다. 그래서 필요한 행 말고 모든 행에 대해 join을 걸면서 row의 갯수가 늘어났던 것이었다.&lt;/p>
 &lt;p>그 조건을 넣어서 테스트 해봤더니 row의 갯수도 잘 줄어들었고, 15s -&amp;gt; 1s로 속도가 빨라진 것을 확인했다.&lt;/p>
-&lt;h1 id="후기">후기&lt;/h1>
+&lt;h2 id="후기">후기&lt;/h2>
 &lt;p>생각보다 간단하게 수정되어서 조금은 허탈했다.&lt;/p>
 &lt;p>코드의 의도를 읽기 위해서 온갖 시도를 했었는데(실제 코드는 많이 복잡하다.) 의도를 파악하고, 문제를 파악하고 나니, 정말 어이없는 곳에서 문제가 있었던 케이스였던 것 같다.&lt;/p>
 &lt;p>이 트러블슈팅 경험으로 인해 ORM에 대한 단점이 더 눈에 들어오더라. ORM이 마냥 좋은 것만은 아니라는 건 체감하고 있었지만, 이번 경험으로 인해 그 생각이 확고히 굳어진 것 같다. SQL, 그리고 DBMS에 대한 이해 없이 ORM만 사용하게 된다면, 좋은 개발자가 될 수 없을 것이라고 생각한다.&lt;/p>
-&lt;p>앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다.&lt;/p></description></item><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h1 id="문제">문제&lt;/h1>
+&lt;p>앞으로도 여러 가지 방법을 잘 조합해서 사용해 보도록 해야겠다.&lt;/p></description></item><item><title>[Python] 커스텀 Router 객체를 만들어 보았다.</title><link>https://fhdufhdu.github.io/post/6/</link><pubDate>Thu, 04 Jan 2024 23:10:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/6/</guid><description>&lt;h2 id="문제">문제&lt;/h2>
 &lt;p>문제는 importlib이라는 python 기본 라이브러리가 문제였다. 해당 라이브러리를 사용할 때 간헐적으로 최대 1.8초나 지연되는 현상이 발생했다.
 ​&lt;/p>
-&lt;h2 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h2>
+&lt;h3 id="기존-라우팅-방식">기존 라우팅 방식&lt;/h3>
 &lt;p>​
 해당 서버는 웹 프레임워크를 사용하지 않았기에, 챗봇별로 로직을 실행할 때 &lt;code>importlib&lt;/code>이라는 라이브러리를 이용해서 라우팅을 실시했다. &lt;code>importlib&lt;/code>은 동적으로 import를 할 수 있게 도와주는 라이브러리이다.
 ​
@@ -2224,26 +2482,26 @@ resize()
 ​
 그런데 &lt;code>importlib&lt;/code>이 느리다니&amp;hellip; 이해가 되지 않았다. &lt;code>importlib&lt;/code>은 결국 &lt;code>__import__&lt;/code> 함수의 래퍼이다. &lt;code>__import__&lt;/code>함수는 import 구문을 만나면 실행되는 기본적인 함수이다. 이게 느리다면, 파이썬을 사용해도 되는 것일까?
 ​&lt;/p>
-&lt;h2 id="import의-작동-방식에-대해서-알아보자">Import의 작동 방식에 대해서 알아보자&lt;/h2>
+&lt;h3 id="import의-작동-방식에-대해서-알아보자">Import의 작동 방식에 대해서 알아보자&lt;/h3>
 &lt;p>​
 해당 정보는 &lt;a class="link" href="https://medium.com/@likegondry/python-til-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%B4-import%EB%A1%9C-%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9D%84-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95-76e268e7613b" target="_blank" rel="noopener"
 >김지연 님의 블로그&lt;/a>를 참고해서 작성했다.
 ​&lt;/p>
-&lt;h2 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기&lt;/h2>
+&lt;h3 id="1-sysmodule에-모듈이-존재하는지-찾아보기">1. sys.module에 모듈이 존재하는지 찾아보기&lt;/h3>
 &lt;p>​
 sys.module에는 이때까지 사용했던 module들이 딕셔너리 형태로 저장되어 있다. import시 해당 모듈이 이전에 import 된 것이라면 빠르게 가져올 수 있다.
 ​&lt;/p>
-&lt;h2 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기&lt;/h2>
+&lt;h3 id="2-syspath에-저장된-파일-목록들-하나하나-찾아보기">2. sys.path에 저장된 파일 목록들 하나하나 찾아보기&lt;/h3>
 &lt;p>​
 이 작업이 좀 오래 걸린다. 파일 리스트을 하나하나 탐색하면서 모듈을 가져오기 때문에 시간이 오래걸린다. 아마 필자의 생각으로는 File I/O 작업이라서 오래 걸리는 것 같다.
 ​&lt;/p>
-&lt;h2 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&amp;hellip;?&lt;/h2>
+&lt;h3 id="그럼-동적으로-import-하는-것은">그럼 동적으로 import 하는 것은&amp;hellip;?&lt;/h3>
 &lt;p>​
 만약 &lt;code>FooFacade&lt;/code> 클래스를 &lt;strong>처음&lt;/strong> 동적으로 import 한다면, 생각보다 시간이 오래 걸릴 수 있겠다는 생각이 들었다. 실제로도 처음 실행할 때와, 조금 유휴시간이 지난 후 실행하면 &lt;code>importlib&lt;/code> 동작 시간이 오래 걸리는 것을 확인할 수 있었다.
 ​
 심지어 AWS 람다를 이용하고 있어서, 일정 유휴시간이 지나면 컨테이너가 내려가버린다. 그렇다면 새롭게 컨테이너가 생성될 때마다, &lt;code>importlib&lt;/code>에서 시간을 많이 잡아먹었다.
 ​&lt;/p>
-&lt;h1 id="해결방법">해결방법&lt;/h1>
+&lt;h2 id="해결방법">해결방법&lt;/h2>
 &lt;p>​
 이제 문제점을 찾았으니 해결을 해보자.
 ​
@@ -2288,7 +2546,7 @@ FastAPI는 어떻게 라우팅을 사용하고 있을까?
 그렇다면 &lt;code>api_route&lt;/code> 함수를 보자.
 ​&lt;/li>
 &lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 너무 길어서 간략하게 축소한 버전이다.&lt;/span>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 너무 길어서 간략하게 축소한 버전이다.&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">api_route&lt;/span>(
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> self,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> path: str,
@@ -2331,12 +2589,12 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 그리고 path param을 생각하면 딕셔너리의 key, value 탐색보다 리스트 탐색이 더 낫다고 생각이 든다.(path param이 들어가면 어쨌든 n만큼 순회해야 하니까!)&lt;/p>
 &lt;p>​
 필자의 생각이 어느 정도 맞다는 걸 인지했으니 신나게 Router 객체를 제작해서 만들었다.&lt;/p>
-&lt;h1 id="결과">결과&lt;/h1>
+&lt;h2 id="결과">결과&lt;/h2>
 &lt;p>​
 무려 라우팅시 1.8초나 걸리던 것이 0.001초 미만에 해결되는 모습을 보였다. 해당 코드를 만들고 코드리뷰 때 &amp;ldquo;어떻게 이런 생각을 했냐&amp;quot;라고 하셔서 되게 기분이 좋았다.&lt;/p></description></item><item><title>[JS] 이벤트 루프와 비동기 함수</title><link>https://fhdufhdu.github.io/post/5/</link><pubDate>Wed, 03 Jan 2024 23:34:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/5/</guid><description>&lt;p>오늘은 JS의 비동기에 관해 설명해 보고자 한다. JS에 대해 잘 모르고 비동기에 대한 개념이 희박하던 때, 단순히 콜백함수가 비동기 함수인 줄 알았다. 하지만 단순히 콜백함수를 만든다고 해서 비동기적으로 작동하는 것은 아니다. 특정 조건의 함수만 비동기 함수가 될 수 있다.&lt;/p>
 &lt;p>동기와 비동기 작업에 대해 알아보고 싶다면 해당&lt;a class="link" href="https://fhdufhdu.github.io/page/4" >게시글&lt;/a>을 참고하자.&lt;/p>
 &lt;p>조금 더 자세히 알아보자.&lt;/p>
-&lt;h1 id="콜백-함수는-동기이다">콜백 함수는 동기이다.&lt;/h1>
+&lt;h2 id="콜백-함수는-동기이다">콜백 함수는 동기이다.&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-js" data-lang="js">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">count&lt;/span> &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#a6e22e">num&lt;/span>, &lt;span style="color:#a6e22e">callback&lt;/span>) =&amp;gt; {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">let&lt;/span> &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">10&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span>&lt;span style="color:#f92672">++&lt;/span>){
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">num&lt;/span>)
@@ -2379,7 +2637,7 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1009
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>1000 1010
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>완벽하게 동기로 실행되는 것을 볼 수 있다. 그러므로 콜백함수를 만든다고 해서 비동기로 작동하지 않는다.&lt;/p>
-&lt;h1 id="javascript-런타임">javascript 런타임&lt;/h1>
+&lt;h2 id="javascript-런타임">javascript 런타임&lt;/h2>
 &lt;p>js에서 비동기를 이해하기 위해서는 &lt;code>javacript 런타임&lt;/code> 에 대해 이해할 필요가 있다.&lt;/p>
 &lt;p>런타임은 어떠한 코드가 실제로 구동할 수 있는 환경을 의미힌다. 그러므로 당연하게도 &lt;code>javascript 런타임&lt;/code>은 js 코드를 실제로 구동할 수 있는 환경이다.&lt;/p>
 &lt;p>&lt;code>javascript 런타임&lt;/code>도 종류가 있는데, 크게 분리하면 &lt;code>웹 브라우저&lt;/code> 와 &lt;code>node.js&lt;/code>가 있다. 웹 브라우저는 흔히 사용하는 크롬, 사파리, 파이어폭스 등이 있다.&lt;/p>
@@ -2393,10 +2651,10 @@ path는 &amp;ldquo;/user/&amp;rdquo;, endpoint는 &lt;code>read_users&lt;/code> 
 &lt;li>&lt;code>Web APIs&lt;/code>(node.js에서는 &lt;code>libuv&lt;/code>)&lt;/li>
 &lt;/ul>
 &lt;p>이 두가지가 존재한다.&lt;/p>
-&lt;h2 id="javascript-엔진">javascript 엔진&lt;/h2>
+&lt;h3 id="javascript-엔진">javascript 엔진&lt;/h3>
 &lt;p>그렇다면 &lt;code>javascript 엔진&lt;/code>이란 무엇일까? js 코드를 실제로 실행하는 영역이다. 개발자가 작성한 모든 js 코드는 &lt;code>javascript 엔진&lt;/code>에서 파싱되고 실행된다. 이 &lt;code>javascript 엔진&lt;/code>은 &lt;strong>싱글 스레드&lt;/strong>에서 작동한다.&lt;/p>
 &lt;p>여기에는 흔히 알려져 있는 &lt;code>이벤트 루프&lt;/code>도 포함되어 있다. &lt;code>이벤트 루프&lt;/code>에 대해서는 뒤에서 자세하게 설명하도록 하겠다. 우선 이 &lt;code>이벤트 루프&lt;/code>가 &lt;code>javascript 엔진&lt;/code>에서 작동한다는 사실만 기억하자.&lt;/p>
-&lt;h3 id="javascript-엔진의-구성-요소">javascript 엔진의 구성 요소&lt;/h3>
+&lt;h4 id="javascript-엔진의-구성-요소">javascript 엔진의 구성 요소&lt;/h4>
 &lt;ul>
 &lt;li>콜 스택 (call stack)
 &lt;ul>
@@ -2436,9 +2694,9 @@ data-flex-basis="453px"
 &lt;/ul>
 &lt;/li>
 &lt;/ul>
-&lt;h2 id="web-apis">Web APIs&lt;/h2>
+&lt;h3 id="web-apis">Web APIs&lt;/h3>
 &lt;p>&lt;code>웹 브라우저&lt;/code>에서 비동기적인 이벤트를 처리하기 위해 제공하는 API들이다. &lt;code>웹 브라우저&lt;/code>에서 제공하는 것이기 때문에, 해당 api는 &lt;code>javascript 엔진&lt;/code>에서 실행되지 않는다. 이 api들은 &lt;code>javascript 엔진&lt;/code>과 실제로 다른 프로세스에서 실행되며, js에서 호출할 수 있도록 &lt;code>javascript 엔진&lt;/code>에서는 인터페이스만 제공한다.&lt;/p>
-&lt;h3 id="여기서-잠깐-인터페이스만-제공한다는-것의-의미란">여기서 잠깐! 인터페이스만 제공한다는 것의 의미란?&lt;/h3>
+&lt;h4 id="여기서-잠깐-인터페이스만-제공한다는-것의-의미란">여기서 잠깐! 인터페이스만 제공한다는 것의 의미란?&lt;/h4>
 &lt;p>API는 Application Programming Interface의 약자이다. 이는 &lt;strong>두 개의 서로 다른 프로세스(혹은 프로그램)간에 통신을 위한 일종의 약속&lt;/strong>이다.&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;code>A&lt;/code>와 &lt;code>B&lt;/code>라는 두 개의 프로세스가 있고, &lt;code>B&lt;/code>에는 &lt;code>getData&lt;/code>라는 기능이 있다. &lt;code>A&lt;/code>에서 &lt;code>B&lt;/code>의 &lt;code>getData&lt;/code>라는 기능을 사용하기 위해서는 &lt;code>getData&lt;/code>의 실행에 필요한 데이터를 전달해 주어야 한다.
@@ -2449,7 +2707,7 @@ data-flex-basis="453px"
 &lt;p>해당 게시글을 처음 시작할 때, 특정 조건의 함수만 비동기가 될 수 있다고 했다. 그 특정 조건의 함수란 바로, &lt;code>Web APIs&lt;/code>에 등록된 함수이다.&lt;/p>
 &lt;p>&lt;a class="link" href="https://developer.mozilla.org/ko/docs/Web/API" target="_blank" rel="noopener"
 >Web APIs 함수 목록-mdn web docs&lt;/a>&lt;/p>
-&lt;h1 id="이벤트-루프">이벤트 루프&lt;/h1>
+&lt;h2 id="이벤트-루프">이벤트 루프&lt;/h2>
 &lt;p>이벤트 루프를 이해하기 위해서는 비동기에 대한 이해가 필요하다.&lt;/p>
 &lt;blockquote>
 &lt;p>&lt;!-- raw HTML omitted -->비동기란?&lt;!-- raw HTML omitted -->&lt;!-- raw HTML omitted -->
@@ -2495,7 +2753,7 @@ class="gallery-image"
 data-flex-grow="177"
 data-flex-basis="426px"
 >&lt;/p>
-&lt;h1 id="정리">정리&lt;/h1>
+&lt;h2 id="정리">정리&lt;/h2>
 &lt;ul>
 &lt;li>콜백을 사용한다고 모두 비동기가 되는 것이 아니다.&lt;/li>
 &lt;li>&lt;code>javascript 런타임&lt;/code>은 js를 실행하는 구동 환경이다.
@@ -2533,9 +2791,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -2549,7 +2807,7 @@ resize()
 &lt;/script></description></item><item><title>[CS] 동기/비동기에 대해서 알아보자(sync/async)</title><link>https://fhdufhdu.github.io/post/4/</link><pubDate>Tue, 02 Jan 2024 22:15:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/4/</guid><description>&lt;p>오늘은 동기와 비동기에 대해서 설명하고자 한다.&lt;/p>
 &lt;p>해당 개념은 설명만 들으면 쉽게 이해가 될 수도 있지만, 헷갈릴 여지도 많은 개념이라고 생각한다.&lt;/p>
 &lt;p>특히 스레드 개념과 엮이기 시작하면 많이 헷갈리기 시작하는 개념이다.&lt;/p>
-&lt;h1 id="동기sync">동기(Sync)&lt;/h1>
+&lt;h2 id="동기sync">동기(Sync)&lt;/h2>
 &lt;p>동기가 제일 간단하다. 흔히 우리가 쓰는 코드를 상상하면 된다.&lt;/p>
 &lt;p>아래 JS 예제가 있다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-js" data-lang="js">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#ae81ff">1&lt;/span>)
@@ -2565,9 +2823,9 @@ class="gallery-image"
 data-flex-grow="97"
 data-flex-basis="233px"
 >&lt;/p>
-&lt;h1 id="비동기async">비동기(Async)&lt;/h1>
+&lt;h2 id="비동기async">비동기(Async)&lt;/h2>
 &lt;p>자 이제 비동기에 대해 이해해 보자. 단순하게 비동기는 동기의 반대말이다. 동기가 순차적으로 실행되는 것을 의미하니까 비동기는 순차적으로 실행되지 않는다고 생각하면 된다. 순차적으로 실행되지 않는다면, 코드의 실행순서를 파악하기 힘들 것이다. 이렇게 생각했을 때 비동기가 정말 필요한지에 대해 의문점이 생긴다.&lt;/p>
-&lt;h2 id="비동기의-필요성">비동기의 필요성&lt;/h2>
+&lt;h3 id="비동기의-필요성">비동기의 필요성&lt;/h3>
 &lt;p>비동기가 등장한 이유는 낭비되는 시간이 아까워서이다. 아래와 같은 코드를 보자&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-js" data-lang="js">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 해당 코드는 psuedo 코드이다.
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
@@ -2596,7 +2854,7 @@ data-flex-grow="259"
 data-flex-basis="623px"
 >&lt;/p>
 &lt;p>위 그림처럼, 2번이 완료되지 않았음에도, 2번의 응답이 오기까지의 시간동안 다른 작업을 하는 것이 바로 비동기라고 할 수 있다.&lt;/p>
-&lt;h2 id="콜백">콜백&lt;/h2>
+&lt;h3 id="콜백">콜백&lt;/h3>
 &lt;p>앞서 비동기의 필요성을 말했다. 그렇다면 100초 동안 비는 시간에 다른 작업을 하고 나서, 응답을 받는 순간에는 어떻게 될까? 해당 값으로 처리하는 로직이 필요할 것이다. 그것이 바로 콜백(callback)이다.&lt;/p>
 &lt;p>콜백의 주요 논지는 &lt;strong>&amp;ldquo;해야할 일을 뒤로 미루는 것&amp;rdquo;&lt;/strong> 이다.&lt;/p>
 &lt;p>사실, 이름만 봐도 알 수 있다. callback은 회신하다/답신하다는 뜻이다.&lt;/p>
@@ -2640,7 +2898,7 @@ data-flex-basis="623px"
 &lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#a6e22e">console&lt;/span>.&lt;span style="color:#a6e22e">log&lt;/span>(&lt;span style="color:#a6e22e">response&lt;/span>.&lt;span style="color:#a6e22e">body&lt;/span>)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위 처럼 콜백 함수를 작성할 수 있을 것이다. 저 4번 콜백 함수는 http 응답이 오면 실행된다.&lt;/p>
 &lt;p>4번의 콜백 함수는 앞서 말한 &lt;strong>&amp;ldquo;해야 할 일을 뒤로 미루는 것&amp;quot;과&lt;/strong> 같다.&lt;/p>
-&lt;h1 id="마무리">마무리&lt;/h1>
+&lt;h2 id="마무리">마무리&lt;/h2>
 &lt;p>간단하게 비동기와 콜백에 대해 알아보았다.&lt;/p>
 &lt;p>이렇게 보면 비동기 자체는 크게 어렵지 않은 것 같다. 하지만 필자도 이 개념을 오해 없이 이해하기에 많은 시간이 들었다.&lt;/p>
 &lt;p>여러분들도 오해없이 비동기를 이해할 수 있게 되었으면 좋겠다.&lt;/p>
@@ -2654,9 +2912,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -2668,12 +2926,12 @@ clearInterval(interval)
 window.addEventListener("resize", resize)
 resize()
 &lt;/script></description></item><item><title>[Docker] 컨테이너를 Docker Hub에 올리기</title><link>https://fhdufhdu.github.io/post/3/</link><pubDate>Wed, 20 Dec 2023 12:39:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/3/</guid><description>&lt;p>Docker 컨테이너를 그대로 이미지로 만들어서 Docker Hub에 올리고 싶다면 아래와 같이 진행하자.&lt;/p>
-&lt;h1 id="docker-hub-로그인하기">Docker Hub 로그인하기&lt;/h1>
+&lt;h2 id="docker-hub-로그인하기">Docker Hub 로그인하기&lt;/h2>
 &lt;p>&lt;a class="link" href="https://hub.docker.com/" target="_blank" rel="noopener"
 >Docker Hub&lt;/a>에 들어가서 로그인을 먼저 한다. 회원가입을 진행하지 않았다면 회원가입을 먼저 하자.&lt;/p>
 &lt;p>개인 Docker Hub Repository에 이미지를 올리기 때문에 로그인은 필수다.&lt;/p>
 &lt;p>회원가입을 하고 나면 플랜을 선택하라는 화면이 나올 수 있는데, 이때 Personal 플랜으로 진행하면 된다.(무료)&lt;/p>
-&lt;h1 id="repository-만들기">Repository 만들기&lt;/h1>
+&lt;h2 id="repository-만들기">Repository 만들기&lt;/h2>
 &lt;p>로그인을 하고나서 메인화면에서&lt;/p>
 &lt;p>&lt;img src="https://fhdufhdu.github.io/post/3/image.png"
 width="2552"
@@ -2686,15 +2944,15 @@ data-flex-basis="2097px"
 >&lt;/p>
 &lt;p>위 이미지와 같이 Repository -&amp;gt; Create Repository를 눌러준다.&lt;/p>
 &lt;p>정보 입력 후 Repostiory를 생성하게 되면 자신의 Repository 화면으로 들어갈 수 있게 된다.&lt;/p>
-&lt;h1 id="컨테이너-commit-하기">컨테이너 commit 하기&lt;/h1>
+&lt;h2 id="컨테이너-commit-하기">컨테이너 commit 하기&lt;/h2>
 &lt;p>현재 자신의 컴퓨터에 존재하는 컨테이너를 image화 하는 과정이다.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ docker commit 자신의컨테이너이름 repository경로:tag
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 실제 입력 예&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># tag(=version)는 본인 전략대로 사용하기&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 실제 입력 예&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## tag(=version)는 본인 전략대로 사용하기&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker commit es fhdufhdu/test_elasticsearch:1.0
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="생성된-이미지를-업로드하기">생성된 이미지를 업로드하기&lt;/h1>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 로그인, username에 email은 입력하지 말기&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="생성된-이미지를-업로드하기">생성된 이미지를 업로드하기&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 로그인, username에 email은 입력하지 말기&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ docker login
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">#이미지 이름에 있는 repository로 이미지가 업로드되게 된다.&lt;/span>
@@ -2723,9 +2981,9 @@ images = document.querySelectorAll('.gallery')
 if (images.length > 0){
 images.forEach((image)=>{
 const getEm = (width) => {
-if (width > 1535) return 15
+if (width > 1535) return 4
 else if(width &lt; 0) return 0
-return (15/767) * width - (11520/767)
+return (4/767) * width - (3072/767)
 }
 const em = getEm(window.innerWidth)
 image.style.padding = `0 ${em}em 0 ${em}em`
@@ -2736,7 +2994,7 @@ clearInterval(interval)
 }
 window.addEventListener("resize", resize)
 resize()
-&lt;/script></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h1 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h1>
+&lt;/script></description></item><item><title>[Python] 추상 클래스 만들기</title><link>https://fhdufhdu.github.io/post/2/</link><pubDate>Wed, 20 Dec 2023 12:16:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/2/</guid><description>&lt;h2 id="추상-클래스-만들기">추상 클래스 만들기&lt;/h2>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> abc
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BaseClass&lt;/span>(metaclass&lt;span style="color:#f92672">=&lt;/span>abc&lt;span style="color:#f92672">.&lt;/span>ABCMeta):
@@ -2744,7 +3002,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">run&lt;/span>(self):
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># 아래처럼 &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">## 아래처럼 &lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">BaseClass&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> __metaclass__ &lt;span style="color:#f92672">=&lt;/span> abc&lt;span style="color:#f92672">.&lt;/span>ABCMeta
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@abc.abstractmethod&lt;/span>
@@ -2766,8 +3024,8 @@ resize()
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></description></item><item><title>[개발방법론] 객체 지향과 절차 지향에 대해 알아보자</title><link>https://fhdufhdu.github.io/post/1/</link><pubDate>Wed, 20 Dec 2023 11:14:00 +0900</pubDate><guid>https://fhdufhdu.github.io/post/1/</guid><description>&lt;blockquote>
 &lt;p>개발을 막 시작한 새내기 개발자부터 개발 경력이 많은 개발자까지 무조건 들어봤을 용어, 객체 지향에 대해 알아보자.&lt;!-- raw HTML omitted -->&lt;!-- raw HTML omitted -->자동차 운전을 코드로 구현하는 것을 예시로, 객체 지향과 절차 지향을 비교해 가면서 설명한다. 객체 지향을 배우러 왔는데, 절차 지향까지 알아야 한다고 겁먹지 말자, 절차 지향을 이해한다면, 객체 지향을 이해하기 더욱 쉬울 것이다.&lt;!-- raw HTML omitted -->&lt;!-- raw HTML omitted -->이 내용은 기본적인 코드 작성 지식이 있어야 이해할 수 있다.&lt;/p>
 &lt;/blockquote>
-&lt;h1 id="절차-지향과-객체-지향">절차 지향과 객체 지향&lt;/h1>
-&lt;h2 id="절차-지향이란">절차 지향이란?&lt;/h2>
+&lt;h2 id="절차-지향과-객체-지향">절차 지향과 객체 지향&lt;/h2>
+&lt;h3 id="절차-지향이란">절차 지향이란?&lt;/h3>
 &lt;p>객체지향이 있기 이전, 개발 패러다임은 절차 지향이었다. 절차 지향은 간단히 &amp;ldquo;어떤 일을 하기 위해 필요한 행동들의 나열&amp;rdquo; 이라고 정의할 수 있다. 아래와 같은 코드 예제를 보자&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>():
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> direction &lt;span style="color:#f92672">=&lt;/span> input(&lt;span style="color:#e6db74">&amp;#34;핸들을 어느 방향으로 돌릴 것 인가요?(left, right): &amp;#34;&lt;/span>)
@@ -2780,7 +3038,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>main()
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>사용자에게 핸들 방향을 입력받고, 해당 방향에 맞게 핸들을 돌렸다고 출력해 주는 코드이다.&lt;/p>
 &lt;p>이와 같이, &amp;ldquo;핸들을 꺾기 위해(어떤 일) 사용자의 입력을 받고, 입력에 맞게 문자열을 출력하는 코드 (행동들의 나열)&amp;ldquo;로 볼 수 있는 것이 절차 지향적인 코드 작성 방법이다.&lt;/p>
-&lt;h2 id="객체-지향이란">객체 지향이란?&lt;/h2>
+&lt;h3 id="객체-지향이란">객체 지향이란?&lt;/h3>
 &lt;p>객체 지향은 절차지향의 정의인 &amp;ldquo;어떤 일을 하기 위해 필요한 행동들의 나열&amp;quot;을 확장해서 &amp;ldquo;어떤 일을 하기 위한 객체들의 상호작용&amp;quot;으로 정의할 수 있다. 아래와 같은 코드 예제를 보자&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Car&lt;/span>:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">chagne_direction&lt;/span>(self, direction: string):
@@ -2800,7 +3058,7 @@ resize()
 &lt;p>그리고 절차 지향에서의 코드와 같이 사용자에게 입력을 받고, 해당 입력을 저장해 둔다.&lt;/p>
 &lt;p>이후, Car(클래스)에서 car(인스턴스)를 만들고, car(인스턴스)의 change_direction을 실행해서 핸들을 전환하도록 한다.&lt;/p>
 &lt;p>이와 같이 자동차라는 개념적인 그룹으로 묶어서 코드를 작성하는 방식을 객체 지향 개발이라고 한다.&lt;/p>
-&lt;h1 id="클래스와-인스턴스">클래스와 인스턴스&lt;/h1>
+&lt;h2 id="클래스와-인스턴스">클래스와 인스턴스&lt;/h2>
 &lt;p>클래스/인스턴스는 처음 마주했을 때 이해하기 쉽지 않은 용어이다.&lt;/p>
 &lt;p>자동차를 예로 들어보자.&lt;/p>
 &lt;p>자동차는 어떤 것인가? 명확히 정의하긴 어렵지만, 바퀴 4개(혹은 더 여러 개), 엔진, 핸들이 있는 탈 것이라고 할 수 있다. 이런 개념적인 것들을 가진 모든 것들을 자동차라고 부를 수 있다. 이렇게 보면, 완전히 추상적인 개념이라고 볼 수 있다. 이런 것들을 클래스라고 한다.&lt;/p>
@@ -2825,7 +3083,7 @@ resize()
 &lt;p>정리하자면,&lt;/p>
 &lt;p>&lt;strong>클래스는 &amp;ldquo;어떤 행동을 하는 추상적인 개념 - 자동차, 사람&amp;rdquo;&lt;/strong>&lt;/p>
 &lt;p>**인스턴스는 &amp;ldquo;실제로 그 행동을 하는 실체 - 산타페(자동차), 나 자신(사람), 여러분들(사람)&amp;rdquo;**으로 정리할 수 있겠다.&lt;/p>
-&lt;h1 id="객체와의-상호작용">객체와의 상호작용&lt;/h1>
+&lt;h2 id="객체와의-상호작용">객체와의 상호작용&lt;/h2>
 &lt;p>이번엔 객체 지향 프로그래밍의 본질인, 객체와의 상호작용을 알아보자.&lt;/p>
 &lt;p>이번에도 코드 예제를 보도록 하자.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-python" data-lang="python">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Wheel&lt;/span>:
@@ -2873,7 +3131,7 @@ resize()
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>main()
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>위와 같이 끝났을 것이다.&lt;/p>
 &lt;p>어라 근데 여기서 이상한 점이 보인다.&lt;/p>
-&lt;h1 id="절차-지향이-더-좋아-보이는데">절차 지향이 더 좋아 보이는데&amp;hellip;?&lt;/h1>
+&lt;h2 id="절차-지향이-더-좋아-보이는데">절차 지향이 더 좋아 보이는데&amp;hellip;?&lt;/h2>
 &lt;p>필자가 제시한 예제를 보면, 절차지향적인 코드가 훨씬 짧고 간결해 보이고, 이해하기도 쉬워 보인다.&lt;/p>
 &lt;p>하지만 다들 실제로 객체지향적으로 구현을 하고 있다.&lt;/p>
 &lt;p>이유가 뭘까?&lt;/p>
@@ -2882,12 +3140,12 @@ resize()
 &lt;p>저 if-else 부분을 100번 돌리는 것이 좋을까? Car를 100개 만드는 게 좋을까?&lt;/p>
 &lt;p>직관적으로 봤을 때, Car를 100개 만드는 것이 다른 사람이 볼 때 더욱 이해하기가 쉽지 않을까?&lt;/p>
 &lt;p>하지만 더욱 중요한 이유가 있다.&lt;/p>
-&lt;h1 id="다른-사람과의-협업을-고려하자">다른 사람과의 협업을 고려하자.&lt;/h1>
+&lt;h2 id="다른-사람과의-협업을-고려하자">다른 사람과의 협업을 고려하자.&lt;/h2>
 &lt;p>개발은 혼자 할 수 도 있지만 여러 명과 같이 할 수도 있다.&lt;/p>
 &lt;p>클래스로 짜놓으면, 누가 봐도 &amp;lsquo;아 이 부분은 자동차를 구현하려고 한 거구나&amp;rsquo;를 알 수 있다.(주석 없이도!) if-else 문을 100번 반복한다고 했을 때, 같이 협업하는 사람이 보면 과연 이 코드를 제대로 이해할까? 필자였다면, 머릿속에 물음표만을 띄웠을 것이다.&lt;/p>
 &lt;p>그런 면에서 봤을 때, 객체 지향 프로그래밍이 많이 쓰이는 이유를 알 수 있을 것이다.&lt;/p>
-&lt;h1 id="맹신은-금물">맹신은 금물.&lt;/h1>
+&lt;h2 id="맹신은-금물">맹신은 금물.&lt;/h2>
 &lt;p>어느 패러다임이 항상 정답은 경우는 없다. 객체 지향이 무조건 옳지도 않고, 상황에 따라 절차 지향적으로 개발하는 것이 더 좋을 때도 있다.&lt;/p>
 &lt;p>항상 요구사항에 맞게 개발하는 것이 중요하다. 무조건적인 적용은 오히려 협업을 방해할 수도 있다는 것을 명심하자.&lt;/p>
-&lt;h1 id="마무리하며">마무리하며&lt;/h1>
+&lt;h2 id="마무리하며">마무리하며&lt;/h2>
 &lt;p>오늘은 객체 지향에 대해 설명해 보았다. 필자도 객체지향에 대해 설명하면서, 알고 있다고 생각했지만 머릿속에 막연히 있는 개념을 글로 풀어내는 것이 참 어렵다고 느낀다. 이 개념을 처음 접하는 분들도 이해하지 못한 부분이 있을 것이라고 생각한다. 그런 부분이 있다면 댓글로 물어봐주시길 바란다.&lt;/p></description></item><item><title>Search</title><link>https://fhdufhdu.github.io/page/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fhdufhdu.github.io/page/search/</guid><description/></item></channel></rss>
