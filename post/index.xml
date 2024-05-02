@@ -228,7 +228,7 @@ class="gallery-image"
 data-flex-grow="124"
 data-flex-basis="298px"
 >&lt;/p>
-&lt;p>간단한 Spring boot에서의 검증 플로우에서 말했던 것처럼 검증 로직이 진행된다는 것을 알 수 있다.&lt;/p>
+&lt;p>간단한 &amp;ldquo;Spring boot에서의 검증 플로우&amp;rdquo; 챕터에서 말했던 것처럼 검증 로직이 진행된다는 것을 알 수 있다.&lt;/p>
 &lt;h2 id="마치며">마치며&lt;/h2>
 &lt;p>이 기능에 대해 구현하고 블로그를 작성하며 Spring boot의 내부 구조와 작동 방식에 대해서 다시 한번 공부하게 되었고, Bean Validation에 대한 공식 문서를 보면서 작동 방식에 대해 익숙해질 수 있었다.&lt;/p>
 &lt;p>또한 디버그 모드를 통해 validation이 작동하는 위치에 대한 추측을 증명할 수 있었다.&lt;/p>
